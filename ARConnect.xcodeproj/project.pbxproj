@@ -9,21 +9,39 @@
 /* Begin PBXBuildFile section */
 		19913A0E216CED7500174187 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A0D216CED7500174187 /* AppDelegate.swift */; };
 		19913A10216CED7600174187 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 19913A0F216CED7600174187 /* art.scnassets */; };
-		19913A12216CED7600174187 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A11216CED7600174187 /* ViewController.swift */; };
+		19913A12216CED7600174187 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A11216CED7600174187 /* RegisterViewController.swift */; };
 		19913A15216CED7600174187 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 19913A13216CED7600174187 /* Main.storyboard */; };
 		19913A17216CED7800174187 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19913A16216CED7800174187 /* Assets.xcassets */; };
 		19913A1A216CED7800174187 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 19913A18216CED7800174187 /* LaunchScreen.storyboard */; };
+		19913A23216CF1F200174187 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 19913A22216CF1F200174187 /* GoogleService-Info.plist */; };
+		19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A24216CF46100174187 /* ARSessionViewController.swift */; };
+		19913A27216CF7A100174187 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A26216CF7A100174187 /* LoginViewController.swift */; };
+		19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A2B216D2FBF00174187 /* MainViewController.swift */; };
+		19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A2E216D3A4300174187 /* FirebaseClient.swift */; };
+		19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E0F216FB7E8008C39DA /* RootViewController.swift */; };
+		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
+		C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		19913A0A216CED7500174187 /* ARConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19913A0D216CED7500174187 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19913A0F216CED7600174187 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
-		19913A11216CED7600174187 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		19913A11216CED7600174187 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 		19913A14216CED7600174187 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		19913A16216CED7800174187 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		19913A19216CED7800174187 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		19913A1B216CED7800174187 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		19913A22216CF1F200174187 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		19913A24216CF46100174187 /* ARSessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionViewController.swift; sourceTree = "<group>"; };
+		19913A26216CF7A100174187 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		19913A2B216D2FBF00174187 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		19913A2E216D3A4300174187 /* FirebaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseClient.swift; sourceTree = "<group>"; };
+		19948E0F216FB7E8008C39DA /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
+		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
+		20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A4BC534F0E30D99C8828C606 /* Pods-ARConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARConnect.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect.release.xcconfig"; sourceTree = "<group>"; };
+		D4AE572E1499CBA03AA6E180 /* Pods-ARConnect.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARConnect.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +61,8 @@
 			children = (
 				19913A0C216CED7500174187 /* ARConnect */,
 				19913A0B216CED7500174187 /* Products */,
+				BB929971DADCCBDD956900DE /* Pods */,
+				E03C9D2E721D42771969AC8E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -56,15 +77,55 @@
 		19913A0C216CED7500174187 /* ARConnect */ = {
 			isa = PBXGroup;
 			children = (
+				19913A2D216D39C400174187 /* Model */,
+				19913A21216CEE6300174187 /* Controller */,
 				19913A0D216CED7500174187 /* AppDelegate.swift */,
 				19913A0F216CED7600174187 /* art.scnassets */,
-				19913A11216CED7600174187 /* ViewController.swift */,
 				19913A13216CED7600174187 /* Main.storyboard */,
 				19913A16216CED7800174187 /* Assets.xcassets */,
 				19913A18216CED7800174187 /* LaunchScreen.storyboard */,
 				19913A1B216CED7800174187 /* Info.plist */,
+				19913A22216CF1F200174187 /* GoogleService-Info.plist */,
 			);
 			path = ARConnect;
+			sourceTree = "<group>";
+		};
+		19913A21216CEE6300174187 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				19948E0F216FB7E8008C39DA /* RootViewController.swift */,
+				19948E11216FB7FB008C39DA /* SplashViewController.swift */,
+				19913A26216CF7A100174187 /* LoginViewController.swift */,
+				19913A11216CED7600174187 /* RegisterViewController.swift */,
+				19913A2B216D2FBF00174187 /* MainViewController.swift */,
+				19913A24216CF46100174187 /* ARSessionViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		19913A2D216D39C400174187 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				19913A2E216D3A4300174187 /* FirebaseClient.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		BB929971DADCCBDD956900DE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D4AE572E1499CBA03AA6E180 /* Pods-ARConnect.debug.xcconfig */,
+				A4BC534F0E30D99C8828C606 /* Pods-ARConnect.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		E03C9D2E721D42771969AC8E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -74,9 +135,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 19913A1E216CED7800174187 /* Build configuration list for PBXNativeTarget "ARConnect" */;
 			buildPhases = (
+				E40818F9AC15053DD9C9CF17 /* [CP] Check Pods Manifest.lock */,
 				19913A06216CED7500174187 /* Sources */,
 				19913A07216CED7500174187 /* Frameworks */,
 				19913A08216CED7500174187 /* Resources */,
+				3449924C954A9D71FC7039C6 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -127,6 +190,7 @@
 			files = (
 				19913A10216CED7600174187 /* art.scnassets in Resources */,
 				19913A1A216CED7800174187 /* LaunchScreen.storyboard in Resources */,
+				19913A23216CF1F200174187 /* GoogleService-Info.plist in Resources */,
 				19913A17216CED7800174187 /* Assets.xcassets in Resources */,
 				19913A15216CED7600174187 /* Main.storyboard in Resources */,
 			);
@@ -134,13 +198,72 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		3449924C954A9D71FC7039C6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E40818F9AC15053DD9C9CF17 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ARConnect-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		19913A06216CED7500174187 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				19913A12216CED7600174187 /* ViewController.swift in Sources */,
+				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
+				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
+				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,
+				19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */,
+				19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */,
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
+				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
+				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,9 +407,11 @@
 		};
 		19913A1F216CED7800174187 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D4AE572E1499CBA03AA6E180 /* Pods-ARConnect.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = FB653T9YQ9;
 				INFOPLIST_FILE = ARConnect/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -301,9 +426,11 @@
 		};
 		19913A20216CED7800174187 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A4BC534F0E30D99C8828C606 /* Pods-ARConnect.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = FB653T9YQ9;
 				INFOPLIST_FILE = ARConnect/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
