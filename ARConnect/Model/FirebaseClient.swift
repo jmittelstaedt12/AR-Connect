@@ -56,4 +56,15 @@ class FirebaseClient {
             AppDelegate.shared.rootViewController.switchToMainScreen()
         }
     }
+    
+    // Log out current user and return to login screen
+    @objc func logoutOfDB() {
+        do{
+            try Auth.auth().signOut()
+            AppDelegate.shared.rootViewController.switchToLogout()
+        }catch let logoutError {
+            print(logoutError)
+        }
+        
+    }
 }

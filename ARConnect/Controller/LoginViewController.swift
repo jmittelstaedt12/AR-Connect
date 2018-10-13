@@ -111,6 +111,7 @@ class LoginViewController: UIViewController {
     }
     
     @objc private func signUp() {
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Log In", style: .plain, target: nil, action: nil)
         self.navigationController?.pushViewController(RegisterViewController(), animated: true)
     }
 

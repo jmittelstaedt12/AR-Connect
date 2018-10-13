@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1937026521727136008B46EE /* LocationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937026421727136008B46EE /* LocationModel.swift */; };
 		19913A0E216CED7500174187 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A0D216CED7500174187 /* AppDelegate.swift */; };
 		19913A10216CED7600174187 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 19913A0F216CED7600174187 /* art.scnassets */; };
 		19913A12216CED7600174187 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A11216CED7600174187 /* RegisterViewController.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1937026421727136008B46EE /* LocationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModel.swift; sourceTree = "<group>"; };
 		19913A0A216CED7500174187 /* ARConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19913A0D216CED7500174187 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19913A0F216CED7600174187 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -77,8 +79,8 @@
 		19913A0C216CED7500174187 /* ARConnect */ = {
 			isa = PBXGroup;
 			children = (
-				19913A2D216D39C400174187 /* Model */,
 				19913A21216CEE6300174187 /* Controller */,
+				19913A2D216D39C400174187 /* Model */,
 				19913A0D216CED7500174187 /* AppDelegate.swift */,
 				19913A0F216CED7600174187 /* art.scnassets */,
 				19913A13216CED7600174187 /* Main.storyboard */,
@@ -107,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				19913A2E216D3A4300174187 /* FirebaseClient.swift */,
+				1937026421727136008B46EE /* LocationModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -260,6 +263,7 @@
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
 				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,
 				19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */,
+				1937026521727136008B46EE /* LocationModel.swift in Sources */,
 				19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */,
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,

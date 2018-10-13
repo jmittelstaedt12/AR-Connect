@@ -7,8 +7,6 @@
 //
 
 import UIKit
-import SceneKit
-import ARKit
 import Firebase
 
 class RegisterViewController: UIViewController {
