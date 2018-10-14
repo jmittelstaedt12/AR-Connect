@@ -10,9 +10,9 @@ import UIKit
 import MapKit
 import Firebase
 
+let locationModel = LocationModel()
+
 class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate{
-    
-    var locationModel = LocationModel()
 
     let mapView: MKMapView = {
         let map = MKMapView()
@@ -72,7 +72,7 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     // Setup auto layout anchors for map view
     private func setupMap() {
-        locationModel.setupMap(map: mapView, view: view)
+        locationModel.setMapProperties(for: mapView, in: view)
         mapView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
     }
     

@@ -76,22 +76,12 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate {
         dismissButton.dimensionAnchors(height: 30, width: 60)
     }
     
-    
-    private func calculateBearing() -> Double {
-        #warning("move into location model")
-        let a = sin(targetCoordinates.longitude.toRadians() - currentCoordinates.longitude.toRadians()) * cos(targetCoordinates.latitude.toRadians())
-        let b = cos(currentCoordinates.latitude.toRadians()) * sin(targetCoordinates.latitude.toRadians()) - sin(currentCoordinates.latitude.toRadians()) * cos(targetCoordinates.latitude.toRadians()) * cos(currentCoordinates.longitude.toRadians() - targetCoordinates.longitude.toRadians())
-        return atan2(a, b)
-    }
-    
+    // Place node in current AR Session at target location
     private func addTargetNode() {
         let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
         node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-        let d = currentLocation.distance(from: targetLocation)
-        let b = calculateBearing()
-        let x = d*cos(b)
-        let y = d*sin(b)
-        node.position = SCNVector3(x, 0, -y)
+        let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: targetLocation)
+        node.position = SCNVector3(arCoordinates.0, 0, -arCoordinates.1)
         sceneView.scene.rootNode.addChildNode(node)
     }
     
@@ -124,14 +114,4 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate {
         
     }
 
-}
-
-extension Double {
-    func toRadians() -> Double {
-        return self * .pi / 180.0
-    }
-    
-    func toDegrees() -> Double {
-        return self * 180.0 / .pi
-    }
 }
