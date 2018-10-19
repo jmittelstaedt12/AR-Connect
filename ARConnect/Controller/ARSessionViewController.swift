@@ -7,8 +7,6 @@
 //
 
 import UIKit
-import QuartzCore
-import SceneKit
 import ARKit
 import MapKit
 

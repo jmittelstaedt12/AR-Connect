@@ -165,9 +165,7 @@ class RegisterViewController: UIViewController {
     // Request to register user in database
     @objc private func handleRegister() {
         guard let name = nameTextField.text, !name.isEmpty, let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
-            let alert = UIAlertController(title: "Error", message: "Please populate all fields", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
+            self.createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
         FBClient.createNewUser(name: name, email: email, password: password, controller: self)

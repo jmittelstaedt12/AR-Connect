@@ -56,7 +56,7 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         }
         
         title = "AR Connect"
-        let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(FBClient.logoutOfDB))
+        let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
         
         view.addSubview(mapView)
@@ -91,21 +91,22 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     // Log out current user and return to login screen
     @objc private func logout() {
-        do{
-            try Auth.auth().signOut()
-            AppDelegate.shared.rootViewController.switchToLogout()
-        }catch let logoutError {
-            print(logoutError)
-        }
-        
+//        do{
+//            try Auth.auth().signOut()
+//            AppDelegate.shared.rootViewController.switchToLogout()
+//        }catch let logoutError {
+//            print(logoutError)
+//        }
+        FBClient.logoutOfDB(controller: self)
     }
     
     // Segue into AR Connect session
     @objc private func startARSession() {
         guard let location = locationModel.locationManager.location else{
-            let alert = UIAlertController(title: "Error", message: "Current location is not available", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
+            self.createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
+//            let alert = UIAlertController(title: "Error", message: "Current location is not available", preferredStyle: .alert)
+//            alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
+//            self.present(alert, animated: true, completion: nil)
             return
         }
         let arSessionVC = ARSessionViewController()

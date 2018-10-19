@@ -24,12 +24,12 @@ class FirebaseClient {
                 return
             }
             
-            if let uid = data?.user.uid {
-                self.userId = uid
+            guard let uid = data?.user.uid else{
+                return
             }
-            
+            self.userId = uid
             let ref = Database.database().reference(fromURL: "https://ar-connect.firebaseio.com/")
-            let usersReference = ref.child("Users")
+            let usersReference = ref.child("Users").child(uid)
             let values = ["name": name, "email":email]
             usersReference.updateChildValues(values, withCompletionBlock:
             { (error, ref) in
@@ -39,6 +39,7 @@ class FirebaseClient {
                     controller.present(alert, animated: true, completion: nil)
                     return
                 }
+                print("hi")
                 AppDelegate.shared.rootViewController.switchToMainScreen()
             })
         }
@@ -48,9 +49,7 @@ class FirebaseClient {
     func logInToDB(email: String,password: String,controller: UIViewController){
         Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
             if let err = error {
-                let alert = UIAlertController(title: "Authorization error", message: err.localizedDescription, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
-                controller.present(alert, animated: true, completion: nil)
+                controller.createAndDisplayAlert(withTitle: "Authorization error", body: err.localizedDescription)
                 return
             }
             AppDelegate.shared.rootViewController.switchToMainScreen()
@@ -58,13 +57,16 @@ class FirebaseClient {
     }
     
     // Log out current user and return to login screen
-    @objc func logoutOfDB() {
+    @objc func logoutOfDB(controller: UIViewController) {
         do{
             try Auth.auth().signOut()
-            AppDelegate.shared.rootViewController.switchToLogout()
         }catch let logoutError {
             print(logoutError)
+            controller.createAndDisplayAlert(withTitle: "Log out error", body: logoutError.localizedDescription)
+            return
         }
+        locationModel.locationManager.stopUpdatingLocation()
+        AppDelegate.shared.rootViewController.switchToLogout()
         
     }
 }

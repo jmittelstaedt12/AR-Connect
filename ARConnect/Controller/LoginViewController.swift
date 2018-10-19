@@ -66,7 +66,7 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         view.backgroundColor = UIColor(r: 61, g: 91, b: 151)
         view.addSubview(arConnectLabel)
         view.addSubview(emailTextField)
@@ -76,6 +76,7 @@ class LoginViewController: UIViewController {
         setSubviewConstraints()
         
         title = "AR Connect"
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "Log In", style: .plain, target: nil, action: nil)
         
         hideKeyboardWhenTappedAround()
         emailTextField.delegate = self
@@ -99,19 +100,16 @@ class LoginViewController: UIViewController {
         
     }
     
+    // Request to login to database and segue into MainVC
     @objc private func logIn() {
-        
         guard let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
-            let alert = UIAlertController(title: "Error", message: "Please populate all fields", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
+            self.createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
         FBClient.logInToDB(email: email, password: password, controller: self)
     }
     
     @objc private func signUp() {
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Log In", style: .plain, target: nil, action: nil)
         self.navigationController?.pushViewController(RegisterViewController(), animated: true)
     }
 
