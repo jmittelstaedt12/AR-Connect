@@ -10,10 +10,11 @@ import UIKit
 import MapKit
 import Firebase
 
-let locationModel = LocationModel()
-
 class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate{
-
+    
+    var currentUser : User?
+    let locationModel = LocationModel()
+    
     let mapView: MKMapView = {
         let map = MKMapView()
         map.mapType = .standard
@@ -46,7 +47,8 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        currentUser = Auth.auth().currentUser ?? nil
+        searchTextField.delegate = self
         locationModel.locationManager.delegate = self
         locationModel.locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
@@ -91,28 +93,26 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     // Log out current user and return to login screen
     @objc private func logout() {
-//        do{
-//            try Auth.auth().signOut()
-//            AppDelegate.shared.rootViewController.switchToLogout()
-//        }catch let logoutError {
-//            print(logoutError)
-//        }
-        FBClient.logoutOfDB(controller: self)
+        if FirebaseClient.logoutOfDB(controller: self){
+            locationModel.locationManager.stopUpdatingLocation()
+            AppDelegate.shared.rootViewController.switchToLogout()
+        }
     }
     
     // Segue into AR Connect session
     @objc private func startARSession() {
         guard let location = locationModel.locationManager.location else{
             self.createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
-//            let alert = UIAlertController(title: "Error", message: "Current location is not available", preferredStyle: .alert)
-//            alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
-//            self.present(alert, animated: true, completion: nil)
             return
         }
         let arSessionVC = ARSessionViewController()
         arSessionVC.currentLocation = location
         arSessionVC.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.00001, longitude: location.coordinate.longitude+0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
         present(arSessionVC, animated: true, completion: nil)
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
     }
     
 //    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

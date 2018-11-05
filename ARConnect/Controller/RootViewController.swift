@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-let FBClient = FirebaseClient()
+//let FBClient = FirebaseClient()
 
 class RootViewController: UIViewController {
 

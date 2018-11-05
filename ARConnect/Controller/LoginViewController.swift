@@ -106,7 +106,7 @@ class LoginViewController: UIViewController {
             self.createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
-        FBClient.logInToDB(email: email, password: password, controller: self)
+        FirebaseClient.logInToDB(email: email, password: password, controller: self)
     }
     
     @objc private func signUp() {

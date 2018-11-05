@@ -168,7 +168,7 @@ class RegisterViewController: UIViewController {
             self.createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
-        FBClient.createNewUser(name: name, email: email, password: password, controller: self)
+        FirebaseClient.createNewUser(name: name, email: email, password: password, controller: self)
     }
 }
 

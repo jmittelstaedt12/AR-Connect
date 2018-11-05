@@ -10,10 +10,10 @@ import Foundation
 import UIKit
 import MapKit
 
-class LocationModel {
+struct LocationModel {
     
     let locationManager = CLLocationManager()
-
+    
     // Set up behavior for MKMapView object
     func setMapProperties(for map: MKMapView,in view: UIView) {
         map.frame = view.frame
@@ -28,14 +28,14 @@ class LocationModel {
     }
     
     // From true north, determine angle between coordinate points using Haversine formula
-    class func calculateBearing(from current: CLLocationCoordinate2D,to target: CLLocationCoordinate2D) -> Double {
+    static func calculateBearing(from current: CLLocationCoordinate2D,to target: CLLocationCoordinate2D) -> Double {
         let a = sin(target.longitude.toRadians() - current.longitude.toRadians()) * cos(target.latitude.toRadians())
         let b = cos(current.latitude.toRadians()) * sin(target.latitude.toRadians()) - sin(current.latitude.toRadians()) * cos(target.latitude.toRadians()) * cos(current.longitude.toRadians() - target.longitude.toRadians())
         return atan2(a, b)
     }
     
     // Do polar coordinate conversion to cartesian coordinates for ARKit grid system
-    class func getARCoordinates(from current: CLLocation,to target: CLLocation) -> (Double, Double){
+    static func getARCoordinates(from current: CLLocation,to target: CLLocation) -> (Double, Double){
         let bearing = calculateBearing(from: current.coordinate, to: target.coordinate)
         let distance = current.distance(from: target)
         return (distance*cos(bearing),distance*sin(bearing))

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1937026521727136008B46EE /* LocationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937026421727136008B46EE /* LocationModel.swift */; };
+		198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198DA989218A5C230054E1BD /* LocalUser.swift */; };
 		19913A0E216CED7500174187 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A0D216CED7500174187 /* AppDelegate.swift */; };
 		19913A10216CED7600174187 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 19913A0F216CED7600174187 /* art.scnassets */; };
 		19913A12216CED7600174187 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A11216CED7600174187 /* RegisterViewController.swift */; };
@@ -21,11 +22,13 @@
 		19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A2E216D3A4300174187 /* FirebaseClient.swift */; };
 		19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E0F216FB7E8008C39DA /* RootViewController.swift */; };
 		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
+		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
 		C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1937026421727136008B46EE /* LocationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModel.swift; sourceTree = "<group>"; };
+		198DA989218A5C230054E1BD /* LocalUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUser.swift; sourceTree = "<group>"; };
 		19913A0A216CED7500174187 /* ARConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19913A0D216CED7500174187 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19913A0F216CED7600174187 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -41,6 +44,7 @@
 		19913A2E216D3A4300174187 /* FirebaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseClient.swift; sourceTree = "<group>"; };
 		19948E0F216FB7E8008C39DA /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
+		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
 		20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4BC534F0E30D99C8828C606 /* Pods-ARConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARConnect.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect.release.xcconfig"; sourceTree = "<group>"; };
 		D4AE572E1499CBA03AA6E180 /* Pods-ARConnect.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARConnect.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect.debug.xcconfig"; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 				19913A11216CED7600174187 /* RegisterViewController.swift */,
 				19913A2B216D2FBF00174187 /* MainViewController.swift */,
 				19913A24216CF46100174187 /* ARSessionViewController.swift */,
+				19BE2A04218A665C007304CF /* SearchTableViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -110,6 +115,7 @@
 			children = (
 				19913A2E216D3A4300174187 /* FirebaseClient.swift */,
 				1937026421727136008B46EE /* LocationModel.swift */,
+				198DA989218A5C230054E1BD /* LocalUser.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -267,6 +273,8 @@
 				19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */,
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
+				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
+				198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */,
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
