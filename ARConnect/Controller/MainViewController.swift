@@ -14,7 +14,7 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     var currentUser : User?
     let locationModel = LocationModel()
-    
+
     let mapView: MKMapView = {
         let map = MKMapView()
         map.mapType = .standard
@@ -47,6 +47,7 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        FirebaseClient.checkOnline()
         currentUser = Auth.auth().currentUser ?? nil
         searchTextField.delegate = self
         locationModel.locationManager.delegate = self
@@ -112,6 +113,7 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
+        searchTextField.endEditing(true)
         present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
     }
     
