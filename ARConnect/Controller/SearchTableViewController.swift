@@ -11,7 +11,7 @@ import Firebase
 
 class SearchTableViewController: UIViewController {
 
-    var users = [LocalUser]()
+    var users: [LocalUser]?
     let cellId = "cellId"
 
     let searchUsersTextField: UITextField = {
@@ -39,7 +39,6 @@ class SearchTableViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
-
         view.addSubview(searchUsersTextField)
         view.addSubview(tableView)
         setupViews()
@@ -47,11 +46,10 @@ class SearchTableViewController: UIViewController {
         navigationItem.setLeftBarButton(logoutButton, animated: true)
     }
     
-    func setupViews(){
-        searchUsersTextField.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor)
+    private func setupViews(){
+        searchUsersTextField.edgeAnchors(top: view.topAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 30, left: 0, bottom: 0, right: 0))
         searchUsersTextField.dimensionAnchors(height: 30)
-
-        tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor)
+        tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
     
     @objc private func dismissVC(){
@@ -59,27 +57,30 @@ class SearchTableViewController: UIViewController {
     }
 }
 
+
 extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return users.count
+        return users?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
-        let user = users[indexPath.row]
+        guard let user = users?[indexPath.row] else{
+            return cell
+        }
         cell.textLabel?.text = user.name
         cell.detailTextLabel?.text = user.email
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let cell = tableView.cellForRow(at: indexPath), let email = cell.detailTextLabel, let user = users.first(where: {$0.email == email.text}), let uid = user.uid else{
+        guard let cell = tableView.cellForRow(at: indexPath), let email = cell.detailTextLabel, let user = users?.first(where: {$0.email == email.text}) else{
             return;
         }
-        let userForCellRef = Database.database().reference().child("Users").child(uid)
-        userForCellRef.updateChildValues(["connectedTo": uid])
-        cell.setSelected(false, animated: true)
+        let cellDetailVC = CellDetailViewController()
+        cellDetailVC.user = user
+        self.navigationController?.pushViewController(cellDetailVC, animated: true)
     }
 }
 

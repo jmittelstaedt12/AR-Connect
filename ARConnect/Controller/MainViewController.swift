@@ -10,7 +10,7 @@ import UIKit
 import MapKit
 import Firebase
 
-class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate{
+class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate{
     
     var currentUser : User?
     let locationModel = LocationModel()
@@ -45,34 +45,47 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         return btn
     }()
     
+    let childSearchViewController: SearchTableViewController = {
+        let searchVC = SearchTableViewController()
+        searchVC.view.translatesAutoresizingMaskIntoConstraints = false
+        searchVC.view.backgroundColor = .gray
+        return searchVC
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        FirebaseClient.checkOnline()
         currentUser = Auth.auth().currentUser ?? nil
         searchTextField.delegate = self
-        locationModel.locationManager.delegate = self
-        locationModel.locationManager.requestAlwaysAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            locationModel.locationManager.delegate = self
-            locationModel.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationModel.locationManager.startUpdatingLocation()
-        }
+//        locationModel.locationManager.delegate = self
+//        locationModel.locationManager.requestAlwaysAuthorization()
+//        if CLLocationManager.locationServicesEnabled() {
+//            locationModel.locationManager.delegate = self
+//            locationModel.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+//            locationModel.locationManager.startUpdatingLocation()
+//        }
         
         title = "AR Connect"
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
         
-        view.addSubview(mapView)
-        view.addSubview(searchTextField)
-        view.addSubview(startConnectSessionButton)
+        addChildViews()
+        setupPanGestureRecognizer()
         setupMap()
         setupSearchTextField()
+        setupChildSearchViewController()
         setupStartConnectSessionButton()
-        
         searchTextField.delegate = self
         hideKeyboardWhenTappedAround()
     }
     
+    private func addChildViews(){
+        view.addSubview(mapView)
+        view.addSubview(searchTextField)
+        view.addSubview(startConnectSessionButton)
+        addChild(childSearchViewController)
+        view.addSubview(childSearchViewController.view)
+        childSearchViewController.didMove(toParent: self)
+    }
     // Setup auto layout anchors for map view
     private func setupMap() {
         locationModel.setMapProperties(for: mapView, in: view)
@@ -92,6 +105,34 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         startConnectSessionButton.dimensionAnchors(height: 40, width: 100)
     }
     
+    // Setup auto layout anchors for child instance SearchViewController
+    private func setupChildSearchViewController() {
+        childSearchViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: -70, left: 0, bottom: 0, right: 0))
+        childSearchViewController.view.dimensionAnchors(height: 667)
+    }
+    
+    private func setupPanGestureRecognizer(){
+        let panGestureRecognizer = UIPanGestureRecognizer(target: childSearchViewController, action: #selector(onSearchViewControllerPan(sender:)))
+        panGestureRecognizer.cancelsTouchesInView = false
+        panGestureRecognizer.delegate = self
+        self.view.addGestureRecognizer(panGestureRecognizer)
+    }
+    
+    // Run on child instance of SearchViewController pan gesture
+    @objc private func onSearchViewControllerPan(sender: UIPanGestureRecognizer) {
+        let translationPoint = sender.translation(in: view.superview)
+        let velocity = sender.velocity(in: view.superview)
+        switch sender.state {
+        case .changed:
+            print("changed")
+        //TODO: SET CHANGED RECOGNIZER
+        case .ended:
+            print("ended")
+        //TODO: SET ENDED RECOGNIZER
+        default:
+            return
+        }
+    }
     // Log out current user and return to login screen
     @objc private func logout() {
         if FirebaseClient.logoutOfDB(controller: self){

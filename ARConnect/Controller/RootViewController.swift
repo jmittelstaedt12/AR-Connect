@@ -33,13 +33,15 @@ class RootViewController: UIViewController {
         current.didMove(toParent: self)
     }
     
+    // Displays the login screen
+    // If there was no user signed in on last app close, this will display the login screen
     func showLoginScreen() {
         let new = UINavigationController(rootViewController: LoginViewController())
         addChild(new)
         new.view.frame = view.bounds
         view.addSubview(new.view)
         new.didMove(toParent: self)
-        
+
         current.willMove(toParent: nil)
         current.view.removeFromSuperview()
         current.removeFromParent()
@@ -47,17 +49,19 @@ class RootViewController: UIViewController {
         current = new
     }
     
+    // If a user signs in, display the main map screen
     func switchToMainScreen() {
         let mainScreen = UINavigationController(rootViewController: MainViewController())
         animateFadeTransition(to: mainScreen)
     }
     
+    // If the user signs out, switch to the login screen
     func switchToLogout() {
-        
         let logoutScreen = UINavigationController(rootViewController: LoginViewController())
         animateDismissTransition(to: logoutScreen)
     }
     
+    // Animation for presenting main map screen
     private func animateFadeTransition(to new: UIViewController, completion: (() -> Void)? = nil){
         current.willMove(toParent: nil)
         addChild(new)
@@ -70,6 +74,7 @@ class RootViewController: UIViewController {
         }
     }
     
+    // Animation for dismissing
     private func animateDismissTransition(to new: UIViewController, completion: (() -> Void)? = nil) {
         current.willMove(toParent: nil)
         addChild(new)
@@ -117,7 +122,7 @@ extension UIViewController: UITextFieldDelegate {
 
 extension UIView {
     
-    // Set auto layout anchors for UIView edges
+    // Used to set auto layout anchors for UIView edges
     func edgeAnchors(top: NSLayoutYAxisAnchor? = nil, leading: NSLayoutXAxisAnchor? = nil, bottom: NSLayoutYAxisAnchor? = nil, trailing: NSLayoutXAxisAnchor? = nil, padding: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)){
         if let top = top {
             topAnchor.constraint(equalTo: top, constant: padding.top).isActive = true
@@ -133,7 +138,7 @@ extension UIView {
         }
     }
     
-    // Set auto layout anchors for UIView center coordinates
+    // Usex to set auto layout anchors for UIView center coordinates
     func centerAnchors(centerX: NSLayoutXAxisAnchor? = nil, centerY: NSLayoutYAxisAnchor? = nil){
         if let centerX = centerX {
             centerXAnchor.constraint(equalTo: centerX).isActive = true
@@ -143,7 +148,7 @@ extension UIView {
         }
     }
     
-    // Set auto layout anchors for UIView width and height
+    // Used to set auto layout anchors for UIView width and height
     func dimensionAnchors(height: CGFloat? = nil, heightMultiplier: CGFloat = 1, width: CGFloat? = nil, widthMultiplier: CGFloat = 1){
         if let height = height{
             heightAnchor.constraint(equalToConstant: height*heightMultiplier).isActive = true

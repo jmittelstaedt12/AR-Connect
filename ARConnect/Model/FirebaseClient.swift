@@ -11,6 +11,7 @@ import Firebase
 import UIKit
 
 struct FirebaseClient {
+    
     // Request to authorize a new user and add them to database
     static func createNewUser(name: String, email: String,password: String, controller: UIViewController) {
         Auth.auth().createUser(withEmail: email, password: password) { (data, error) in
@@ -84,7 +85,9 @@ struct FirebaseClient {
         }
     }
     
+    // See if user is connected to firebase
     static func checkOnline() {
+        #warning("handle online stuff")
         let connectedRef = Database.database().reference(withPath: ".info/connected")
         connectedRef.observe(.value) { (snapshot) in
             if snapshot.value as? Bool ?? false {

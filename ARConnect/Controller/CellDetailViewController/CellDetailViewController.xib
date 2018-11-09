@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CellDetailViewController" customModule="ARConnect" customModuleProvider="target">
+            <connections>
+                <outlet property="connectButton" destination="SbZ-PK-gzc" id="Zeb-27-uD7"/>
+                <outlet property="messageButton" destination="qAU-1n-vUD" id="e4g-dv-Zsb"/>
+                <outlet property="nameLabel" destination="7Ev-NN-Ig0" id="tm2-8Y-WhZ"/>
+                <outlet property="userImageView" destination="Kwg-0m-LSC" id="xRM-Pc-wQM"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Kwg-0m-LSC">
+                    <rect key="frame" x="50" y="84" width="275" height="275"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="Kwg-0m-LSC" secondAttribute="height" multiplier="1:1" id="kL4-aO-uXW"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="John Doe" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7Ev-NN-Ig0">
+                    <rect key="frame" x="119.5" y="379" width="136" height="39.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="33"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qAU-1n-vUD">
+                    <rect key="frame" x="240" y="591" width="103" height="44"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="26"/>
+                    <state key="normal" title="Message"/>
+                    <connections>
+                        <action selector="messageUser:" destination="-1" eventType="touchUpInside" id="NyO-JM-Ahq"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SbZ-PK-gzc">
+                    <rect key="frame" x="124" y="479" width="129" height="54"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="35"/>
+                    <state key="normal" title="Connect"/>
+                    <connections>
+                        <action selector="connectToUser:" destination="-1" eventType="touchUpInside" id="xEb-ot-zBc"/>
+                    </connections>
+                </button>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="7Ev-NN-Ig0" firstAttribute="top" secondItem="Kwg-0m-LSC" secondAttribute="bottom" constant="20" id="2Ot-e1-0Rz"/>
+                <constraint firstItem="Kwg-0m-LSC" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="64" id="Cg8-97-8Bs"/>
+                <constraint firstItem="Kwg-0m-LSC" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="50" id="MC9-ha-NjU"/>
+                <constraint firstItem="Kwg-0m-LSC" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="QEa-16-4pc"/>
+                <constraint firstItem="7Ev-NN-Ig0" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="spQ-2i-bpU"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <point key="canvasLocation" x="63.200000000000003" y="111.99400299850076"/>
+        </view>
+    </objects>
+</document>

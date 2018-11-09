@@ -20,9 +20,13 @@
 		19913A27216CF7A100174187 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A26216CF7A100174187 /* LoginViewController.swift */; };
 		19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A2B216D2FBF00174187 /* MainViewController.swift */; };
 		19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A2E216D3A4300174187 /* FirebaseClient.swift */; };
+		199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199383C12195EE58001BE7FD /* MessageViewController.swift */; };
+		199383C42195EE58001BE7FD /* MessageViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 199383C22195EE58001BE7FD /* MessageViewController.xib */; };
 		19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E0F216FB7E8008C39DA /* RootViewController.swift */; };
 		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
+		19DD8D4B219486E200C01EDC /* CellDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DD8D49219486E200C01EDC /* CellDetailViewController.swift */; };
+		19DD8D4C219486E200C01EDC /* CellDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19DD8D4A219486E200C01EDC /* CellDetailViewController.xib */; };
 		C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */; };
 /* End PBXBuildFile section */
 
@@ -42,9 +46,13 @@
 		19913A26216CF7A100174187 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		19913A2B216D2FBF00174187 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		19913A2E216D3A4300174187 /* FirebaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseClient.swift; sourceTree = "<group>"; };
+		199383C12195EE58001BE7FD /* MessageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageViewController.swift; sourceTree = "<group>"; };
+		199383C22195EE58001BE7FD /* MessageViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MessageViewController.xib; sourceTree = "<group>"; };
 		19948E0F216FB7E8008C39DA /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
+		19DD8D49219486E200C01EDC /* CellDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellDetailViewController.swift; sourceTree = "<group>"; };
+		19DD8D4A219486E200C01EDC /* CellDetailViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CellDetailViewController.xib; sourceTree = "<group>"; };
 		20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4BC534F0E30D99C8828C606 /* Pods-ARConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARConnect.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect.release.xcconfig"; sourceTree = "<group>"; };
 		D4AE572E1499CBA03AA6E180 /* Pods-ARConnect.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARConnect.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect.debug.xcconfig"; sourceTree = "<group>"; };
@@ -106,6 +114,8 @@
 				19913A2B216D2FBF00174187 /* MainViewController.swift */,
 				19913A24216CF46100174187 /* ARSessionViewController.swift */,
 				19BE2A04218A665C007304CF /* SearchTableViewController.swift */,
+				199383C62195EE99001BE7FD /* CellDetailViewController */,
+				199383C72195EEAA001BE7FD /* MessageViewController */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -118,6 +128,24 @@
 				198DA989218A5C230054E1BD /* LocalUser.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		199383C62195EE99001BE7FD /* CellDetailViewController */ = {
+			isa = PBXGroup;
+			children = (
+				19DD8D49219486E200C01EDC /* CellDetailViewController.swift */,
+				19DD8D4A219486E200C01EDC /* CellDetailViewController.xib */,
+			);
+			path = CellDetailViewController;
+			sourceTree = "<group>";
+		};
+		199383C72195EEAA001BE7FD /* MessageViewController */ = {
+			isa = PBXGroup;
+			children = (
+				199383C12195EE58001BE7FD /* MessageViewController.swift */,
+				199383C22195EE58001BE7FD /* MessageViewController.xib */,
+			);
+			path = MessageViewController;
 			sourceTree = "<group>";
 		};
 		BB929971DADCCBDD956900DE /* Pods */ = {
@@ -200,8 +228,10 @@
 				19913A10216CED7600174187 /* art.scnassets in Resources */,
 				19913A1A216CED7800174187 /* LaunchScreen.storyboard in Resources */,
 				19913A23216CF1F200174187 /* GoogleService-Info.plist in Resources */,
+				199383C42195EE58001BE7FD /* MessageViewController.xib in Resources */,
 				19913A17216CED7800174187 /* Assets.xcassets in Resources */,
 				19913A15216CED7600174187 /* Main.storyboard in Resources */,
+				19DD8D4C219486E200C01EDC /* CellDetailViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +296,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
+				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
 				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,
 				19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */,
@@ -276,6 +307,7 @@
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
 				198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */,
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
+				19DD8D4B219486E200C01EDC /* CellDetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
