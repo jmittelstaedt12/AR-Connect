@@ -9,16 +9,29 @@
 import UIKit
 import Firebase
 
-class SearchTableViewController: UIViewController {
+protocol SearchTableViewControllerDelegate {
+    func updateCoordinatesForChild(searchTableViewController: UIViewController,to: CGPoint, withVelocity: CGPoint)
+}
 
+class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
+    
+    var delegate: SearchTableViewControllerDelegate!
     var users: [LocalUser]?
     let cellId = "cellId"
 
+    let drawerIconView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.gray
+        view.layer.cornerRadius = 1.5
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     let searchUsersTextField: UITextField = {
         let tf = UITextField()
         tf.backgroundColor = .white
+        tf.placeholder = "Find a friend"
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.layer.borderWidth = 2
         tf.layer.borderColor = UIColor.black.cgColor
         tf.layer.cornerRadius = 5
         return tf
@@ -39,15 +52,42 @@ class SearchTableViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
+        view.addSubview(drawerIconView)
         view.addSubview(searchUsersTextField)
         view.addSubview(tableView)
+        setupPanGestureRecognizer()
         setupViews()
         let logoutButton = UIBarButtonItem(title: "Dismiss", style: .plain, target: self, action: #selector(dismissVC))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
     }
     
+    // Configure pan gesture recognizer for use in MainViewController
+    private func setupPanGestureRecognizer(){
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(onSearchViewControllerPan(sender:)))
+        panGestureRecognizer.cancelsTouchesInView = false
+        panGestureRecognizer.delegate = self
+        self.view.addGestureRecognizer(panGestureRecognizer)
+    }
+    
+    // Run on child instance of SearchViewController pan gesture
+    @objc private func onSearchViewControllerPan(sender: UIPanGestureRecognizer) {
+        let translationPoint = sender.translation(in: view.superview)
+        let velocity = sender.velocity(in: view.superview)
+        switch sender.state {
+        case .changed:
+            delegate.updateCoordinatesForChild(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
+        case .ended:
+            delegate.updateCoordinatesForChild(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
+        default:
+            return
+        }
+    }
+    
     private func setupViews(){
-        searchUsersTextField.edgeAnchors(top: view.topAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 30, left: 0, bottom: 0, right: 0))
+        drawerIconView.edgeAnchors(top: view.topAnchor, padding: UIEdgeInsets(top: 6, left: 00, bottom: 0, right: 0))
+        drawerIconView.centerAnchors(centerX: view.centerXAnchor)
+        drawerIconView.dimensionAnchors(height: 3, width: 32)
+        searchUsersTextField.edgeAnchors(top: drawerIconView.bottomAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 6, left: 10, bottom: 0, right: -10))
         searchUsersTextField.dimensionAnchors(height: 30)
         tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
@@ -84,6 +124,12 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
     }
 }
 
+extension SearchTableViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+    }
+}
+
 class UserCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
@@ -91,11 +137,5 @@ class UserCell: UITableViewCell {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-}
-
-extension SearchTableViewController: UISearchBarDelegate {
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
     }
 }

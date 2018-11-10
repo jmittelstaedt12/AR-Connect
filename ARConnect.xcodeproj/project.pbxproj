@@ -112,8 +112,8 @@
 				19913A26216CF7A100174187 /* LoginViewController.swift */,
 				19913A11216CED7600174187 /* RegisterViewController.swift */,
 				19913A2B216D2FBF00174187 /* MainViewController.swift */,
-				19913A24216CF46100174187 /* ARSessionViewController.swift */,
 				19BE2A04218A665C007304CF /* SearchTableViewController.swift */,
+				19913A24216CF46100174187 /* ARSessionViewController.swift */,
 				199383C62195EE99001BE7FD /* CellDetailViewController */,
 				199383C72195EEAA001BE7FD /* MessageViewController */,
 			);

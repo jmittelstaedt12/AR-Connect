@@ -10,7 +10,8 @@ import UIKit
 import MapKit
 import Firebase
 
-class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate{
+class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
+    
     
     var currentUser : User?
     let locationModel = LocationModel()
@@ -42,40 +43,46 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         btn.layer.cornerRadius = 5
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.addTarget(self, action: #selector(startARSession), for: .touchUpInside)
+        btn.isHidden = true
         return btn
     }()
     
     let childSearchViewController: SearchTableViewController = {
         let searchVC = SearchTableViewController()
         searchVC.view.translatesAutoresizingMaskIntoConstraints = false
-        searchVC.view.backgroundColor = .gray
+        searchVC.view.backgroundColor = UIColor(white: 5/6, alpha: 1.0)
+        searchVC.view.layer.cornerRadius = 5
         return searchVC
     }()
     
+    override func viewDidAppear(_ animated: Bool) {
+        setupNavigationBarAttributes()
+        
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         currentUser = Auth.auth().currentUser ?? nil
         searchTextField.delegate = self
-//        locationModel.locationManager.delegate = self
-//        locationModel.locationManager.requestAlwaysAuthorization()
-//        if CLLocationManager.locationServicesEnabled() {
-//            locationModel.locationManager.delegate = self
-//            locationModel.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-//            locationModel.locationManager.startUpdatingLocation()
-//        }
+        locationModel.locationManager.delegate = self
+        locationModel.locationManager.requestAlwaysAuthorization()
+        if CLLocationManager.locationServicesEnabled() {
+            locationModel.locationManager.delegate = self
+            locationModel.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationModel.locationManager.startUpdatingLocation()
+        }
         
         title = "AR Connect"
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
         
         addChildViews()
-        setupPanGestureRecognizer()
         setupMap()
         setupSearchTextField()
-        setupChildSearchViewController()
-        setupStartConnectSessionButton()
         searchTextField.delegate = self
         hideKeyboardWhenTappedAround()
+        setupChildSearchViewController()
+        childSearchViewController.delegate = self
+        setupStartConnectSessionButton()
     }
     
     private func addChildViews(){
@@ -86,17 +93,26 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         view.addSubview(childSearchViewController.view)
         childSearchViewController.didMove(toParent: self)
     }
+    
+    private func setupNavigationBarAttributes(){
+        navigationController?.navigationBar.isTranslucent = true
+        navigationController?.navigationBar.barTintColor = UIColor.gray
+        navigationController?.navigationBar.alpha = 0.9
+        navigationController?.navigationBar.tintColor = UIColor.white
+        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+    }
     // Setup auto layout anchors for map view
     private func setupMap() {
         locationModel.setMapProperties(for: mapView, in: view)
-        mapView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+        mapView.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
     }
     
     // Setup auto layout anchors for search text field
     private func setupSearchTextField() {
-        searchTextField.edgeAnchors(top: mapView.topAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
-        searchTextField.dimensionAnchors(height: 30, width: mapView.frame.width, widthMultiplier: 0.85)
-        searchTextField.centerAnchors(centerX: mapView.centerXAnchor)
+        searchTextField.isHidden = true
+//        searchTextField.edgeAnchors(top: mapView.topAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
+//        searchTextField.dimensionAnchors(height: 30, width: mapView.frame.width, widthMultiplier: 0.85)
+//        searchTextField.centerAnchors(centerX: mapView.centerXAnchor)
     }
     
     // Setup auto layout anchors for AR Session initialization button
@@ -107,32 +123,10 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     // Setup auto layout anchors for child instance SearchViewController
     private func setupChildSearchViewController() {
-        childSearchViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: -70, left: 0, bottom: 0, right: 0))
+        childSearchViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: -50, left: 4, bottom: 0, right: -4))
         childSearchViewController.view.dimensionAnchors(height: 667)
     }
     
-    private func setupPanGestureRecognizer(){
-        let panGestureRecognizer = UIPanGestureRecognizer(target: childSearchViewController, action: #selector(onSearchViewControllerPan(sender:)))
-        panGestureRecognizer.cancelsTouchesInView = false
-        panGestureRecognizer.delegate = self
-        self.view.addGestureRecognizer(panGestureRecognizer)
-    }
-    
-    // Run on child instance of SearchViewController pan gesture
-    @objc private func onSearchViewControllerPan(sender: UIPanGestureRecognizer) {
-        let translationPoint = sender.translation(in: view.superview)
-        let velocity = sender.velocity(in: view.superview)
-        switch sender.state {
-        case .changed:
-            print("changed")
-        //TODO: SET CHANGED RECOGNIZER
-        case .ended:
-            print("ended")
-        //TODO: SET ENDED RECOGNIZER
-        default:
-            return
-        }
-    }
     // Log out current user and return to login screen
     @objc private func logout() {
         if FirebaseClient.logoutOfDB(controller: self){
@@ -153,12 +147,19 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         present(arSessionVC, animated: true, completion: nil)
     }
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        searchTextField.endEditing(true)
-        present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
-    }
+//    func textFieldDidBeginEditing(_ textField: UITextField) {
+//        searchTextField.endEditing(true)
+//        present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
+//    }
     
 //    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 //        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
 //    }
+}
+
+extension MainViewController: SearchTableViewControllerDelegate {
+    func updateCoordinatesForChild(searchTableViewController for: UIViewController, to: CGPoint, withVelocity: CGPoint) {
+        #warning("TODO: Write this function")
+    }
+    
 }
