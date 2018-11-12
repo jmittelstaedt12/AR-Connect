@@ -15,7 +15,9 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     var currentUser : User?
     let locationModel = LocationModel()
-
+    var childSearchVCTopConstraint: NSLayoutConstraint?
+    var searchViewControllerPreviousYCoordinate: CGFloat?
+    
     let mapView: MKMapView = {
         let map = MKMapView()
         map.mapType = .standard
@@ -47,32 +49,24 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         return btn
     }()
     
-    enum expansionState: CGFloat {
+    enum ExpansionState: CGFloat {
         case expanded
         case compressed
     }
     
-//    private func expansionStateConstraint(forState state: expansionState, inContainer container: CGRect) -> CGFloat{
-//        switch state {
-//        case .expanded:
-//            return container.height/2
-//        case .compressed:
-//            return container.height/8
-//        }
-//    }
-    private func setChildSearchVCState(toState state: expansionState) {
-        guard let tc = topConstraint else {
+    private func setChildSearchVCState(toState state: ExpansionState) {
+        guard let tc = childSearchVCTopConstraint else {
             return
         }
         switch state {
         case .compressed:
             tc.constant = -50
+            searchViewControllerPreviousYCoordinate = view.bounds.height - 50
         case .expanded:
             tc.constant = -400
+            searchViewControllerPreviousYCoordinate = view.bounds.height - 400
         }
     }
-    
-    var topConstraint: NSLayoutConstraint?
     
     let childSearchViewController: SearchTableViewController = {
         let searchVC = SearchTableViewController()
@@ -104,7 +98,7 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         
         addChildViews()
         setupMap()
-        setupSearchTextField()
+//        setupSearchTextField()
         searchTextField.delegate = self
         hideKeyboardWhenTappedAround()
         setupChildSearchViewController()
@@ -135,12 +129,12 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     }
     
     // Setup auto layout anchors for search text field
-    private func setupSearchTextField() {
-        searchTextField.isHidden = true
+//    private func setupSearchTextField() {
+//        searchTextField.isHidden = true
 //        searchTextField.edgeAnchors(top: mapView.topAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
 //        searchTextField.dimensionAnchors(height: 30, width: mapView.frame.width, widthMultiplier: 0.85)
 //        searchTextField.centerAnchors(centerX: mapView.centerXAnchor)
-    }
+//    }
     
     // Setup auto layout anchors for AR Session initialization button
     private func setupStartConnectSessionButton() {
@@ -151,9 +145,9 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     // Setup auto layout anchors for child instance SearchViewController
     private func setupChildSearchViewController() {
         childSearchViewController.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
-        topConstraint = childSearchViewController.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
+        childSearchVCTopConstraint = childSearchViewController.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
         setChildSearchVCState(toState: .compressed)
-        topConstraint?.isActive = true
+        childSearchVCTopConstraint?.isActive = true
         childSearchViewController.view.dimensionAnchors(height: 667)
     }
     
@@ -188,40 +182,67 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
 }
 
 extension MainViewController: SearchTableViewControllerDelegate {
-    func updateCoordinatesForChild(searchTableViewController: UIViewController, to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
-        #warning("TODO: Write this function")
-        let previousSearchViewControllerTopConstraint = childSearchViewController.view.frame.origin.y
-        searchTableViewController.view.isUserInteractionEnabled = true
-        let newTopConstraint = previousSearchViewControllerTopConstraint + translationPoint.y
-        let compressedConstraint = view.frame.height-50
-        let expandedConstraint = view.frame.height-300
-
-        let velocityThreshold: CGFloat = 400
-
-        if velocity.y < velocityThreshold {
-            if previousSearchViewControllerTopConstraint == compressedConstraint {
-                if newTopConstraint < previousSearchViewControllerTopConstraint {
-                    setChildSearchVCState(toState: .expanded)
-                    animateTopConstraint()
-                }
-            }else {
-                if newTopConstraint > previousSearchViewControllerTopConstraint {
-                    setChildSearchVCState(toState: .compressed)
-                    animateTopConstraint()
-                }
-            }
-        } else {
-//            if previousSearchViewControllerTopConstraint == compressedConstraint {
-//                if newTopConstraint < previousSearchViewControllerTopConstraint {
-//                }
-//            } else {
-//
-//            }
+    
+    // During pan of drawer VC, update child coordinates to match
+    func updateCoordinatesDuringPanFor(searchTableViewController: UIViewController, to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
+        searchTableViewController.view.isUserInteractionEnabled = false
+        guard let previousYCoordinate = searchViewControllerPreviousYCoordinate, let topConstraint = childSearchVCTopConstraint else{
+            return
+        }
+        let constraintOffset = previousYCoordinate - view.bounds.height
+        let newTopConstraint = previousYCoordinate + translationPoint.y
+        let compressedYCoordinate = view.bounds.height - 50
+        let expandedYCoordinate = view.bounds.height - 400
+        if newTopConstraint >= expandedYCoordinate - 20 && newTopConstraint <= compressedYCoordinate + 20 {
+            topConstraint.constant = constraintOffset+translationPoint.y
         }
     }
     
+    // When release pan, update coordinates to compressed or expanded depending on velocity
+    func updateCoordinatesAfterPanFor(searchTableViewController: UIViewController, to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
+        guard let previousYCoordinate = searchViewControllerPreviousYCoordinate, let topConstraint = childSearchVCTopConstraint else{
+            return
+        }
+        let newTopConstraint = previousYCoordinate + translationPoint.y
+        let compressedYCoordinate = view.frame.height-50
+        let expandedYCoordinate = view.frame.height-400
+        let velocityThreshold: CGFloat = 300
+        searchTableViewController.view.isUserInteractionEnabled = true
+        if abs(velocity.y) < velocityThreshold {
+            if previousYCoordinate == compressedYCoordinate {
+                if newTopConstraint <= compressedYCoordinate-100 {
+                    setChildSearchVCState(toState: .expanded)
+                } else {
+                    setChildSearchVCState(toState: .compressed)
+                }
+            } else {
+                if newTopConstraint >= expandedYCoordinate+100{
+                    setChildSearchVCState(toState: .compressed)
+                } else {
+                    setChildSearchVCState(toState: .expanded)
+                }
+            }
+        
+        } else {
+            if previousYCoordinate == compressedYCoordinate {
+                if newTopConstraint <= compressedYCoordinate {
+                    setChildSearchVCState(toState: .expanded)
+                } else {
+                    setChildSearchVCState(toState: .compressed)
+                }
+            } else {
+                if newTopConstraint >= expandedYCoordinate{
+                    setChildSearchVCState(toState: .compressed)
+                } else {
+                    setChildSearchVCState(toState: .expanded)
+                }
+            }
+        }
+        animateTopConstraint()
+    }
+    
     private func animateTopConstraint() {
-        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
+        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
             self.view.layoutIfNeeded()
         }, completion: nil)
     }

@@ -10,7 +10,8 @@ import UIKit
 import Firebase
 
 protocol SearchTableViewControllerDelegate {
-    func updateCoordinatesForChild(searchTableViewController: UIViewController,to translationPoint: CGPoint, withVelocity velocity: CGPoint)
+    func updateCoordinatesDuringPanFor(searchTableViewController: UIViewController,to translationPoint: CGPoint, withVelocity velocity: CGPoint)
+    func updateCoordinatesAfterPanFor(searchTableViewController: UIViewController,to translationPoint: CGPoint, withVelocity velocity: CGPoint)
 }
 
 class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
@@ -49,11 +50,12 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
             self.users = fetchedUsers
             self.tableView.reloadData()
         })
+        view.addSubview(drawerIconView)
+        searchUsersTextField.delegate = self
+        view.addSubview(searchUsersTextField)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
-        view.addSubview(drawerIconView)
-        view.addSubview(searchUsersTextField)
         view.addSubview(tableView)
         setupPanGestureRecognizer()
         setupViews()
@@ -75,9 +77,9 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         let velocity = sender.velocity(in: view.superview)
         switch sender.state {
         case .changed:
-            delegate.updateCoordinatesForChild(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
+            delegate.updateCoordinatesDuringPanFor(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
         case .ended:
-            delegate.updateCoordinatesForChild(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
+            delegate.updateCoordinatesAfterPanFor(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
         default:
             return
         }
@@ -92,6 +94,12 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         searchUsersTextField.dimensionAnchors(height: 30)
         tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
+    
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            view.backgroundColor = .red
+//            searchTextField.endEditing(true)
+//            present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
+        }
     
     @objc private func dismissVC(){
         dismiss(animated: true, completion: nil)
