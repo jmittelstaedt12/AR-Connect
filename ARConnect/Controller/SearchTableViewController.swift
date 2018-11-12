@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 
 protocol SearchTableViewControllerDelegate {
-    func updateCoordinatesForChild(searchTableViewController: UIViewController,to: CGPoint, withVelocity: CGPoint)
+    func updateCoordinatesForChild(searchTableViewController: UIViewController,to translationPoint: CGPoint, withVelocity velocity: CGPoint)
 }
 
 class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
@@ -83,6 +83,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
+    // Set dimensions and constraints for subviews
     private func setupViews(){
         drawerIconView.edgeAnchors(top: view.topAnchor, padding: UIEdgeInsets(top: 6, left: 00, bottom: 0, right: 0))
         drawerIconView.centerAnchors(centerX: view.centerXAnchor)
@@ -114,14 +115,14 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let cell = tableView.cellForRow(at: indexPath), let email = cell.detailTextLabel, let user = users?.first(where: {$0.email == email.text}) else{
-            return;
-        }
-        let cellDetailVC = CellDetailViewController()
-        cellDetailVC.user = user
-        self.navigationController?.pushViewController(cellDetailVC, animated: true)
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        guard let cell = tableView.cellForRow(at: indexPath), let email = cell.detailTextLabel, let user = users?.first(where: {$0.email == email.text}) else{
+//            return;
+//        }
+//        let cellDetailVC = CellDetailViewController()
+//        cellDetailVC.user = user
+//        self.navigationController?.pushViewController(cellDetailVC, animated: true)
+//    }
 }
 
 extension SearchTableViewController: UISearchBarDelegate {

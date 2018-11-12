@@ -47,6 +47,33 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         return btn
     }()
     
+    enum expansionState: CGFloat {
+        case expanded
+        case compressed
+    }
+    
+//    private func expansionStateConstraint(forState state: expansionState, inContainer container: CGRect) -> CGFloat{
+//        switch state {
+//        case .expanded:
+//            return container.height/2
+//        case .compressed:
+//            return container.height/8
+//        }
+//    }
+    private func setChildSearchVCState(toState state: expansionState) {
+        guard let tc = topConstraint else {
+            return
+        }
+        switch state {
+        case .compressed:
+            tc.constant = -50
+        case .expanded:
+            tc.constant = -400
+        }
+    }
+    
+    var topConstraint: NSLayoutConstraint?
+    
     let childSearchViewController: SearchTableViewController = {
         let searchVC = SearchTableViewController()
         searchVC.view.translatesAutoresizingMaskIntoConstraints = false
@@ -123,7 +150,10 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     // Setup auto layout anchors for child instance SearchViewController
     private func setupChildSearchViewController() {
-        childSearchViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: -50, left: 4, bottom: 0, right: -4))
+        childSearchViewController.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
+        topConstraint = childSearchViewController.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
+        setChildSearchVCState(toState: .compressed)
+        topConstraint?.isActive = true
         childSearchViewController.view.dimensionAnchors(height: 667)
     }
     
@@ -158,8 +188,43 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
 }
 
 extension MainViewController: SearchTableViewControllerDelegate {
-    func updateCoordinatesForChild(searchTableViewController for: UIViewController, to: CGPoint, withVelocity: CGPoint) {
+    func updateCoordinatesForChild(searchTableViewController: UIViewController, to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
         #warning("TODO: Write this function")
+        let previousSearchViewControllerTopConstraint = childSearchViewController.view.frame.origin.y
+        searchTableViewController.view.isUserInteractionEnabled = true
+        let newTopConstraint = previousSearchViewControllerTopConstraint + translationPoint.y
+        let compressedConstraint = view.frame.height-50
+        let expandedConstraint = view.frame.height-300
+
+        let velocityThreshold: CGFloat = 400
+
+        if velocity.y < velocityThreshold {
+            if previousSearchViewControllerTopConstraint == compressedConstraint {
+                if newTopConstraint < previousSearchViewControllerTopConstraint {
+                    setChildSearchVCState(toState: .expanded)
+                    animateTopConstraint()
+                }
+            }else {
+                if newTopConstraint > previousSearchViewControllerTopConstraint {
+                    setChildSearchVCState(toState: .compressed)
+                    animateTopConstraint()
+                }
+            }
+        } else {
+//            if previousSearchViewControllerTopConstraint == compressedConstraint {
+//                if newTopConstraint < previousSearchViewControllerTopConstraint {
+//                }
+//            } else {
+//
+//            }
+        }
     }
+    
+    private func animateTopConstraint() {
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
+            self.view.layoutIfNeeded()
+        }, completion: nil)
+    }
+    
     
 }

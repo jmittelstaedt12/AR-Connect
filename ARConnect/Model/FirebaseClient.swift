@@ -87,7 +87,7 @@ struct FirebaseClient {
     
     // See if user is connected to firebase
     static func checkOnline() {
-        #warning("handle online stuff")
+        #warning("TODO: handle online stuff")
         let connectedRef = Database.database().reference(withPath: ".info/connected")
         connectedRef.observe(.value) { (snapshot) in
             if snapshot.value as? Bool ?? false {
