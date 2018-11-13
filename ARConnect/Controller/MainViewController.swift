@@ -82,6 +82,10 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        FirebaseClient.observeConnectionRequests { (connectedUserUid) in
+            print("you are connected to \(connectedUserUid)")
+            #warning("TODO: handle connection request with alert")
+        }
         currentUser = Auth.auth().currentUser ?? nil
         locationModel.locationManager.delegate = self
         locationModel.locationManager.requestAlwaysAuthorization()

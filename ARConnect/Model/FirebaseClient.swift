@@ -65,13 +65,13 @@ struct FirebaseClient {
     }
     
     // Fetch all the users currently in the database
-    static func fetchUsers(closure: @escaping (([LocalUser]) -> Void)) {
+    static func fetchUsers(handler: @escaping (([LocalUser]) -> Void)) {
 //        let usersReference = Database.database().reference().child("Users")
         var users = [LocalUser]()
         usersRef.observeSingleEvent(of: .value) { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject] {
                 for child in dictionary.values {
-                    if let userDictionary = child as? [String: String]{
+                    if let userDictionary = child as? [String: String] {
                         let user = LocalUser()
                         user.name = userDictionary["name"]
                         user.email = userDictionary["email"]
@@ -81,18 +81,25 @@ struct FirebaseClient {
                 for (i,k) in dictionary.keys.enumerated(){
                     users[i].uid = k
                 }
-                closure(users)
+                handler(users)
             }
         }
     }
     
     // Add observer for connection request
-    static func observeConnectionRequests() {
-        #warning("handled connection requests")
+    static func observeConnectionRequests(handler: @escaping ((String) -> Void)) {
         guard let uid = Auth.auth().currentUser?.uid else {
             return
         }
-        let connectionRequestRef = usersRef.child(uid)
+        let currentUserRef = usersRef.child(uid).child("connectedTo")
+        currentUserRef.observe(.value) { (snapshot) in
+            if let connectedTo = snapshot.value as? String {
+                if !connectedTo.isEmpty {
+                    print("connection request!")
+                    handler(connectedTo)
+                }
+            }
+        }
     }
     // See if user is connected to firebase
     static func checkOnline() {

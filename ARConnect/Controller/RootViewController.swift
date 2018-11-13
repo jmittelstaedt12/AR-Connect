@@ -94,7 +94,7 @@ class RootViewController: UIViewController {
 extension UIViewController {
     
     // Creates UIAlertController and displays it over the current view hierarchy
-    func createAndDisplayAlert(withTitle title: String, body: String){
+    func createAndDisplayAlert(withTitle title: String, body: String) {
         let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)

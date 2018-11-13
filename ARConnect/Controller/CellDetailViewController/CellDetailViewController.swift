@@ -23,7 +23,6 @@ class CellDetailViewController: UIViewController {
     @IBAction func connectToUser(_ sender: UIButton) {
         if let uid = user?.uid {
             let userForCellRef = FirebaseClient.usersRef.child(uid)
-//            let userForCellRef = Database.database().reference().child("Users").child(uid)
             userForCellRef.updateChildValues(["connectedTo": uid])
         }
     }

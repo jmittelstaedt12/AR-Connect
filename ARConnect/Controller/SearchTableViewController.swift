@@ -49,7 +49,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        FirebaseClient.fetchUsers(closure: { fetchedUsers in
+        FirebaseClient.fetchUsers(handler: { fetchedUsers in
             self.users = fetchedUsers
             self.tableView.reloadData()
         })
