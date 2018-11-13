@@ -27,16 +27,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         return map
     }()
     
-    let searchTextField: UITextField = {
-        let tf = UITextField()
-        tf.backgroundColor = .white
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.layer.borderWidth = 2
-        tf.layer.borderColor = UIColor.black.cgColor
-        tf.layer.cornerRadius = 5
-        return tf
-    }()
-    
     let startConnectSessionButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.setTitle("Start", for: .normal)
@@ -49,6 +39,14 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         return btn
     }()
     
+    let childSearchViewController: SearchTableViewController = {
+        let searchVC = SearchTableViewController()
+        searchVC.view.translatesAutoresizingMaskIntoConstraints = false
+        searchVC.view.backgroundColor = UIColor(white: 5/6, alpha: 1.0)
+        searchVC.view.layer.cornerRadius = 5
+        return searchVC
+    }()
+    
     enum ExpansionState: CGFloat {
         case expanded
         case compressed
@@ -58,6 +56,7 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         guard let tc = childSearchVCTopConstraint else {
             return
         }
+        
         switch state {
         case .compressed:
             tc.constant = -50
@@ -68,22 +67,22 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         }
     }
     
-    let childSearchViewController: SearchTableViewController = {
-        let searchVC = SearchTableViewController()
-        searchVC.view.translatesAutoresizingMaskIntoConstraints = false
-        searchVC.view.backgroundColor = UIColor(white: 5/6, alpha: 1.0)
-        searchVC.view.layer.cornerRadius = 5
-        return searchVC
+    let userDetailViewController: CellDetailViewController = {
+        let vc = CellDetailViewController()
+        vc.view.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.backgroundColor = .white
+        vc.view.layer.cornerRadius = 5
+        vc.view.isHidden = true
+        return vc
     }()
     
     override func viewDidAppear(_ animated: Bool) {
         setupNavigationBarAttributes()
-        
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         currentUser = Auth.auth().currentUser ?? nil
-        searchTextField.delegate = self
         locationModel.locationManager.delegate = self
         locationModel.locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
@@ -98,21 +97,22 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         
         addChildViews()
         setupMap()
-//        setupSearchTextField()
-        searchTextField.delegate = self
-        hideKeyboardWhenTappedAround()
         setupChildSearchViewController()
         childSearchViewController.delegate = self
+        hideKeyboardWhenTappedAround()
+        setupUserDetailViewController()
         setupStartConnectSessionButton()
     }
     
     private func addChildViews(){
         view.addSubview(mapView)
-        view.addSubview(searchTextField)
         view.addSubview(startConnectSessionButton)
         addChild(childSearchViewController)
         view.addSubview(childSearchViewController.view)
         childSearchViewController.didMove(toParent: self)
+        addChild(userDetailViewController)
+        view.addSubview(userDetailViewController.view)
+        userDetailViewController.didMove(toParent: self)
     }
     
     private func setupNavigationBarAttributes(){
@@ -128,14 +128,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         mapView.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
     }
     
-    // Setup auto layout anchors for search text field
-//    private func setupSearchTextField() {
-//        searchTextField.isHidden = true
-//        searchTextField.edgeAnchors(top: mapView.topAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
-//        searchTextField.dimensionAnchors(height: 30, width: mapView.frame.width, widthMultiplier: 0.85)
-//        searchTextField.centerAnchors(centerX: mapView.centerXAnchor)
-//    }
-    
     // Setup auto layout anchors for AR Session initialization button
     private func setupStartConnectSessionButton() {
         startConnectSessionButton.edgeAnchors(leading: mapView.leadingAnchor, bottom: mapView.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
@@ -149,6 +141,10 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         setChildSearchVCState(toState: .compressed)
         childSearchVCTopConstraint?.isActive = true
         childSearchViewController.view.dimensionAnchors(height: 667)
+    }
+    
+    private func setupUserDetailViewController() {
+        userDetailViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
     }
     
     // Log out current user and return to login screen
@@ -171,11 +167,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         present(arSessionVC, animated: true, completion: nil)
     }
     
-//    func textFieldDidBeginEditing(_ textField: UITextField) {
-//        searchTextField.endEditing(true)
-//        present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
-//    }
-    
 //    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 //        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
 //    }
@@ -184,8 +175,8 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
 extension MainViewController: SearchTableViewControllerDelegate {
     
     // During pan of drawer VC, update child coordinates to match
-    func updateCoordinatesDuringPanFor(searchTableViewController: UIViewController, to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
-        searchTableViewController.view.isUserInteractionEnabled = false
+    func updateCoordinatesDuringPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
+        childSearchViewController.view.isUserInteractionEnabled = false
         guard let previousYCoordinate = searchViewControllerPreviousYCoordinate, let topConstraint = childSearchVCTopConstraint else{
             return
         }
@@ -199,15 +190,14 @@ extension MainViewController: SearchTableViewControllerDelegate {
     }
     
     // When release pan, update coordinates to compressed or expanded depending on velocity
-    func updateCoordinatesAfterPanFor(searchTableViewController: UIViewController, to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
-        guard let previousYCoordinate = searchViewControllerPreviousYCoordinate, let topConstraint = childSearchVCTopConstraint else{
+    func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
+        guard let previousYCoordinate = searchViewControllerPreviousYCoordinate else{
             return
         }
         let newTopConstraint = previousYCoordinate + translationPoint.y
         let compressedYCoordinate = view.frame.height-50
         let expandedYCoordinate = view.frame.height-400
         let velocityThreshold: CGFloat = 300
-        searchTableViewController.view.isUserInteractionEnabled = true
         if abs(velocity.y) < velocityThreshold {
             if previousYCoordinate == compressedYCoordinate {
                 if newTopConstraint <= compressedYCoordinate-100 {
@@ -244,8 +234,21 @@ extension MainViewController: SearchTableViewControllerDelegate {
     private func animateTopConstraint() {
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
             self.view.layoutIfNeeded()
-        }, completion: nil)
+        }) { (completed) in
+            if completed {
+                self.childSearchViewController.view.isUserInteractionEnabled = true
+            }
+        }
     }
     
+    func animateToExpanded() {
+        setChildSearchVCState(toState: .expanded)
+        animateTopConstraint()
+    }
+    
+    func setChildUserDetailVCVisible(withUser user: LocalUser) {
+        userDetailViewController.user = user
+        userDetailViewController.view.isHidden = false
+    }
     
 }

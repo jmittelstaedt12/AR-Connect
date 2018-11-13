@@ -12,6 +12,8 @@ import UIKit
 
 struct FirebaseClient {
     
+    static let usersRef = Database.database().reference().child("Users")
+    
     // Request to authorize a new user and add them to database
     static func createNewUser(name: String, email: String,password: String, controller: UIViewController) {
         Auth.auth().createUser(withEmail: email, password: password) { (data, error) in
@@ -21,11 +23,10 @@ struct FirebaseClient {
                 controller.present(alert, animated: true, completion: nil)
                 return
             }
-            let ref = Database.database().reference()
             guard let uid = data?.user.uid else{
                 return
             }
-            let usersReference = ref.child("Users").child(uid)
+            let usersReference = usersRef.child(uid)
             let values = ["name": name, "email": email, "connectedTo": ""]
             usersReference.updateChildValues(values, withCompletionBlock:
             { (error, ref) in
@@ -65,9 +66,9 @@ struct FirebaseClient {
     
     // Fetch all the users currently in the database
     static func fetchUsers(closure: @escaping (([LocalUser]) -> Void)) {
-        let usersReference = Database.database().reference().child("Users")
+//        let usersReference = Database.database().reference().child("Users")
         var users = [LocalUser]()
-        usersReference.observeSingleEvent(of: .value) { (snapshot) in
+        usersRef.observeSingleEvent(of: .value) { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject] {
                 for child in dictionary.values {
                     if let userDictionary = child as? [String: String]{
@@ -85,6 +86,14 @@ struct FirebaseClient {
         }
     }
     
+    // Add observer for connection request
+    static func observeConnectionRequests() {
+        #warning("handled connection requests")
+        guard let uid = Auth.auth().currentUser?.uid else {
+            return
+        }
+        let connectionRequestRef = usersRef.child(uid)
+    }
     // See if user is connected to firebase
     static func checkOnline() {
         #warning("TODO: handle online stuff")

@@ -11,24 +11,33 @@ import Firebase
 
 class CellDetailViewController: UIViewController {
 
+    
+    @IBOutlet weak var cancelButton: UIButton!
+    @IBAction func onCancel(_ sender: UIButton) {
+        view.isHidden = true
+    }
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var messageButton: UIButton!
     @IBOutlet weak var connectButton: UIButton!
     @IBAction func connectToUser(_ sender: UIButton) {
-        if let uid = user.uid {
-            let userForCellRef = Database.database().reference().child("Users").child(uid)
+        if let uid = user?.uid {
+            let userForCellRef = FirebaseClient.usersRef.child(uid)
+//            let userForCellRef = Database.database().reference().child("Users").child(uid)
             userForCellRef.updateChildValues(["connectedTo": uid])
         }
-        self.dismiss(animated: true, completion: nil)
     }
+    
     @IBAction func messageUser(_ sender: UIButton) {
         let messageVC = MessageViewController()
         self.navigationController?.pushViewController(messageVC, animated: true)
     }
     
-    
-    var user: LocalUser!
+    var user: LocalUser? {
+        didSet {
+            nameLabel.text = user?.name
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,18 +45,8 @@ class CellDetailViewController: UIViewController {
     }
 
     func setupUIElements() {
-        nameLabel.text = user.name
+        cancelButton.setTitle("Cancel", for: .normal)
         messageButton.setTitle("Message", for: .normal)
         connectButton.setTitle("Connect", for: .normal)
     }
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

@@ -10,8 +10,10 @@ import UIKit
 import Firebase
 
 protocol SearchTableViewControllerDelegate {
-    func updateCoordinatesDuringPanFor(searchTableViewController: UIViewController,to translationPoint: CGPoint, withVelocity velocity: CGPoint)
-    func updateCoordinatesAfterPanFor(searchTableViewController: UIViewController,to translationPoint: CGPoint, withVelocity velocity: CGPoint)
+    func updateCoordinatesDuringPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
+    func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
+    func animateToExpanded()
+    func setChildUserDetailVCVisible(withUser user: LocalUser)
 }
 
 class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
@@ -41,6 +43,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     let tableView: UITableView = {
         let tb = UITableView()
         tb.translatesAutoresizingMaskIntoConstraints = false
+        tb.alwaysBounceVertical = false
         return tb
     }()
     
@@ -77,9 +80,9 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         let velocity = sender.velocity(in: view.superview)
         switch sender.state {
         case .changed:
-            delegate.updateCoordinatesDuringPanFor(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
+            delegate.updateCoordinatesDuringPan(to: translationPoint, withVelocity: velocity)
         case .ended:
-            delegate.updateCoordinatesAfterPanFor(searchTableViewController: self, to: translationPoint, withVelocity: velocity)
+            delegate.updateCoordinatesAfterPan(to: translationPoint, withVelocity: velocity)
         default:
             return
         }
@@ -96,7 +99,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
         func textFieldDidBeginEditing(_ textField: UITextField) {
-            view.backgroundColor = .red
+            delegate.animateToExpanded()
 //            searchTextField.endEditing(true)
 //            present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
         }
@@ -123,19 +126,29 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
         return cell
     }
     
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        guard let cell = tableView.cellForRow(at: indexPath), let email = cell.detailTextLabel, let user = users?.first(where: {$0.email == email.text}) else{
-//            return;
-//        }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let cell = tableView.cellForRow(at: indexPath), let email = cell.detailTextLabel, let user = users?.first(where: {$0.email == email.text}) else{
+            return;
+        }
+        cell.isSelected = false
+        delegate.setChildUserDetailVCVisible(withUser: user)
 //        let cellDetailVC = CellDetailViewController()
 //        cellDetailVC.user = user
 //        self.navigationController?.pushViewController(cellDetailVC, animated: true)
-//    }
+    }
 }
 
 extension SearchTableViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
+    }
+}
+
+extension SearchTableViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y <= 0 {
+            onSearchViewControllerPan(sender: scrollView.panGestureRecognizer)
+        }
     }
 }
 

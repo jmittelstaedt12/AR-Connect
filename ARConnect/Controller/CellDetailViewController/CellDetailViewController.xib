@@ -11,6 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CellDetailViewController" customModule="ARConnect" customModuleProvider="target">
             <connections>
+                <outlet property="cancelButton" destination="3Df-Ch-98b" id="7vR-rP-sHA"/>
                 <outlet property="connectButton" destination="SbZ-PK-gzc" id="Zeb-27-uD7"/>
                 <outlet property="messageButton" destination="qAU-1n-vUD" id="e4g-dv-Zsb"/>
                 <outlet property="nameLabel" destination="7Ev-NN-Ig0" id="tm2-8Y-WhZ"/>
@@ -25,6 +26,7 @@
             <subviews>
                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Kwg-0m-LSC">
                     <rect key="frame" x="50" y="84" width="275" height="275"/>
+                    <color key="backgroundColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="Kwg-0m-LSC" secondAttribute="height" multiplier="1:1" id="kL4-aO-uXW"/>
                     </constraints>
@@ -35,22 +37,27 @@
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
-                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qAU-1n-vUD">
-                    <rect key="frame" x="240" y="591" width="103" height="44"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="26"/>
-                    <state key="normal" title="Message"/>
-                    <connections>
-                        <action selector="messageUser:" destination="-1" eventType="touchUpInside" id="NyO-JM-Ahq"/>
-                    </connections>
-                </button>
-                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SbZ-PK-gzc">
-                    <rect key="frame" x="124" y="479" width="129" height="54"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="35"/>
+                <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SbZ-PK-gzc">
+                    <rect key="frame" x="16" y="458.5" width="75" height="36"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
                     <state key="normal" title="Connect"/>
                     <connections>
                         <action selector="connectToUser:" destination="-1" eventType="touchUpInside" id="xEb-ot-zBc"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Df-Ch-98b">
+                    <rect key="frame" x="319" y="28" width="48" height="30"/>
+                    <state key="normal" title="Cancel"/>
+                    <connections>
+                        <action selector="onCancel:" destination="-1" eventType="touchUpInside" id="DBa-lv-u9a"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qAU-1n-vUD">
+                    <rect key="frame" x="279" y="458.5" width="80" height="36"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                    <state key="normal" title="Message"/>
+                    <connections>
+                        <action selector="messageUser:" destination="-1" eventType="touchUpInside" id="NyO-JM-Ahq"/>
                     </connections>
                 </button>
             </subviews>
@@ -58,9 +65,16 @@
             <constraints>
                 <constraint firstItem="7Ev-NN-Ig0" firstAttribute="top" secondItem="Kwg-0m-LSC" secondAttribute="bottom" constant="20" id="2Ot-e1-0Rz"/>
                 <constraint firstItem="Kwg-0m-LSC" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="64" id="Cg8-97-8Bs"/>
+                <constraint firstItem="SbZ-PK-gzc" firstAttribute="top" secondItem="7Ev-NN-Ig0" secondAttribute="bottom" constant="40" id="KBU-LF-4Kb"/>
                 <constraint firstItem="Kwg-0m-LSC" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="50" id="MC9-ha-NjU"/>
+                <constraint firstItem="qAU-1n-vUD" firstAttribute="top" secondItem="SbZ-PK-gzc" secondAttribute="top" id="Nuj-pc-eMl"/>
                 <constraint firstItem="Kwg-0m-LSC" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="QEa-16-4pc"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="3Df-Ch-98b" secondAttribute="trailing" constant="8" id="TLG-Le-Rua"/>
+                <constraint firstItem="3Df-Ch-98b" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="8" id="chI-GM-2m5"/>
+                <constraint firstItem="SbZ-PK-gzc" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="16" id="iUx-VY-Zto"/>
                 <constraint firstItem="7Ev-NN-Ig0" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="spQ-2i-bpU"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="qAU-1n-vUD" secondAttribute="trailing" constant="16" id="t42-hD-efx"/>
+                <constraint firstItem="qAU-1n-vUD" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="SbZ-PK-gzc" secondAttribute="trailing" constant="16" id="vbO-Tl-zTB"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <point key="canvasLocation" x="63.200000000000003" y="111.99400299850076"/>
