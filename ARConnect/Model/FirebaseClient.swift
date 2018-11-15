@@ -27,7 +27,7 @@ struct FirebaseClient {
                 return
             }
             let usersReference = usersRef.child(uid)
-            let values = ["name": name, "email": email, "connectedTo": ""]
+            let values = ["name": name, "email": email, "connectedTo": "", "latitude": "", "longitude": ""]
             usersReference.updateChildValues(values, withCompletionBlock:
             { (error, ref) in
                 if let err = error {
@@ -56,6 +56,7 @@ struct FirebaseClient {
     static func logoutOfDB(controller: UIViewController) -> Bool {
         do{
             try Auth.auth().signOut()
+            AppDelegate.shared.currentUser = nil
         }catch let logoutError {
             print(logoutError)
             controller.createAndDisplayAlert(withTitle: "Log out error", body: logoutError.localizedDescription)
@@ -66,15 +67,14 @@ struct FirebaseClient {
     
     // Fetch all the users currently in the database
     static func fetchUsers(handler: @escaping (([LocalUser]) -> Void)) {
-//        let usersReference = Database.database().reference().child("Users")
         var users = [LocalUser]()
         usersRef.observeSingleEvent(of: .value) { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject] {
                 for child in dictionary.values {
-                    if let userDictionary = child as? [String: String] {
+                    if let userDictionary = child as? [String: AnyObject] {
                         let user = LocalUser()
-                        user.name = userDictionary["name"]
-                        user.email = userDictionary["email"]
+                        user.name = userDictionary["name"] as? String
+                        user.email = userDictionary["email"] as? String
                         users.append(user)
                     }
                 }
@@ -88,9 +88,7 @@ struct FirebaseClient {
     
     // Add observer for connection request
     static func observeConnectionRequests(handler: @escaping ((String) -> Void)) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return
-        }
+        guard let uid = Auth.auth().currentUser?.uid else { return }
         let currentUserRef = usersRef.child(uid).child("connectedTo")
         currentUserRef.observe(.value) { (snapshot) in
             if let connectedTo = snapshot.value as? String {
@@ -101,6 +99,7 @@ struct FirebaseClient {
             }
         }
     }
+    
     // See if user is connected to firebase
     static func checkOnline() {
         #warning("TODO: handle online stuff")

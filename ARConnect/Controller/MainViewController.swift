@@ -85,8 +85,11 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         FirebaseClient.observeConnectionRequests { (connectedUserUid) in
             print("you are connected to \(connectedUserUid)")
             #warning("TODO: handle connection request with alert")
+            self.present(ConnectRequestViewController(), animated: true, completion: nil)
+            
         }
         currentUser = Auth.auth().currentUser ?? nil
+        AppDelegate.shared.currentUser = currentUser
         locationModel.locationManager.delegate = self
         locationModel.locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
@@ -102,10 +105,11 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         addChildViews()
         setupMap()
         setupChildSearchViewController()
-        childSearchViewController.delegate = self
-        hideKeyboardWhenTappedAround()
         setupUserDetailViewController()
         setupStartConnectSessionButton()
+        
+        childSearchViewController.delegate = self
+        hideKeyboardWhenTappedAround()
     }
     
     private func addChildViews(){
@@ -171,9 +175,10 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         present(arSessionVC, animated: true, completion: nil)
     }
     
-//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
-//    }
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate, let user = currentUser else { return }
+        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude" : locValue.latitude, "longitude" : locValue.longitude])
+    }
 }
 
 extension MainViewController: SearchTableViewControllerDelegate {
