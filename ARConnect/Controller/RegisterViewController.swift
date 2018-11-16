@@ -9,7 +9,9 @@
 import UIKit
 import Firebase
 
-class RegisterViewController: UIViewController {
+class RegisterViewController: UIViewController, KeyboardHandler {
+    
+    var keyboardWillAnimate = true
     
     let profileImageView: UIImageView = {
         let imageView = UIImageView()
@@ -84,6 +86,10 @@ class RegisterViewController: UIViewController {
         nameTextField.delegate = self
         emailTextField.delegate = self
         passwordTextField.delegate = self
+        
+        startObservingKeyboardChanges()
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {

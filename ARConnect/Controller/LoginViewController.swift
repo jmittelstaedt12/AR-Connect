@@ -9,8 +9,45 @@
 import UIKit
 import Firebase
 
-class LoginViewController: UIViewController {
+protocol KeyboardHandler: class {
+    var keyboardWillAnimate: Bool { get set }
+    func startObservingKeyboardChanges()
+    func keyboardWillShow(notification: Notification)
+    func keyboardWillHide(notification: Notification)
+}
 
+extension KeyboardHandler where Self: UIViewController{
+    
+    func startObservingKeyboardChanges() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) { (notification) in
+            self.keyboardWillShow(notification: notification)
+        }
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) { (notification) in
+            self.keyboardWillHide(notification: notification)
+        }
+    }
+    
+    func keyboardWillShow(notification: Notification) {
+        if !keyboardWillAnimate{return}
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
+        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
+            self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y-100, width: self.view.bounds.width, height: self.view.bounds.height)
+        }, completion: nil)
+        keyboardWillAnimate = false
+    }
+    
+    func keyboardWillHide(notification: Notification){
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
+        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
+            self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y+100, width: self.view.bounds.width, height: self.view.bounds.height)
+        }, completion: nil)
+        keyboardWillAnimate = true
+    }
+}
+class LoginViewController: UIViewController, KeyboardHandler {
+
+    var keyboardWillAnimate = true
+    
     let arConnectLabel: UILabel = {
         let lbl = UILabel()
         lbl.text = "AR Connect"
@@ -82,8 +119,9 @@ class LoginViewController: UIViewController {
         emailTextField.delegate = self
         passwordTextField.delegate = self
         
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        startObservingKeyboardChanges()
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     private func setSubviewConstraints() {
@@ -114,19 +152,5 @@ class LoginViewController: UIViewController {
     
     @objc private func signUp() {
         self.navigationController?.pushViewController(RegisterViewController(), animated: true)
-    }
-    
-    @objc private func keyboardWillShow(notification: NSNotification) {
-        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
-        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
-            self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y-200, width: self.view.bounds.width, height: self.view.bounds.height)
-        }, completion: nil)
-    }
-    
-    @objc private func keyboardWillHide(notification: NSNotification){
-        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
-        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
-            self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y+200, width: self.view.bounds.width, height: self.view.bounds.height)
-        }, completion: nil)
     }
 }
