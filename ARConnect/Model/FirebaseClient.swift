@@ -56,7 +56,6 @@ struct FirebaseClient {
     static func logoutOfDB(controller: UIViewController) -> Bool {
         do{
             try Auth.auth().signOut()
-            AppDelegate.shared.currentUser = nil
         }catch let logoutError {
             print(logoutError)
             controller.createAndDisplayAlert(withTitle: "Log out error", body: logoutError.localizedDescription)

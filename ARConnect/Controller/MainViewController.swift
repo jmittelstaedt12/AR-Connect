@@ -47,6 +47,15 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         return searchVC
     }()
     
+    let userDetailViewController: CellDetailViewController = {
+        let vc = CellDetailViewController()
+        vc.view.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.backgroundColor = .white
+        vc.view.layer.cornerRadius = 5
+        vc.view.isHidden = true
+        return vc
+    }()
+    
     enum ExpansionState: CGFloat {
         case expanded
         case compressed
@@ -56,7 +65,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         guard let tc = childSearchVCTopConstraint else {
             return
         }
-        
         switch state {
         case .compressed:
             tc.constant = -50
@@ -66,15 +74,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
             searchViewControllerPreviousYCoordinate = view.bounds.height - 400
         }
     }
-    
-    let userDetailViewController: CellDetailViewController = {
-        let vc = CellDetailViewController()
-        vc.view.translatesAutoresizingMaskIntoConstraints = false
-        vc.view.backgroundColor = .white
-        vc.view.layer.cornerRadius = 5
-        vc.view.isHidden = true
-        return vc
-    }()
     
     override func viewDidAppear(_ animated: Bool) {
         setupNavigationBarAttributes()
@@ -88,8 +87,10 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
             self.present(ConnectRequestViewController(), animated: true, completion: nil)
             
         }
-        currentUser = Auth.auth().currentUser ?? nil
-        AppDelegate.shared.currentUser = currentUser
+        if let user = Auth.auth().currentUser {
+            currentUser = user
+            FirebaseClient.usersRef.child(user.uid).onDisconnectUpdateChildValues(["connectedTo" : ""])
+        }
         locationModel.locationManager.delegate = self
         locationModel.locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
@@ -240,21 +241,22 @@ extension MainViewController: SearchTableViewControllerDelegate {
         animateTopConstraint()
     }
     
+    // Animate transition to compressed or expanded and make view interactive again
     private func animateTopConstraint() {
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
             self.view.layoutIfNeeded()
-        }) { (completed) in
-            if completed {
-                self.childSearchViewController.view.isUserInteractionEnabled = true
-            }
-        }
+        })
+        self.childSearchViewController.view.isUserInteractionEnabled = true
+
     }
     
+    // Animate transition to expanded from compressed
     func animateToExpanded() {
         setChildSearchVCState(toState: .expanded)
         animateTopConstraint()
     }
     
+    // Make card for tapped user visible in view
     func setChildUserDetailVCVisible(withUser user: LocalUser) {
         userDetailViewController.user = user
         userDetailViewController.view.isHidden = false

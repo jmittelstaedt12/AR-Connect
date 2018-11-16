@@ -98,10 +98,9 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
     
-        func textFieldDidBeginEditing(_ textField: UITextField) {
+    // If user taps on text field from compressed, expand before editing
+    func textFieldDidBeginEditing(_ textField: UITextField) {
             delegate.animateToExpanded()
-//            searchTextField.endEditing(true)
-//            present(UINavigationController(rootViewController: SearchTableViewController()), animated: true, completion: nil)
         }
     
     @objc private func dismissVC(){

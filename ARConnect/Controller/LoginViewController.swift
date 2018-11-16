@@ -81,6 +81,9 @@ class LoginViewController: UIViewController {
         hideKeyboardWhenTappedAround()
         emailTextField.delegate = self
         passwordTextField.delegate = self
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     private func setSubviewConstraints() {
@@ -112,5 +115,18 @@ class LoginViewController: UIViewController {
     @objc private func signUp() {
         self.navigationController?.pushViewController(RegisterViewController(), animated: true)
     }
-
+    
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
+        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
+            self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y-200, width: self.view.bounds.width, height: self.view.bounds.height)
+        }, completion: nil)
+    }
+    
+    @objc private func keyboardWillHide(notification: NSNotification){
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
+        UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
+            self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y+200, width: self.view.bounds.width, height: self.view.bounds.height)
+        }, completion: nil)
+    }
 }
