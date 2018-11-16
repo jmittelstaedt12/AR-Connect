@@ -88,14 +88,13 @@ class RegisterViewController: UIViewController, KeyboardHandler {
         passwordTextField.delegate = self
         
         startObservingKeyboardChanges()
-//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
+    #warning("TODO: very boring subview refactor")
     private func setupProfileImageView() {
         //need x, y, width, height constraints
         profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true

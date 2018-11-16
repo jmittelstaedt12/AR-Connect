@@ -18,6 +18,7 @@ protocol KeyboardHandler: class {
 
 extension KeyboardHandler where Self: UIViewController{
     
+    // Add observers for keyboardWillShow and keyboardWillHide
     func startObservingKeyboardChanges() {
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) { (notification) in
             self.keyboardWillShow(notification: notification)
@@ -27,23 +28,26 @@ extension KeyboardHandler where Self: UIViewController{
         }
     }
     
+    // When keyboard appears, animate view upwards
     func keyboardWillShow(notification: Notification) {
-        if !keyboardWillAnimate{return}
-        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
+        guard keyboardWillAnimate, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
+        
         UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
             self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y-100, width: self.view.bounds.width, height: self.view.bounds.height)
         }, completion: nil)
         keyboardWillAnimate = false
     }
     
+    // When keyboard hides, animate view downwards
     func keyboardWillHide(notification: Notification){
-        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {return}
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
         UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
             self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y+100, width: self.view.bounds.width, height: self.view.bounds.height)
         }, completion: nil)
         keyboardWillAnimate = true
     }
 }
+
 class LoginViewController: UIViewController, KeyboardHandler {
 
     var keyboardWillAnimate = true
@@ -120,10 +124,9 @@ class LoginViewController: UIViewController, KeyboardHandler {
         passwordTextField.delegate = self
         
         startObservingKeyboardChanges()
-//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
+    // Set auto layout anchors for all subviews
     private func setSubviewConstraints() {
         // set x, y, width, and height constraints for arConnectLabel
         arConnectLabel.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 100, left: 32, bottom: 0, right: -32))
