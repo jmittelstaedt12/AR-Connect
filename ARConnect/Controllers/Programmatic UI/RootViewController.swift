@@ -9,8 +9,6 @@
 import UIKit
 import Firebase
 
-let globalColor = UIColor(r: 23, g: 212, b: 132)
-
 class RootViewController: UIViewController {
 
     private var current: UIViewController

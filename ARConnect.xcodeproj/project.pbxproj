@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1937026521727136008B46EE /* LocationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937026421727136008B46EE /* LocationModel.swift */; };
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
+		1981CB6921A604C600B69138 /* constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* constants.swift */; };
 		198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198DA989218A5C230054E1BD /* LocalUser.swift */; };
 		19913A0E216CED7500174187 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A0D216CED7500174187 /* AppDelegate.swift */; };
 		19913A10216CED7600174187 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 19913A0F216CED7600174187 /* art.scnassets */; };
@@ -35,6 +36,7 @@
 /* Begin PBXFileReference section */
 		1937026421727136008B46EE /* LocationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModel.swift; sourceTree = "<group>"; };
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		1981CB6821A604C600B69138 /* constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = constants.swift; sourceTree = "<group>"; };
 		198DA989218A5C230054E1BD /* LocalUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUser.swift; sourceTree = "<group>"; };
 		19913A0A216CED7500174187 /* ARConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19913A0D216CED7500174187 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 		19913A0C216CED7500174187 /* ARConnect */ = {
 			isa = PBXGroup;
 			children = (
+				1981CB6821A604C600B69138 /* constants.swift */,
 				19913A21216CEE6300174187 /* Controllers */,
 				19913A2D216D39C400174187 /* Model */,
 				19913A0D216CED7500174187 /* AppDelegate.swift */,
@@ -324,6 +327,7 @@
 				19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */,
 				1937026521727136008B46EE /* LocationModel.swift in Sources */,
 				19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */,
+				1981CB6921A604C600B69138 /* constants.swift in Sources */,
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,

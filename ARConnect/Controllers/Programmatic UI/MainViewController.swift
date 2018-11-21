@@ -11,7 +11,7 @@ import MapKit
 import Firebase
 import SystemConfiguration
 
-class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
+class MainViewController: UIViewController {
     
     var currentUser : User?
     var childSearchVCTopConstraint: NSLayoutConstraint?
@@ -169,11 +169,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         present(arSessionVC, animated: true, completion: nil)
     }
     
-//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate, let user = currentUser else { return }
-//        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude" : locValue.latitude, "longitude" : locValue.longitude])
-//    }
-    
     @objc private func endARSession() {
         #warning("TODO: write end session logic")
     }
@@ -257,12 +252,5 @@ extension MainViewController: SearchTableViewControllerDelegate {
     func setChildUserDetailVCVisible(withUser user: LocalUser) {
         userDetailViewController.userForCell = user
         userDetailViewController.view.isHidden = false
-    }
-}
-
-extension MainViewController: ConnectRequestDelegate {
-    func startSession() {
-        childSearchViewController.view.isHidden = true
-        viewARSessionButton.isHidden = false
     }
 }

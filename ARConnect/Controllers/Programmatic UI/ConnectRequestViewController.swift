@@ -9,12 +9,8 @@
 import UIKit
 import Firebase
 
-protocol ConnectRequestDelegate {
-    func startSession()
-}
 class ConnectRequestViewController: UIViewController {
 
-    var delegate: ConnectRequestDelegate!
     var requestingUser: LocalUser!
     
     let requestingUserImageView: UIImageView = {
@@ -74,7 +70,8 @@ class ConnectRequestViewController: UIViewController {
         if sender.title(for: .normal) == "Confirm"{
             FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid,"requestingUser" : ""])
             FirebaseClient.usersRef.child(requestUid).updateChildValues(["connectedTo" : uid])
-            delegate.startSession()
+            let name = Notification.Name(rawValue: connectionNotificationKey)
+            NotificationCenter.default.post(name: name, object: nil, userInfo: ["user" : requestingUser])
         } else {
             FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
         }

@@ -174,4 +174,15 @@ struct FirebaseClient {
             }
         }
     }
+    
+    static func fetchCoordinates(uid: String, handler: @escaping((Double?,Double?) -> (Void))) {
+        let userRef = usersRef.child(uid)
+        userRef.observeSingleEvent(of: .value) { (snapshot) in
+            if let userDictionary = snapshot.value as? [String : Any] {
+                let latitude = userDictionary["latitude"] as? Double
+                let longitude = userDictionary["longitude"] as? Double
+                handler(latitude,longitude)
+            }
+        }
+    }
 }
