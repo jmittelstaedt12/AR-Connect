@@ -8,9 +8,10 @@
 
 import UIKit
 
-class LocalUser: NSObject {
-    var profileImage: UIImage?
+class LocalUser: NSObject{
+//    var profileImage: UIImage?
     var name: String?
     var email: String?
     var uid: String?
+    var connectedUid: String?
 }

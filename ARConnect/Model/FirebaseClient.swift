@@ -27,7 +27,14 @@ struct FirebaseClient {
                 return
             }
             let usersReference = usersRef.child(uid)
-            let values = ["name": name, "email": email, "connectedTo": "", "latitude": "", "longitude": ""]
+            let values = ["email" : email,
+                          "name" : name,
+                          "requestingUser" : "",
+                          "connectedTo" : "",
+                          "pendingRequest" : false,
+                          "latitude" : 0,
+                          "longitude" : 0,
+                          "isOnline" : false] as [String : Any]
             usersReference.updateChildValues(values, withCompletionBlock:
             { (error, ref) in
                 if let err = error {
@@ -64,6 +71,19 @@ struct FirebaseClient {
         return true
     }
     
+    // Fetch user for uid in database
+    static func fetchUser(forUid uid: String,handler: @escaping((LocalUser) -> Void)) {
+        usersRef.child(uid).observeSingleEvent(of: .value) { (snapshot) in
+            if let dictionary = snapshot.value as? [String: AnyObject] {
+                let user = LocalUser()
+                user.uid = uid
+                user.name = dictionary["name"] as? String
+                user.email = dictionary["email"] as? String
+                handler(user)
+            }
+        }
+    }
+    
     // Fetch all the users currently in the database
     static func fetchUsers(handler: @escaping (([LocalUser]) -> Void)) {
         var users = [LocalUser]()
@@ -85,29 +105,72 @@ struct FirebaseClient {
         }
     }
     
-    // Add observer for connection request
-    static func observeConnectionRequests(handler: @escaping ((String) -> Void)) {
+    // Add observer to current user for connection request
+    static func observeConnectionRequests(handler: @escaping ((LocalUser) -> Void)) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        let currentUserRef = usersRef.child(uid).child("connectedTo")
-        currentUserRef.observe(.value) { (snapshot) in
-            if let connectedTo = snapshot.value as? String {
-                if !connectedTo.isEmpty {
-                    print("connection request!")
-                    handler(connectedTo)
+        let requestingUserRef = usersRef.child(uid).child("requestingUser")
+        requestingUserRef.observe(.value) { (snapshot) in
+            if let requestingUserUid = snapshot.value as? String {
+                if !requestingUserUid.isEmpty {
+                    FirebaseClient.fetchUser(forUid: requestingUserUid, handler: { (user) in
+                        handler(user)
+                    })
+                }
+            }
+        }
+    }
+    
+    static func observeUidValue(forKey key: String, handler: @escaping ((LocalUser) -> Void)) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let ref = usersRef.child(uid).child(key)
+        ref.observe(.value) { (snapshot) in
+            if let observedUid = snapshot.value as? String {
+                if !observedUid.isEmpty {
+                    FirebaseClient.fetchUser(forUid: observedUid, handler: { (user) in
+                        handler(user)
+                    })
+                }
+            }
+        }
+    }
+    
+    static func observePending(handler: @escaping (() -> Void)) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let userRef = usersRef.child(uid)
+        userRef.child("pendingRequest").observe(.value) { (snapshot) in
+            if let isPending = snapshot.value as? Bool {
+                if !isPending {
+                    handler()
+                    userRef.child("pendingRequest").removeAllObservers()
                 }
             }
         }
     }
     
     // See if user is connected to firebase
-    static func checkOnline() {
-        #warning("TODO: handle online stuff")
+    static func checkOnline(handler: @escaping ((Bool) -> Void)) {
         let connectedRef = Database.database().reference(withPath: ".info/connected")
         connectedRef.observe(.value) { (snapshot) in
-            if snapshot.value as? Bool ?? false {
-                print("Connected")
+            guard let uid = Auth.auth().currentUser?.uid else { return }
+            let connected = snapshot.value as? Bool ?? false
+            if connected {
+                usersRef.child(uid).updateChildValues(["isOnline" : true])
             }else {
-                print("Not connected")
+                usersRef.child(uid).updateChildValues(["isOnline" : false])
+            }
+            handler(connected)
+        }
+    }
+    
+    // Check for connection initialized
+    static func observeConnection(handler: @escaping((String) -> (Void))) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let connectedToRef = usersRef.child(uid).child("connectedTo")
+        connectedToRef.observe(.value) { (snapshot) in
+            if let connectedTo = snapshot.value as? String {
+                if !connectedTo.isEmpty {
+                    handler(connectedTo)
+                }
             }
         }
     }

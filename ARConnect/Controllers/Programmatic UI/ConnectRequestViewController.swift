@@ -7,9 +7,16 @@
 //
 
 import UIKit
+import Firebase
 
+protocol ConnectRequestDelegate {
+    func startSession()
+}
 class ConnectRequestViewController: UIViewController {
 
+    var delegate: ConnectRequestDelegate!
+    var requestingUser: LocalUser!
+    
     let requestingUserImageView: UIImageView = {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -17,11 +24,18 @@ class ConnectRequestViewController: UIViewController {
         return view
     }()
     
+    let requestingUserNameLabel: UILabel = {
+        #warning("Build out this UI")
+        let lbl = UILabel()
+        lbl.translatesAutoresizingMaskIntoConstraints = false
+        return lbl
+    }()
+    
     let acceptButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Confirm", for: .normal)
-        btn.addTarget(self, action: #selector(onConfirm), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(handleResponse(sender:)), for: .touchUpInside)
         return btn
     }()
     
@@ -29,7 +43,7 @@ class ConnectRequestViewController: UIViewController {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Deny", for: .normal)
-        btn.addTarget(self, action: #selector(onDeny), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(handleResponse(sender:)), for: .touchUpInside)
         return btn
     }()
     
@@ -52,11 +66,19 @@ class ConnectRequestViewController: UIViewController {
         denyButton.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
     }
     
-    @objc private func onConfirm() {
-        self.dismiss(animated: true, completion: nil)
-    }
-    
-    @objc private func onDeny() {
+    @objc private func handleResponse(sender: UIButton) {
+        guard let requestUid = requestingUser.uid, let uid = Auth.auth().currentUser?.uid else {
+            self.dismiss(animated: true, completion: nil)
+            return
+        }
+        if sender.title(for: .normal) == "Confirm"{
+            FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid,"requestingUser" : ""])
+            FirebaseClient.usersRef.child(requestUid).updateChildValues(["connectedTo" : uid])
+            delegate.startSession()
+        } else {
+            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
+        }
+        FirebaseClient.usersRef.child(requestUid).updateChildValues(["pendingRequest" : false])
         self.dismiss(animated: true, completion: nil)
     }
 

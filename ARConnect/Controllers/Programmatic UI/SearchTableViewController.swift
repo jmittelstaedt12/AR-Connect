@@ -131,9 +131,6 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
         }
         cell.isSelected = false
         delegate.setChildUserDetailVCVisible(withUser: user)
-//        let cellDetailVC = CellDetailViewController()
-//        cellDetailVC.user = user
-//        self.navigationController?.pushViewController(cellDetailVC, animated: true)
     }
 }
 
