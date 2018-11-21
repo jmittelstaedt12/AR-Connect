@@ -27,7 +27,15 @@ class CellDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupView()
         setupUIElements()
+    }
+    
+    private func setupView() {
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 5
+        view.isHidden = true
     }
 
     func setupUIElements() {

@@ -49,6 +49,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupView()
         FirebaseClient.fetchUsers(handler: { fetchedUsers in
             self.users = fetchedUsers
             self.tableView.reloadData()
@@ -64,6 +65,12 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         setupViews()
         let logoutButton = UIBarButtonItem(title: "Dismiss", style: .plain, target: self, action: #selector(dismissVC))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
+    }
+    
+    private func setupView() {
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(white: 5/6, alpha: 1.0)
+        view.layer.cornerRadius = 5
     }
     
     // Configure pan gesture recognizer for use in MainViewController

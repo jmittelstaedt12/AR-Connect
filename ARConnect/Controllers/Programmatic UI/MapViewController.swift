@@ -8,9 +8,11 @@
 
 import UIKit
 import MapKit
+import Firebase
 
-class MapViewController: UIViewController {
+class MapViewController: UIViewController, CLLocationManagerDelegate {
     
+    let currentUser = Auth.auth().currentUser
     let locationModel = LocationModel()
     
     let map : MKMapView = {
@@ -21,9 +23,23 @@ class MapViewController: UIViewController {
         map.translatesAutoresizingMaskIntoConstraints = false
         return map
     }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = map
+        locationModel.locationManager.delegate = self
+        locationModel.locationManager.requestAlwaysAuthorization()
+        if CLLocationManager.locationServicesEnabled() {
+            locationModel.locationManager.delegate = self
+            locationModel.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationModel.locationManager.startUpdatingLocation()
+        }
+        locationModel.setMapProperties(for: self.view as! MKMapView, in: super.view)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate, let user = currentUser else { return }
+        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude" : locValue.latitude, "longitude" : locValue.longitude])
     }
     
 

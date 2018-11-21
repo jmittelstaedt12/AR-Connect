@@ -14,20 +14,12 @@ import SystemConfiguration
 class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     
     var currentUser : User?
-//    let locationModel = LocationModel()
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
     
-//    let mapView: MKMapView = {
-//        let map = MKMapView()
-//        map.mapType = .standard
-//        map.isZoomEnabled = true
-//        map.isScrollEnabled = true
-//        map.translatesAutoresizingMaskIntoConstraints = false
-//        return map
-//    }()
-    
     let mapViewController = MapViewController()
+    let childSearchViewController = SearchTableViewController()
+    let userDetailViewController = CellDetailViewController()
     
     let viewARSessionButton: UIButton = {
         let btn = UIButton(type: .system)
@@ -51,23 +43,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         btn.addTarget(self, action: #selector(endARSession), for: .touchUpInside)
         btn.isHidden = true
         return btn
-    }()
-    
-    let childSearchViewController: SearchTableViewController = {
-        let searchVC = SearchTableViewController()
-        searchVC.view.translatesAutoresizingMaskIntoConstraints = false
-        searchVC.view.backgroundColor = UIColor(white: 5/6, alpha: 1.0)
-        searchVC.view.layer.cornerRadius = 5
-        return searchVC
-    }()
-    
-    let userDetailViewController: CellDetailViewController = {
-        let vc = CellDetailViewController()
-        vc.view.translatesAutoresizingMaskIntoConstraints = false
-        vc.view.backgroundColor = .white
-        vc.view.layer.cornerRadius = 5
-        vc.view.isHidden = true
-        return vc
     }()
     
     enum ExpansionState: CGFloat {
@@ -102,13 +77,6 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         FirebaseClient.usersRef.child(currentUser!.uid).child("isOnline").onDisconnectSetValue(false)
         setConnectionRequestObserver()
         setConnectionStartObserver()
-        locationModel.locationManager.delegate = self
-        locationModel.locationManager.requestAlwaysAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            locationModel.locationManager.delegate = self
-            locationModel.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationModel.locationManager.startUpdatingLocation()
-        }
         
         title = "AR Connect"
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
@@ -146,13 +114,12 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     }
     // Setup auto layout anchors for map view
     private func setupMap() {
-        locationModel.setMapProperties(for: mapView, in: view)
-        mapView.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+        mapViewController.view.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
     }
     
     // Setup auto layout anchors for AR Session initialization button
     private func setupStartConnectSessionButton() {
-        viewARSessionButton.edgeAnchors(leading: mapView.leadingAnchor, bottom: mapView.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
+        viewARSessionButton.edgeAnchors(leading: mapViewController.view.leadingAnchor, bottom: mapViewController.view.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
         viewARSessionButton.dimensionAnchors(height: 40, width: 100)
     }
     
@@ -185,14 +152,14 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     @objc private func logout() {
         currentUser = nil
         if FirebaseClient.logoutOfDB(controller: self){
-            locationModel.locationManager.stopUpdatingLocation()
+            mapViewController.locationModel.locationManager.stopUpdatingLocation()
             AppDelegate.shared.rootViewController.switchToLogout()
         }
     }
     
     // Segue into AR Connect session
     @objc private func startARSession() {
-        guard let location = locationModel.locationManager.location else{
+        guard let location = mapViewController.locationModel.locationManager.location else{
             self.createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
             return
         }
@@ -202,10 +169,10 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         present(arSessionVC, animated: true, completion: nil)
     }
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate, let user = currentUser else { return }
-        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude" : locValue.latitude, "longitude" : locValue.longitude])
-    }
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate, let user = currentUser else { return }
+//        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude" : locValue.latitude, "longitude" : locValue.longitude])
+//    }
     
     @objc private func endARSession() {
         #warning("TODO: write end session logic")
