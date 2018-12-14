@@ -14,7 +14,7 @@ struct FirebaseClient {
     
     static let usersRef = Database.database().reference().child("Users")
     
-    // Request to authorize a new user and add them to database
+    /// Request to authorize a new user and add them to database
     static func createNewUser(name: String, email: String,password: String, controller: UIViewController) {
         Auth.auth().createUser(withEmail: email, password: password) { (data, error) in
             if let err = error {
@@ -48,7 +48,7 @@ struct FirebaseClient {
         }
     }
     
-    // Request from view controller to log in to the database
+    /// Request from view controller to log in to the database
     static func logInToDB(email: String,password: String,controller: UIViewController){
         Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
             if let err = error {
@@ -59,7 +59,7 @@ struct FirebaseClient {
         }
     }
     
-    // Log out current user and return to login screen
+    /// Log out current user and return to login screen
     static func logoutOfDB(controller: UIViewController) -> Bool {
         do{
             try Auth.auth().signOut()
@@ -71,7 +71,7 @@ struct FirebaseClient {
         return true
     }
     
-    // Fetch user for uid in database
+    /// Fetch user for uid in database
     static func fetchUser(forUid uid: String,handler: @escaping((LocalUser) -> Void)) {
         usersRef.child(uid).observeSingleEvent(of: .value) { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject] {
@@ -84,7 +84,7 @@ struct FirebaseClient {
         }
     }
     
-    // Fetch all the users currently in the database
+    /// Fetch all the users currently in the database
     static func fetchUsers(handler: @escaping (([LocalUser]) -> Void)) {
         var users = [LocalUser]()
         usersRef.observeSingleEvent(of: .value) { (snapshot) in
@@ -105,7 +105,7 @@ struct FirebaseClient {
         }
     }
     
-    // Add observer to current user for connection request
+    /// Add observer to current user for connection request
     static func observeConnectionRequests(handler: @escaping ((LocalUser) -> Void)) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         let requestingUserRef = usersRef.child(uid).child("requestingUser")
@@ -147,7 +147,7 @@ struct FirebaseClient {
         }
     }
     
-    // See if user is connected to firebase
+    /// See if user is connected to firebase
     static func checkOnline(handler: @escaping ((Bool) -> Void)) {
         let connectedRef = Database.database().reference(withPath: ".info/connected")
         connectedRef.observe(.value) { (snapshot) in
@@ -162,7 +162,7 @@ struct FirebaseClient {
         }
     }
     
-    // Check for connection initialized
+    /// Check for connection initialized
     static func observeConnection(handler: @escaping((String) -> (Void))) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         let connectedToRef = usersRef.child(uid).child("connectedTo")

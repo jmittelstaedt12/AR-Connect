@@ -16,32 +16,24 @@ class MainViewController: UIViewController {
     var currentUser : User?
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
-    
+    var arSessionViewController: ARSessionViewController?
+
+    let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     let mapViewController = MapViewController()
-    let childSearchViewController = SearchTableViewController()
-    let userDetailViewController = CellDetailViewController()
+    let searchViewController = SearchTableViewController()
+    let cardDetailViewController = CellDetailViewController()
     
-    let viewARSessionButton: UIButton = {
-        let btn = UIButton(type: .system)
+    let viewARSessionButton: ARSessionButton = {
+        let btn = ARSessionButton(type: .system)
         btn.setTitle("AR", for: .normal)
-        btn.setTitleColor(UIColor.black, for: .normal)
-        btn.backgroundColor = .white
-        btn.layer.cornerRadius = 5
-        btn.translatesAutoresizingMaskIntoConstraints = false
         btn.addTarget(self, action: #selector(startARSession), for: .touchUpInside)
-        btn.isHidden = true
         return btn
     }()
     
-    let endConnectSessionButton: UIButton = {
-        let btn = UIButton(type: .system)
+    let endConnectSessionButton: ARSessionButton = {
+        let btn = ARSessionButton(type: .system)
         btn.setTitle("End", for: .normal)
-        btn.setTitleColor(.white, for: .normal)
-        btn.layer.cornerRadius = btn.frame.size.height/2
-        btn.backgroundColor = .red
-        btn.translatesAutoresizingMaskIntoConstraints = false
         btn.addTarget(self, action: #selector(endARSession), for: .touchUpInside)
-        btn.isHidden = true
         return btn
     }()
     
@@ -74,35 +66,63 @@ class MainViewController: UIViewController {
             AppDelegate.shared.rootViewController.switchToLogout()
         }
         currentUser = Auth.auth().currentUser!
-        FirebaseClient.usersRef.child(currentUser!.uid).child("isOnline").onDisconnectSetValue(false)
+        #warning("uncomment this line later")
+//        FirebaseClient.usersRef.child(currentUser!.uid).child("connectedTo").onDisconnectSetValue("")
         setConnectionRequestObserver()
-        setConnectionStartObserver()
         
         title = "AR Connect"
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
         
-        addChildViews()
-        setupMap()
-        setupChildSearchViewController()
-        setupUserDetailViewController()
-        setupStartConnectSessionButton()
-        
-        childSearchViewController.delegate = self
+        addSubviewsAndChildVCs()
+        setupSubviewsAndChildVCs()
+//        setupMap()
+//        setupSearchViewController()
+//        setupUserDetailViewController()
+//        setupStartConnectSessionButton()
+//        setupEndSessionButton()
+        searchViewController.delegate = self
         hideKeyboardWhenTappedAround()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSessionStart(notification:)), name: connectNotificationName, object: nil)
     }
     
-    private func addChildViews(){
-        //view.addSubview(mapView)
+    /// Add all subviews and child view controllers to main view controller
+    private func addSubviewsAndChildVCs() {
+        addChild(mapViewController)
         view.addSubview(mapViewController.view)
         mapViewController.didMove(toParent: self)
         view.addSubview(viewARSessionButton)
-        addChild(childSearchViewController)
-        view.addSubview(childSearchViewController.view)
-        childSearchViewController.didMove(toParent: self)
-        addChild(userDetailViewController)
-        view.addSubview(userDetailViewController.view)
-        userDetailViewController.didMove(toParent: self)
+        view.addSubview(endConnectSessionButton)
+        addChild(searchViewController)
+        view.addSubview(searchViewController.view)
+        searchViewController.didMove(toParent: self)
+        addChild(cardDetailViewController)
+        view.addSubview(cardDetailViewController.view)
+        cardDetailViewController.didMove(toParent: self)
+    }
+    
+    /// Setup auto layout anchors, dimensions, and other position properties for subviews
+    private func setupSubviewsAndChildVCs() {
+        // Setup auto layout anchors for map view
+        mapViewController.view.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+        
+        // Setup auto layout anchors for viewARSession button
+        viewARSessionButton.edgeAnchors(leading: mapViewController.view.leadingAnchor, bottom: searchViewController.view.topAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
+        viewARSessionButton.dimensionAnchors(height: 40, width: 100)
+        
+        // Setup auto layout anchors for endConnectSession button
+        endConnectSessionButton.edgeAnchors(bottom: searchViewController.view.topAnchor, trailing: mapViewController.view.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
+        
+        // Setup auto layout anchors for searchViewController
+        searchViewController.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
+        childSearchVCTopConstraint = searchViewController.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
+        setChildSearchVCState(toState: .compressed)
+        childSearchVCTopConstraint?.isActive = true
+        searchViewController.view.dimensionAnchors(height: 667)
+        
+        // Setup auto layout anchors for cardDetailViewController
+        cardDetailViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
     }
     
     private func setupNavigationBarAttributes(){
@@ -111,29 +131,6 @@ class MainViewController: UIViewController {
         navigationController?.navigationBar.alpha = 0.9
         navigationController?.navigationBar.tintColor = UIColor.white
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-    }
-    // Setup auto layout anchors for map view
-    private func setupMap() {
-        mapViewController.view.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
-    }
-    
-    // Setup auto layout anchors for AR Session initialization button
-    private func setupStartConnectSessionButton() {
-        viewARSessionButton.edgeAnchors(leading: mapViewController.view.leadingAnchor, bottom: mapViewController.view.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
-        viewARSessionButton.dimensionAnchors(height: 40, width: 100)
-    }
-    
-    // Setup auto layout anchors for child instance SearchViewController
-    private func setupChildSearchViewController() {
-        childSearchViewController.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
-        childSearchVCTopConstraint = childSearchViewController.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
-        setChildSearchVCState(toState: .compressed)
-        childSearchVCTopConstraint?.isActive = true
-        childSearchViewController.view.dimensionAnchors(height: 667)
-    }
-    
-    private func setupUserDetailViewController() {
-        userDetailViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
     }
     
     private func setConnectionRequestObserver() {
@@ -144,41 +141,54 @@ class MainViewController: UIViewController {
         }
     }
     
-    private func setConnectionStartObserver() {
-    #warning("add observer for if connection starts")
-    }
-    
-    // Log out current user and return to login screen
+    /// Log out current user and return to login screen
     @objc private func logout() {
         currentUser = nil
         if FirebaseClient.logoutOfDB(controller: self){
-            mapViewController.locationModel.locationManager.stopUpdatingLocation()
+            mapViewController.locationService.locationManager.stopUpdatingLocation()
             AppDelegate.shared.rootViewController.switchToLogout()
         }
     }
     
-    // Segue into AR Connect session
-    @objc private func startARSession() {
-        guard let location = mapViewController.locationModel.locationManager.location else{
+    /// When connect to user, transition into AR Session state
+    @objc private func handleSessionStart(notification: NSNotification) {
+        searchViewController.view.isHidden = true
+        viewARSessionButton.isHidden = false
+        endConnectSessionButton.isHidden = false
+        guard let location = mapViewController.locationService.locationManager.location else{
             self.createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
             return
         }
-        let arSessionVC = ARSessionViewController()
-        arSessionVC.currentLocation = location
-        arSessionVC.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.00001, longitude: location.coordinate.longitude+0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
+        arSessionViewController = ARSessionViewController()
+        arSessionViewController!.startLocation = location
+        arSessionViewController!.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.00001, longitude: location.coordinate.longitude+0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
+        arSessionViewController!.currentLocation = location
+        mapViewController.delegate = arSessionViewController
+    }
+    
+    /// Segue into AR Connect session
+    @objc private func startARSession() {
+        guard let arSessionVC = arSessionViewController else { return }
         present(arSessionVC, animated: true, completion: nil)
     }
     
     @objc private func endARSession() {
         #warning("TODO: write end session logic")
+        arSessionViewController = nil
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
+
+
 extension MainViewController: SearchTableViewControllerDelegate {
     
-    // During pan of drawer VC, update child coordinates to match
+    /// During pan of drawer VC, update child coordinates to match
     func updateCoordinatesDuringPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
-        childSearchViewController.view.isUserInteractionEnabled = false
+        searchViewController.view.isUserInteractionEnabled = false
         guard let previousYCoordinate = searchViewControllerPreviousYCoordinate, let topConstraint = childSearchVCTopConstraint else{
             return
         }
@@ -191,7 +201,7 @@ extension MainViewController: SearchTableViewControllerDelegate {
         }
     }
     
-    // When release pan, update coordinates to compressed or expanded depending on velocity
+    /// When release pan, update coordinates to compressed or expanded depending on velocity
     func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
         guard let previousYCoordinate = searchViewControllerPreviousYCoordinate else{
             return
@@ -233,24 +243,24 @@ extension MainViewController: SearchTableViewControllerDelegate {
         animateTopConstraint()
     }
     
-    // Animate transition to compressed or expanded and make view interactive again
+    /// Animate transition to compressed or expanded and make view interactive again
     private func animateTopConstraint() {
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
             self.view.layoutIfNeeded()
         })
-        self.childSearchViewController.view.isUserInteractionEnabled = true
+        self.searchViewController.view.isUserInteractionEnabled = true
 
     }
     
-    // Animate transition to expanded from compressed
+    /// Animate transition to expanded from compressed
     func animateToExpanded() {
         setChildSearchVCState(toState: .expanded)
         animateTopConstraint()
     }
     
-    // Make card for tapped user visible in view
+    /// Make card for tapped user visible in view
     func setChildUserDetailVCVisible(withUser user: LocalUser) {
-        userDetailViewController.userForCell = user
-        userDetailViewController.view.isHidden = false
+        cardDetailViewController.userForCell = user
+        cardDetailViewController.view.isHidden = false
     }
 }

@@ -10,11 +10,11 @@ import UIKit
 import ARKit
 import MapKit
 
-class ARSessionViewController: UIViewController, ARSCNViewDelegate {
-
+class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpdateDelegate {
+    
+    var startLocation: CLLocation!
     var currentLocation: CLLocation!
     var targetLocation: CLLocation!
-    var currentCoordinates: CLLocationCoordinate2D!
     var targetCoordinates: CLLocationCoordinate2D!
     
     let sceneView : ARSCNView = {
@@ -35,9 +35,6 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        currentCoordinates = currentLocation.coordinate
-        targetCoordinates = targetLocation.coordinate
         
         view.addSubview(sceneView)
         view.addSubview(dismissButton)
@@ -63,24 +60,39 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
-    // Set auto layout anchors for scene view
+    /// Set auto layout anchors for scene view
     private func setupSceneView() {
         sceneView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
     }
     
-    // Set auto layout anchors for dismiss AR Session button
+    /// Set auto layout anchors for dismiss AR Session button
     private func setupDismissButton() {
         dismissButton.edgeAnchors(top: sceneView.topAnchor, leading: sceneView.leadingAnchor, padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
         dismissButton.dimensionAnchors(height: 30, width: 60)
     }
     
-    // Place node in current AR Session at target location
+    /// Place node in current AR Session at target location
     private func addTargetNode() {
         let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
         node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
         let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: targetLocation)
         node.position = SCNVector3(arCoordinates.0, 0, -arCoordinates.1)
         sceneView.scene.rootNode.addChildNode(node)
+    }
+    
+    
+    private func createNodesFrom(locations: [CLLocation]) {
+        for nodeLocation in locations {
+            let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
+            node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+            let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: nodeLocation)
+            node.position = SCNVector3(arCoordinates.0, 0, arCoordinates.1)
+            sceneView.scene.rootNode.addChildNode(node)
+        }
+    }
+    
+    func didReceiveLocationUpdate(to location: CLLocation) {
+        currentLocation = location
     }
     
     @objc private func dismissARSession() {

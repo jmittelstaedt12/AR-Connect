@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		1937026521727136008B46EE /* LocationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937026421727136008B46EE /* LocationModel.swift */; };
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
-		1981CB6921A604C600B69138 /* constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* constants.swift */; };
+		1981CB6921A604C600B69138 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* Constants.swift */; };
 		198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198DA989218A5C230054E1BD /* LocalUser.swift */; };
 		19913A0E216CED7500174187 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A0D216CED7500174187 /* AppDelegate.swift */; };
 		19913A10216CED7600174187 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 19913A0F216CED7600174187 /* art.scnassets */; };
@@ -27,6 +27,10 @@
 		19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E0F216FB7E8008C39DA /* RootViewController.swift */; };
 		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
+		19D7E68D21C41E9E0046D737 /* ARSessionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */; };
+		19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9521C29C110079AD25 /* JMButton.swift */; };
+		19DC1D9921C341350079AD25 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9821C341350079AD25 /* LocationService.swift */; };
+		19DC1D9B21C3436D0079AD25 /* NavigationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9A21C3436D0079AD25 /* NavigationModel.swift */; };
 		19DD8D4B219486E200C01EDC /* CellDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DD8D49219486E200C01EDC /* CellDetailViewController.swift */; };
 		19DD8D4C219486E200C01EDC /* CellDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19DD8D4A219486E200C01EDC /* CellDetailViewController.xib */; };
 		19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */; };
@@ -36,7 +40,7 @@
 /* Begin PBXFileReference section */
 		1937026421727136008B46EE /* LocationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModel.swift; sourceTree = "<group>"; };
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
-		1981CB6821A604C600B69138 /* constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = constants.swift; sourceTree = "<group>"; };
+		1981CB6821A604C600B69138 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		198DA989218A5C230054E1BD /* LocalUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUser.swift; sourceTree = "<group>"; };
 		19913A0A216CED7500174187 /* ARConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19913A0D216CED7500174187 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -56,6 +60,10 @@
 		19948E0F216FB7E8008C39DA /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
+		19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionButton.swift; sourceTree = "<group>"; };
+		19DC1D9521C29C110079AD25 /* JMButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMButton.swift; sourceTree = "<group>"; };
+		19DC1D9821C341350079AD25 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		19DC1D9A21C3436D0079AD25 /* NavigationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationModel.swift; sourceTree = "<group>"; };
 		19DD8D49219486E200C01EDC /* CellDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellDetailViewController.swift; sourceTree = "<group>"; };
 		19DD8D4A219486E200C01EDC /* CellDetailViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CellDetailViewController.xib; sourceTree = "<group>"; };
 		19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectRequestViewController.swift; sourceTree = "<group>"; };
@@ -76,31 +84,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1981CB6321A4C08500B69138 /* Programmatic UI */ = {
-			isa = PBXGroup;
-			children = (
-				19948E0F216FB7E8008C39DA /* RootViewController.swift */,
-				19948E11216FB7FB008C39DA /* SplashViewController.swift */,
-				19913A26216CF7A100174187 /* LoginViewController.swift */,
-				19913A11216CED7600174187 /* RegisterViewController.swift */,
-				19913A2B216D2FBF00174187 /* MainViewController.swift */,
-				19BE2A04218A665C007304CF /* SearchTableViewController.swift */,
-				19913A24216CF46100174187 /* ARSessionViewController.swift */,
-				19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */,
-				1981CB6621A5FB3D00B69138 /* MapViewController.swift */,
-			);
-			path = "Programmatic UI";
-			sourceTree = "<group>";
-		};
-		1981CB6521A4C0B300B69138 /* XIB UI */ = {
-			isa = PBXGroup;
-			children = (
-				199383C62195EE99001BE7FD /* CellDetailViewController */,
-				199383C72195EEAA001BE7FD /* MessageViewController */,
-			);
-			path = "XIB UI";
-			sourceTree = "<group>";
-		};
 		19913A01216CED7500174187 = {
 			isa = PBXGroup;
 			children = (
@@ -122,14 +105,15 @@
 		19913A0C216CED7500174187 /* ARConnect */ = {
 			isa = PBXGroup;
 			children = (
-				1981CB6821A604C600B69138 /* constants.swift */,
+				19D7E68E21C426920046D737 /* Extensions */,
+				1981CB6821A604C600B69138 /* Constants.swift */,
 				19913A21216CEE6300174187 /* Controllers */,
 				19913A2D216D39C400174187 /* Model */,
+				19D7E68821C41DF60046D737 /* Services */,
+				19DC1D9721C29C200079AD25 /* CustomViews */,
 				19913A0D216CED7500174187 /* AppDelegate.swift */,
-				19913A0F216CED7600174187 /* art.scnassets */,
-				19913A13216CED7600174187 /* Main.storyboard */,
-				19913A16216CED7800174187 /* Assets.xcassets */,
-				19913A18216CED7800174187 /* LaunchScreen.storyboard */,
+				19D7E68921C41E190046D737 /* Assets */,
+				19D7E68B21C41E380046D737 /* Storyboards */,
 				19913A1B216CED7800174187 /* Info.plist */,
 				19913A22216CF1F200174187 /* GoogleService-Info.plist */,
 			);
@@ -139,8 +123,17 @@
 		19913A21216CEE6300174187 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				1981CB6321A4C08500B69138 /* Programmatic UI */,
-				1981CB6521A4C0B300B69138 /* XIB UI */,
+				19948E0F216FB7E8008C39DA /* RootViewController.swift */,
+				19948E11216FB7FB008C39DA /* SplashViewController.swift */,
+				19913A26216CF7A100174187 /* LoginViewController.swift */,
+				19913A11216CED7600174187 /* RegisterViewController.swift */,
+				19913A2B216D2FBF00174187 /* MainViewController.swift */,
+				1981CB6621A5FB3D00B69138 /* MapViewController.swift */,
+				19BE2A04218A665C007304CF /* SearchTableViewController.swift */,
+				19913A24216CF46100174187 /* ARSessionViewController.swift */,
+				19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */,
+				199383C62195EE99001BE7FD /* CellDetailViewController */,
+				199383C72195EEAA001BE7FD /* MessageViewController */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -151,6 +144,7 @@
 				19913A2E216D3A4300174187 /* FirebaseClient.swift */,
 				1937026421727136008B46EE /* LocationModel.swift */,
 				198DA989218A5C230054E1BD /* LocalUser.swift */,
+				19DC1D9A21C3436D0079AD25 /* NavigationModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -171,6 +165,48 @@
 				199383C22195EE58001BE7FD /* MessageViewController.xib */,
 			);
 			path = MessageViewController;
+			sourceTree = "<group>";
+		};
+		19D7E68821C41DF60046D737 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				19DC1D9821C341350079AD25 /* LocationService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		19D7E68921C41E190046D737 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				19913A0F216CED7600174187 /* art.scnassets */,
+				19913A16216CED7800174187 /* Assets.xcassets */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		19D7E68B21C41E380046D737 /* Storyboards */ = {
+			isa = PBXGroup;
+			children = (
+				19913A13216CED7600174187 /* Main.storyboard */,
+				19913A18216CED7800174187 /* LaunchScreen.storyboard */,
+			);
+			path = Storyboards;
+			sourceTree = "<group>";
+		};
+		19D7E68E21C426920046D737 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		19DC1D9721C29C200079AD25 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				19DC1D9521C29C110079AD25 /* JMButton.swift */,
+				19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */,
+			);
+			path = CustomViews;
 			sourceTree = "<group>";
 		};
 		BB929971DADCCBDD956900DE /* Pods */ = {
@@ -322,12 +358,15 @@
 			files = (
 				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
+				19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */,
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
 				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,
 				19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */,
 				1937026521727136008B46EE /* LocationModel.swift in Sources */,
+				19D7E68D21C41E9E0046D737 /* ARSessionButton.swift in Sources */,
 				19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */,
-				1981CB6921A604C600B69138 /* constants.swift in Sources */,
+				1981CB6921A604C600B69138 /* Constants.swift in Sources */,
+				19DC1D9B21C3436D0079AD25 /* NavigationModel.swift in Sources */,
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
@@ -335,6 +374,7 @@
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
 				19DD8D4B219486E200C01EDC /* CellDetailViewController.swift in Sources */,
 				1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */,
+				19DC1D9921C341350079AD25 /* LocationService.swift in Sources */,
 				19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

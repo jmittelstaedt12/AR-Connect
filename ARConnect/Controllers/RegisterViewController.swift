@@ -159,7 +159,7 @@ class RegisterViewController: UIViewController, KeyboardHandler {
         registerButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
     }
     
-    // Returns line separator views to be placed between text fields
+    /// Returns line separator views to be placed between text fields
     private func createSeparatorView() -> UIView {
         let view = UIView()
         view.backgroundColor = UIColor(r: 220, g: 220, b: 220)
@@ -167,7 +167,7 @@ class RegisterViewController: UIViewController, KeyboardHandler {
         return view
     }
     
-    // Request to register user in database
+    /// Request to register user in database
     @objc private func handleRegister() {
         guard let name = nameTextField.text, !name.isEmpty, let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
             self.createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")

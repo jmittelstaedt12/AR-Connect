@@ -73,7 +73,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         view.layer.cornerRadius = 5
     }
     
-    // Configure pan gesture recognizer for use in MainViewController
+    /// Configure pan gesture recognizer for use in MainViewController
     private func setupPanGestureRecognizer(){
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(onSearchViewControllerPan(sender:)))
         panGestureRecognizer.cancelsTouchesInView = false
@@ -81,7 +81,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         self.view.addGestureRecognizer(panGestureRecognizer)
     }
     
-    // Run on child instance of SearchViewController pan gesture
+    /// Run on child instance of SearchViewController pan gesture
     @objc private func onSearchViewControllerPan(sender: UIPanGestureRecognizer) {
         let translationPoint = sender.translation(in: view.superview)
         let velocity = sender.velocity(in: view.superview)
@@ -95,7 +95,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
-    // Set dimensions and constraints for subviews
+    /// Set dimensions and constraints for subviews
     private func setupViews(){
         drawerIconView.edgeAnchors(top: view.topAnchor, padding: UIEdgeInsets(top: 6, left: 00, bottom: 0, right: 0))
         drawerIconView.centerAnchors(centerX: view.centerXAnchor)
@@ -105,7 +105,7 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
         tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
     
-    // If user taps on text field from compressed, expand before editing
+    /// If user taps on text field from compressed, expand before editing
     func textFieldDidBeginEditing(_ textField: UITextField) {
             delegate.animateToExpanded()
         }
