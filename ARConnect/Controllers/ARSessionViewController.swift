@@ -15,8 +15,7 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpda
     var startLocation: CLLocation!
     var currentLocation: CLLocation!
     var targetLocation: CLLocation!
-    var targetCoordinates: CLLocationCoordinate2D!
-    
+    var tripCoordinates: [CLLocationCoordinate2D] = []
     let sceneView : ARSCNView = {
         let view = ARSCNView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -44,7 +43,8 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpda
         sceneView.delegate = self
         sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin]
         
-        addTargetNode()
+//        addTargetNode()
+        createNodes()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -81,18 +81,32 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpda
     }
     
     
-    private func createNodesFrom(locations: [CLLocation]) {
-        for nodeLocation in locations {
+    private func createNodes() {
+        if tripCoordinates.count < 10 { return }
+        for i in 0..<10 {
             let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
             node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-            let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: nodeLocation)
+            let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: CLLocation(coordinate: tripCoordinates[i]))
+            print(arCoordinates.0, arCoordinates.1)
             node.position = SCNVector3(arCoordinates.0, 0, arCoordinates.1)
-            sceneView.scene.rootNode.addChildNode(node)
+            #warning("Update this function to display nodes")
+//            sceneView.scene.rootNode.addChildNode(node)
         }
+//        for nodeLocation in locations {
+//            let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
+//            node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+//            let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: nodeLocation)
+//            node.position = SCNVector3(arCoordinates.0, 0, arCoordinates.1)
+//            sceneView.scene.rootNode.addChildNode(node)
+//        }
     }
     
     func didReceiveLocationUpdate(to location: CLLocation) {
         currentLocation = location
+    }
+    
+    func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D]) {
+        tripCoordinates = steps
     }
     
     @objc private func dismissARSession() {

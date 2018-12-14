@@ -30,7 +30,7 @@ struct LocationModel {
         var intermediaryDistance = interval
         while totalDistance - intermediaryDistance > interval {
             intermediaryDistance += interval
-            var coordinate = calculateCoordinates(from: start.coordinate, withBearing: bearing, andDistance: intermediaryDistance)
+            let coordinate = calculateCoordinates(from: start.coordinate, withBearing: bearing, andDistance: intermediaryDistance)
             points.append(coordinate)
         }
         return points

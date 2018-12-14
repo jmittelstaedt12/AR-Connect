@@ -17,7 +17,8 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     let locationService = LocationService()
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     weak var delegate: LocationUpdateDelegate?
-
+    var tripCoordinates: [CLLocationCoordinate2D] = []
+    
     let map : MKMapView = {
         let map = MKMapView()
         map.mapType = .standard
@@ -80,9 +81,12 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
             }
             self.draw(polyline: line)
             for step in steps {
-                var points = LocationModel.createIntermediaryCoordinates(from: currentLocation, to: CLLocation(latitude: step.polyline.coordinate.latitude, longitude: step.polyline.coordinate.longitude), withInterval: 5)
-//                print(points)
+                let stepPoints = LocationModel.createIntermediaryCoordinates(from: currentLocation, to: CLLocation(coordinate: step.polyline.coordinate), withInterval: 5)
+                self.tripCoordinates.append(contentsOf: stepPoints)
+                self.tripCoordinates.append(step.polyline.coordinate)
             }
+            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+            
         })
     }
     
@@ -111,4 +115,5 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
 
 protocol LocationUpdateDelegate: AnyObject {
     func didReceiveLocationUpdate(to location: CLLocation)
+    func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D])
 }

@@ -76,11 +76,6 @@ class MainViewController: UIViewController {
         
         addSubviewsAndChildVCs()
         setupSubviewsAndChildVCs()
-//        setupMap()
-//        setupSearchViewController()
-//        setupUserDetailViewController()
-//        setupStartConnectSessionButton()
-//        setupEndSessionButton()
         searchViewController.delegate = self
         hideKeyboardWhenTappedAround()
         
@@ -163,6 +158,7 @@ class MainViewController: UIViewController {
         arSessionViewController!.startLocation = location
         arSessionViewController!.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.00001, longitude: location.coordinate.longitude+0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
         arSessionViewController!.currentLocation = location
+        arSessionViewController!.tripCoordinates = mapViewController.tripCoordinates
         mapViewController.delegate = arSessionViewController
     }
     

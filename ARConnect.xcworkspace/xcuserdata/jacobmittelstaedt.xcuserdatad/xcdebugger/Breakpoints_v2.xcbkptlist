@@ -10,13 +10,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ARConnect/Controllers/MainViewController.swift"
-            timestampString = "566503838.559797"
+            timestampString = "566509522.3335201"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "213"
-            endingLineNumber = "213"
-            landmarkName = "MainViewController"
-            landmarkType = "21">
+            startingLineNumber = "173"
+            endingLineNumber = "173"
+            landmarkName = "endARSession()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

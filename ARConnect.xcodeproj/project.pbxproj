@@ -28,6 +28,8 @@
 		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
 		19D7E68D21C41E9E0046D737 /* ARSessionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */; };
+		19D7E69221C43C5D0046D737 /* CLLocation+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E69121C43C5D0046D737 /* CLLocation+Extension.swift */; };
+		19D7E69421C445550046D737 /* MatrixOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E69321C445550046D737 /* MatrixOperations.swift */; };
 		19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9521C29C110079AD25 /* JMButton.swift */; };
 		19DC1D9921C341350079AD25 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9821C341350079AD25 /* LocationService.swift */; };
 		19DC1D9B21C3436D0079AD25 /* NavigationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9A21C3436D0079AD25 /* NavigationModel.swift */; };
@@ -61,6 +63,8 @@
 		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
 		19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionButton.swift; sourceTree = "<group>"; };
+		19D7E69121C43C5D0046D737 /* CLLocation+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CLLocation+Extension.swift"; sourceTree = "<group>"; };
+		19D7E69321C445550046D737 /* MatrixOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixOperations.swift; sourceTree = "<group>"; };
 		19DC1D9521C29C110079AD25 /* JMButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMButton.swift; sourceTree = "<group>"; };
 		19DC1D9821C341350079AD25 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		19DC1D9A21C3436D0079AD25 /* NavigationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationModel.swift; sourceTree = "<group>"; };
@@ -108,7 +112,7 @@
 				19D7E68E21C426920046D737 /* Extensions */,
 				1981CB6821A604C600B69138 /* Constants.swift */,
 				19913A21216CEE6300174187 /* Controllers */,
-				19913A2D216D39C400174187 /* Model */,
+				19913A2D216D39C400174187 /* Models */,
 				19D7E68821C41DF60046D737 /* Services */,
 				19DC1D9721C29C200079AD25 /* CustomViews */,
 				19913A0D216CED7500174187 /* AppDelegate.swift */,
@@ -138,15 +142,16 @@
 			path = Controllers;
 			sourceTree = "<group>";
 		};
-		19913A2D216D39C400174187 /* Model */ = {
+		19913A2D216D39C400174187 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				19913A2E216D3A4300174187 /* FirebaseClient.swift */,
 				1937026421727136008B46EE /* LocationModel.swift */,
 				198DA989218A5C230054E1BD /* LocalUser.swift */,
 				19DC1D9A21C3436D0079AD25 /* NavigationModel.swift */,
+				19D7E69321C445550046D737 /* MatrixOperations.swift */,
 			);
-			path = Model;
+			path = Models;
 			sourceTree = "<group>";
 		};
 		199383C62195EE99001BE7FD /* CellDetailViewController */ = {
@@ -196,6 +201,7 @@
 		19D7E68E21C426920046D737 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				19D7E69121C43C5D0046D737 /* CLLocation+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -360,6 +366,7 @@
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
 				19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */,
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
+				19D7E69221C43C5D0046D737 /* CLLocation+Extension.swift in Sources */,
 				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,
 				19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */,
 				1937026521727136008B46EE /* LocationModel.swift in Sources */,
@@ -375,6 +382,7 @@
 				19DD8D4B219486E200C01EDC /* CellDetailViewController.swift in Sources */,
 				1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */,
 				19DC1D9921C341350079AD25 /* LocationService.swift in Sources */,
+				19D7E69421C445550046D737 /* MatrixOperations.swift in Sources */,
 				19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
