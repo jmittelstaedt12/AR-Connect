@@ -106,7 +106,14 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpda
     }
     
     func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D]) {
-        tripCoordinates = steps
+        guard !steps.isEmpty else { return }
+        var current = steps.first!
+        var stepsWithIntermediaries = steps
+        for (index,step) in steps.enumerated() {
+            let stepPoints = LocationModel.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+            stepsWithIntermediaries.insert(contentsOf: stepPoints, at: index)
+        }        
+        tripCoordinates = stepsWithIntermediaries
     }
     
     @objc private func dismissARSession() {

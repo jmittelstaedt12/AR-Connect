@@ -27,6 +27,8 @@
 		19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E0F216FB7E8008C39DA /* RootViewController.swift */; };
 		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
+		19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */; };
+		19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D736B121CAE15D00D6D92A /* InitialViewController.swift */; };
 		19D7E68D21C41E9E0046D737 /* ARSessionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */; };
 		19D7E69221C43C5D0046D737 /* CLLocation+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E69121C43C5D0046D737 /* CLLocation+Extension.swift */; };
 		19D7E69421C445550046D737 /* MatrixOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E69321C445550046D737 /* MatrixOperations.swift */; };
@@ -62,6 +64,8 @@
 		19948E0F216FB7E8008C39DA /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
+		19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMNavigationBar.swift; sourceTree = "<group>"; };
+		19D736B121CAE15D00D6D92A /* InitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialViewController.swift; sourceTree = "<group>"; };
 		19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionButton.swift; sourceTree = "<group>"; };
 		19D7E69121C43C5D0046D737 /* CLLocation+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CLLocation+Extension.swift"; sourceTree = "<group>"; };
 		19D7E69321C445550046D737 /* MatrixOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixOperations.swift; sourceTree = "<group>"; };
@@ -129,6 +133,7 @@
 			children = (
 				19948E0F216FB7E8008C39DA /* RootViewController.swift */,
 				19948E11216FB7FB008C39DA /* SplashViewController.swift */,
+				19D736B121CAE15D00D6D92A /* InitialViewController.swift */,
 				19913A26216CF7A100174187 /* LoginViewController.swift */,
 				19913A11216CED7600174187 /* RegisterViewController.swift */,
 				19913A2B216D2FBF00174187 /* MainViewController.swift */,
@@ -211,6 +216,7 @@
 			children = (
 				19DC1D9521C29C110079AD25 /* JMButton.swift */,
 				19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */,
+				19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */,
 			);
 			path = CustomViews;
 			sourceTree = "<group>";
@@ -316,6 +322,9 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/RxAtomic/RxAtomic.framework",
+				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
+				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
 				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
@@ -325,6 +334,9 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxAtomic.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxCocoa.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
@@ -377,8 +389,10 @@
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
+				19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */,
 				198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */,
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
+				19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */,
 				19DD8D4B219486E200C01EDC /* CellDetailViewController.swift in Sources */,
 				1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */,
 				19DC1D9921C341350079AD25 /* LocationService.swift in Sources */,

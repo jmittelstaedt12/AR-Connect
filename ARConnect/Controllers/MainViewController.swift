@@ -57,19 +57,18 @@ class MainViewController: UIViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        setupNavigationBarAttributes()
+//        setupNavigationBarAttributes()
+        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if Auth.auth().currentUser?.uid == nil {
-            AppDelegate.shared.rootViewController.switchToLogout()
-        }
         currentUser = Auth.auth().currentUser!
         #warning("uncomment this line later")
 //        FirebaseClient.usersRef.child(currentUser!.uid).child("connectedTo").onDisconnectSetValue("")
         setConnectionRequestObserver()
         
+//        navigationController?.navigationBar = JMNavigationBar()
         title = "AR Connect"
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
@@ -120,14 +119,6 @@ class MainViewController: UIViewController {
         cardDetailViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
     }
     
-    private func setupNavigationBarAttributes(){
-        navigationController?.navigationBar.isTranslucent = true
-        navigationController?.navigationBar.barTintColor = UIColor.gray
-        navigationController?.navigationBar.alpha = 0.9
-        navigationController?.navigationBar.tintColor = UIColor.white
-        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-    }
-    
     private func setConnectionRequestObserver() {
         FirebaseClient.observeUidValue(forKey: "requestingUser") { (requestingUser) in
             let connectRequestVC = ConnectRequestViewController()
@@ -139,7 +130,7 @@ class MainViewController: UIViewController {
     /// Log out current user and return to login screen
     @objc private func logout() {
         currentUser = nil
-        if FirebaseClient.logoutOfDB(controller: self){
+        if FirebaseClient.logoutOfDB(controller: self) {
             mapViewController.locationService.locationManager.stopUpdatingLocation()
             AppDelegate.shared.rootViewController.switchToLogout()
         }

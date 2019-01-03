@@ -21,6 +21,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController =  RootViewController()
         FirebaseApp.configure()
         // Override point for customization after application launch.
+        let navigationBarAppearance = UINavigationBar.appearance()
+        navigationBarAppearance.isTranslucent       = true
+        navigationBarAppearance.barTintColor        = UIColor.gray
+        navigationBarAppearance.alpha               = 0.9
+        navigationBarAppearance.tintColor           = UIColor.white
+        navigationBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
         return true
     }
 

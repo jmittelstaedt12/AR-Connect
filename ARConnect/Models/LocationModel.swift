@@ -6,7 +6,6 @@
 //  Copyright © 2018 Jacob Mittelstaedt. All rights reserved.
 //
 
-import Foundation
 import UIKit
 import MapKit
 
@@ -23,16 +22,10 @@ struct LocationModel {
         return CLLocationCoordinate2D(latitude: lat2.toDegrees(), longitude: lon2.toDegrees())
     }
     
-    static func createIntermediaryCoordinates(from start: CLLocation,to end: CLLocation, withInterval interval: Double) -> [CLLocationCoordinate2D] {
-        var points = [CLLocationCoordinate2D]()
-        let bearing = calculateBearing(from: start.coordinate, to: end.coordinate)
-        let totalDistance = Double(start.distance(from: end))
-        var intermediaryDistance = interval
-        while totalDistance - intermediaryDistance > interval {
-            intermediaryDistance += interval
-            let coordinate = calculateCoordinates(from: start.coordinate, withBearing: bearing, andDistance: intermediaryDistance)
-            points.append(coordinate)
-        }
+    static func createIntermediaryCoordinates(from start: CLLocationCoordinate2D,to end: CLLocationCoordinate2D, withInterval interval: Double) -> [CLLocationCoordinate2D] {
+        let bearing = calculateBearing(from: start, to: end)
+        let totalDistance = Double(CLLocation(coordinate: start).distance(from: CLLocation(coordinate: end)))
+        let points = Array(stride(from: interval, to: totalDistance, by: interval)).map { calculateCoordinates(from: start, withBearing: bearing, andDistance: $0) }
         return points
     }
     

@@ -21,7 +21,12 @@ class JMButton: UIButton {
     }
     
     private func setupButton() {
-        
+//        setTitleColor(UIColor.black, for: .normal)
+        titleLabel?.textColor                           = .black
+        backgroundColor                                 = .white
+        layer.cornerRadius                              = 5
+        translatesAutoresizingMaskIntoConstraints       = false
+        isHidden                                        = false
     }
     
 }

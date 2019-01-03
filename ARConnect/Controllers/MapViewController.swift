@@ -80,11 +80,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                 return
             }
             self.draw(polyline: line)
-            for step in steps {
-                let stepPoints = LocationModel.createIntermediaryCoordinates(from: currentLocation, to: CLLocation(coordinate: step.polyline.coordinate), withInterval: 5)
-                self.tripCoordinates.append(contentsOf: stepPoints)
-                self.tripCoordinates.append(step.polyline.coordinate)
-            }
+            self.tripCoordinates.append(contentsOf: steps.map { $0.polyline.coordinate })
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
             
         })

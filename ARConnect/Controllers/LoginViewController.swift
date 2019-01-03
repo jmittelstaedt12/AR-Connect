@@ -68,7 +68,6 @@ class LoginViewController: UIViewController, KeyboardHandler {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
         view.backgroundColor = ColorConstants.primaryColor
         view.addSubview(arConnectLabel)
         view.addSubview(emailTextField)
@@ -79,12 +78,16 @@ class LoginViewController: UIViewController, KeyboardHandler {
         
         title = "AR Connect"
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "Log In", style: .plain, target: nil, action: nil)
-        
         hideKeyboardWhenTappedAround()
         emailTextField.delegate = self
         passwordTextField.delegate = self
         
         startObservingKeyboardChanges()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
     /// Set auto layout anchors for all subviews
@@ -123,7 +126,7 @@ class LoginViewController: UIViewController, KeyboardHandler {
     }
     
     @objc private func signUp() {
-        self.navigationController?.pushViewController(RegisterViewController(), animated: true)
+        self.present(RegisterViewController(), animated: true, completion: nil)
     }
 }
 
@@ -139,12 +142,12 @@ extension KeyboardHandler where Self: UIViewController{
     
     /// Add observers for keyboardWillShow and keyboardWillHide
     func startObservingKeyboardChanges() {
-        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) { (notification) in
-            self.keyboardWillShow(notification: notification)
-        }
-        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) { (notification) in
-            self.keyboardWillHide(notification: notification)
-        }
+//        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) { (notification) in
+//            self.keyboardWillShow(notification: notification)
+//        }
+//        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) { (notification) in
+//            self.keyboardWillHide(notification: notification)
+//        }
     }
     
     /// When keyboard appears, animate view upwards

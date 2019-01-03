@@ -13,6 +13,14 @@ class RegisterViewController: UIViewController, KeyboardHandler {
     
     var keyboardWillAnimate = true
     
+    let cancelButton: UIButton = {
+        let btn = UIButton()
+        btn.setImage(UIImage(named: "cancel"), for: .normal)
+        btn.addTarget(self, action: #selector(onCancel), for: .touchUpInside)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+    
     let profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.backgroundColor = .gray
@@ -73,13 +81,12 @@ class RegisterViewController: UIViewController, KeyboardHandler {
         nameSeparatorView = createSeparatorView()
         emailSeparatorView = createSeparatorView()
         
+        view.addSubview(cancelButton)
         view.addSubview(profileImageView)
         view.addSubview(inputsContainerView)
         view.addSubview(registerButton)
         
-        setupProfileImageView()
-        setupInputsContainerView()
-        setupRegisterButton()
+        setSubviewConstraints()
         
         hideKeyboardWhenTappedAround()
         
@@ -95,22 +102,24 @@ class RegisterViewController: UIViewController, KeyboardHandler {
     }
     
     #warning("TODO: very boring subview refactor")
-    private func setupProfileImageView() {
-        //need x, y, width, height constraints
-        profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
-        profileImageView.bottomAnchor.constraint(equalTo: inputsContainerView.topAnchor, constant: -16).isActive = true
-        profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        profileImageView.widthAnchor.constraint(equalTo: profileImageView.heightAnchor).isActive = true
-    }
     
-    private func setupInputsContainerView() {
-        // set x, y, width, height constraints
-        inputsContainerView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        inputsContainerView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        inputsContainerView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24).isActive = true
-        inputsContainerView.heightAnchor.constraint(equalToConstant: 150).isActive = true
+    private func setSubviewConstraints() {
         
-        //add views
+        // Set constraints for cancel button
+        cancelButton.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, padding: UIEdgeInsets(top: 16, left: 16, bottom: 0, right: 0))
+        cancelButton.dimensionAnchors(height: 32, width: 32)
+        
+        // Set constraints for profile image view
+        profileImageView.edgeAnchors(top: cancelButton.bottomAnchor, bottom: inputsContainerView.topAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: -16, right: 0))
+        profileImageView.centerAnchors(centerX: view.centerXAnchor)
+        profileImageView.widthAnchor.constraint(equalTo: profileImageView.heightAnchor).isActive = true
+        
+        // Set constraints for input container view
+        inputsContainerView.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
+        inputsContainerView.dimensionAnchors(height: 150)
+        inputsContainerView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24).isActive = true
+        
+        // Add views to input container view
         inputsContainerView.addSubview(nameTextField)
         inputsContainerView.addSubview(emailTextField)
         inputsContainerView.addSubview(passwordTextField)
@@ -121,7 +130,7 @@ class RegisterViewController: UIViewController, KeyboardHandler {
         inputsContainerView.addSubview(nameSeparatorView)
         inputsContainerView.addSubview(emailSeparatorView)
         
-        //need x, y, width, height constraints
+        // Set constraints for input container view subviews
         nameTextField.leadingAnchor.constraint(equalTo: inputsContainerView.leadingAnchor, constant: 12).isActive = true
         nameTextField.topAnchor.constraint(equalTo: inputsContainerView.topAnchor).isActive = true
         nameTextField.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor, constant: -12).isActive = true
@@ -150,9 +159,7 @@ class RegisterViewController: UIViewController, KeyboardHandler {
         passwordTextField.topAnchor.constraint(equalTo: emailSeparatorView.bottomAnchor).isActive = true
         passwordTextField.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor, constant: -12).isActive = true
         passwordTextField.heightAnchor.constraint(equalTo: inputsContainerView.heightAnchor, multiplier: 1/3).isActive = true
-    }
-    
-    private func setupRegisterButton() {
+        
         registerButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         registerButton.topAnchor.constraint(equalTo: inputsContainerView.bottomAnchor, constant: 12).isActive = true
         registerButton.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor).isActive = true
@@ -165,6 +172,10 @@ class RegisterViewController: UIViewController, KeyboardHandler {
         view.backgroundColor = UIColor(r: 220, g: 220, b: 220)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }
+    
+    @objc private func onCancel() {
+        self.dismiss(animated: true, completion: nil)
     }
     
     /// Request to register user in database

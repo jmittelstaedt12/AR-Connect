@@ -6,7 +6,6 @@
 //  Copyright © 2018 Jacob Mittelstaedt. All rights reserved.
 //
 
-import Foundation
 import Firebase
 import UIKit
 
@@ -43,6 +42,9 @@ struct FirebaseClient {
                     controller.present(alert, animated: true, completion: nil)
                     return
                 }
+//                DispatchQueue.main.async {
+//
+//                }
                 AppDelegate.shared.rootViewController.switchToMainScreen()
             })
         }
@@ -86,17 +88,15 @@ struct FirebaseClient {
     
     /// Fetch all the users currently in the database
     static func fetchUsers(handler: @escaping (([LocalUser]) -> Void)) {
-        var users = [LocalUser]()
         usersRef.observeSingleEvent(of: .value) { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject] {
-                for child in dictionary.values {
-                    if let userDictionary = child as? [String: AnyObject] {
-                        let user = LocalUser()
-                        user.name = userDictionary["name"] as? String
-                        user.email = userDictionary["email"] as? String
-                        users.append(user)
-                    }
-                }
+                let users = dictionary.values.filter { $0 is [String: AnyObject] }.map({ (any) -> LocalUser in
+                    let user = LocalUser()
+                    let userDictionary = any as! [String: AnyObject]
+                    user.name = userDictionary["name"] as? String
+                    user.email = userDictionary["email"] as? String
+                    return user
+                })
                 for (i,k) in dictionary.keys.enumerated(){
                     users[i].uid = k
                 }

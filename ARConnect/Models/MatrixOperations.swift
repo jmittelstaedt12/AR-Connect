@@ -6,8 +6,7 @@
 //  Copyright © 2018 Jacob Mittelstaedt. All rights reserved.
 //
 
-import Foundation
-import GLKit
+import GLKit.GLKMatrix4
 import CoreLocation
 
 struct MatrixOperations {
@@ -34,7 +33,6 @@ struct MatrixOperations {
     
     static func rotateAroundY(with matrix: matrix_float4x4, for degrees: Float) -> matrix_float4x4 {
         var matrix : matrix_float4x4 = matrix
-        
         matrix.columns.0.x = cos(degrees)
         matrix.columns.0.z = -sin(degrees)
         
