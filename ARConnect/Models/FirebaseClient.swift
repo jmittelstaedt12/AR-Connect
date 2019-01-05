@@ -12,6 +12,7 @@ import UIKit
 struct FirebaseClient {
     
     static let usersRef = Database.database().reference().child("Users")
+    static var observedReferences = [DatabaseReference]()
     
     /// Request to authorize a new user and add them to database
     static func createNewUser(name: String, email: String,password: String, controller: UIViewController) {
@@ -51,7 +52,7 @@ struct FirebaseClient {
     }
     
     /// Request from view controller to log in to the database
-    static func logInToDB(email: String,password: String,controller: UIViewController){
+    static func logInToDB(email: String,password: String,controller: UIViewController) {
         Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
             if let err = error {
                 controller.createAndDisplayAlert(withTitle: "Authorization error", body: err.localizedDescription)
@@ -63,6 +64,9 @@ struct FirebaseClient {
     
     /// Log out current user and return to login screen
     static func logoutOfDB(controller: UIViewController) -> Bool {
+        for ref in observedReferences {
+            ref.removeAllObservers()
+        }
         do{
             try Auth.auth().signOut()
         }catch let logoutError {
@@ -118,6 +122,7 @@ struct FirebaseClient {
                 }
             }
         }
+        observedReferences.append(requestingUserRef)
     }
     
     static func observeUidValue(forKey key: String, handler: @escaping ((LocalUser) -> Void)) {
@@ -132,12 +137,13 @@ struct FirebaseClient {
                 }
             }
         }
+        observedReferences.append(ref)
     }
     
     static func observePending(handler: @escaping (() -> Void)) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        let userRef = usersRef.child(uid)
-        userRef.child("pendingRequest").observe(.value) { (snapshot) in
+        let userRef = usersRef.child(uid).child("pendingRequest")
+        userRef.observe(.value) { (snapshot) in
             if let isPending = snapshot.value as? Bool {
                 if !isPending {
                     handler()
@@ -145,6 +151,7 @@ struct FirebaseClient {
                 }
             }
         }
+        observedReferences.append(userRef)
     }
     
     /// See if user is connected to firebase
@@ -160,6 +167,7 @@ struct FirebaseClient {
             }
             handler(connected)
         }
+        observedReferences.append(connectedRef)
     }
     
     /// Check for connection initialized
@@ -173,6 +181,7 @@ struct FirebaseClient {
                 }
             }
         }
+        observedReferences.append(connectedToRef)
     }
     
     static func fetchCoordinates(uid: String, handler: @escaping((Double?,Double?) -> (Void))) {

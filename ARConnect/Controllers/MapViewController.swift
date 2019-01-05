@@ -27,10 +27,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         map.translatesAutoresizingMaskIntoConstraints = false
         return map
     }()
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = map
@@ -106,6 +103,10 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         currentLocation = locValue
         delegate?.didReceiveLocationUpdate(to: locValue)
         FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude" : locValue.coordinate.latitude, "longitude" : locValue.coordinate.longitude])
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

@@ -44,6 +44,7 @@ struct LocationModel {
     
     /// Do polar coordinate conversion to cartesian coordinates for ARKit grid system
     static func getARCoordinates(from current: CLLocation,to target: CLLocation) -> (Double, Double) {
+        #warning("why is this returning a tuple and not coordinates?")
         let bearing = calculateBearing(from: current.coordinate, to: target.coordinate)
         let distance = current.distance(from: target)
         return (distance*cos(bearing),distance*sin(bearing))

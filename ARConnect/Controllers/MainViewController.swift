@@ -131,7 +131,6 @@ class MainViewController: UIViewController {
     @objc private func logout() {
         currentUser = nil
         if FirebaseClient.logoutOfDB(controller: self) {
-            mapViewController.locationService.locationManager.stopUpdatingLocation()
             AppDelegate.shared.rootViewController.switchToLogout()
         }
     }
@@ -166,6 +165,7 @@ class MainViewController: UIViewController {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+        mapViewController.locationService.locationManager.stopUpdatingLocation()
     }
 }
 

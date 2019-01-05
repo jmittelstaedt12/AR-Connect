@@ -39,29 +39,16 @@ class RootViewController: UIViewController {
         new.view.frame = view.bounds
         view.addSubview(new.view)
         new.didMove(toParent: self)
-
         current.willMove(toParent: nil)
         current.view.removeFromSuperview()
         current.removeFromParent()
-        
         current = new
     }
     
     // If a user signs in, display the main map screen
     func switchToMainScreen() {
         let mainScreen = UINavigationController(rootViewController: MainViewController())
-        let transition = CATransition()
-        transition.type = .fade
-        transition.duration = 0.5
-        mainScreen.view.layer.add(transition, forKey: nil)
-        
         animateFadeTransition(to: mainScreen)
-//        current.willMove(toParent: nil)
-//        addChild(mainScreen)
-//        self.animateFadeTransition(to: mainScreen)
-//        self.current.removeFromParent()
-//        mainScreen.didMove(toParent: self)
-//        self.current = mainScreen
     }
     
     // If the user signs out, switch to the login screen
@@ -72,29 +59,21 @@ class RootViewController: UIViewController {
     
     // Animation for presenting main map screen
     private func animateFadeTransition(to new: UIViewController, completion: (() -> Void)? = nil){
-        self.present(new, animated: false, completion: nil)
-        //        current.willMove(toParent: nil)
-//        addChild(new)
-//        self.navigationController?.popViewController(animated: false)
-//        self.navigationController?.pushViewController(new, animated: false)
-//        self.current.removeFromParent()
-//        new.didMove(toParent: self)
-//        self.current = new
-//        completion?()
-//        transition(from: current, to: new, duration: 0.9, options: [.transitionCrossDissolve, .curveEaseOut], animations: {}) { (completed) in
-//            self.current.removeFromParent()
-//            new.didMove(toParent: self)
-//            self.current = new
-//            completion?()
-//        }
+        current.willMove(toParent: nil)
+        addChild(new)
+        transition(from: current, to: new, duration: 0.3, options: [.transitionCrossDissolve, .curveEaseOut], animations: {}) { (completed) in
+            self.current.removeFromParent()
+            new.didMove(toParent: self)
+            self.current = new
+            completion?()
+        }
     }
     
     // Animation for dismissing
     private func animateDismissTransition(to new: UIViewController, completion: (() -> Void)? = nil) {
         current.willMove(toParent: nil)
         addChild(new)
-        
-        transition(from: current, to: new, duration: 0.9, options: [], animations: {
+        transition(from: current, to: new, duration: 0.3, options: [], animations: {
             new.view.frame = self.view.bounds
         }) { completed in
             self.current.removeFromParent()

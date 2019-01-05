@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-protocol SearchTableViewControllerDelegate {
+protocol SearchTableViewControllerDelegate: class {
     func updateCoordinatesDuringPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
     func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
     func animateToExpanded()
@@ -18,7 +18,7 @@ protocol SearchTableViewControllerDelegate {
 
 class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     
-    var delegate: SearchTableViewControllerDelegate!
+    weak var delegate: SearchTableViewControllerDelegate!
     var users: [LocalUser]?
     let cellId = "cellId"
 
