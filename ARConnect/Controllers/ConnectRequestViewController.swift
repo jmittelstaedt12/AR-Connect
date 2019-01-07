@@ -77,9 +77,9 @@ class ConnectRequestViewController: UIViewController {
             self.dismiss(animated: true, completion: nil)
             return
         }
-        if sender.title(for: .normal) == "Confirm"{
+        if sender.title(for: .normal) == "Confirm" {
             #warning("uncomment later")
-//            FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid,"requestingUser" : ""])
+            FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid,"requestingUser" : ""])
             FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid]) { (error, ref) in
                 if let err = error {
                     print(err.localizedDescription)
@@ -96,7 +96,8 @@ class ConnectRequestViewController: UIViewController {
             }
         } else {
             #warning("uncomment later")
-//            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
+            
+            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
         }
         FirebaseClient.usersRef.child(requestUid).updateChildValues(["pendingRequest" : false])
         self.dismiss(animated: true, completion: nil)

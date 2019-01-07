@@ -26,6 +26,7 @@
 		199383C42195EE58001BE7FD /* MessageViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 199383C22195EE58001BE7FD /* MessageViewController.xib */; };
 		19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E0F216FB7E8008C39DA /* RootViewController.swift */; };
 		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
+		19997E7D21E258AB0023C3EC /* FIRObservables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E7C21E258AB0023C3EC /* FIRObservables.swift */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
 		19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */; };
 		19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D736B121CAE15D00D6D92A /* InitialViewController.swift */; };
@@ -63,6 +64,7 @@
 		199383C22195EE58001BE7FD /* MessageViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MessageViewController.xib; sourceTree = "<group>"; };
 		19948E0F216FB7E8008C39DA /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
+		19997E7C21E258AB0023C3EC /* FIRObservables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FIRObservables.swift; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
 		19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMNavigationBar.swift; sourceTree = "<group>"; };
 		19D736B121CAE15D00D6D92A /* InitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialViewController.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 				198DA989218A5C230054E1BD /* LocalUser.swift */,
 				19DC1D9A21C3436D0079AD25 /* NavigationModel.swift */,
 				19D7E69321C445550046D737 /* MatrixOperations.swift */,
+				19997E7C21E258AB0023C3EC /* FIRObservables.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -377,6 +380,7 @@
 				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
 				19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */,
+				19997E7D21E258AB0023C3EC /* FIRObservables.swift in Sources */,
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
 				19D7E69221C43C5D0046D737 /* CLLocation+Extension.swift in Sources */,
 				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,

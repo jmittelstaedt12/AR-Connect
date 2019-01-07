@@ -10,6 +10,7 @@ import UIKit
 import MapKit
 import Firebase
 import SystemConfiguration
+import RxSwift
 
 class MainViewController: UIViewController {
     
@@ -17,6 +18,7 @@ class MainViewController: UIViewController {
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
     var arSessionViewController: ARSessionViewController?
+    let bag = DisposeBag()
 
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     let mapViewController = MapViewController()
@@ -65,11 +67,15 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
         currentUser = Auth.auth().currentUser!
         #warning("uncomment this line later")
-//        FirebaseClient.usersRef.child(currentUser!.uid).child("connectedTo").onDisconnectSetValue("")
+        FirebaseClient.usersRef.child(currentUser!.uid).child("connectedTo").onDisconnectSetValue("")
         setConnectionRequestObserver()
-        
+        setObservers()
 //        navigationController?.navigationBar = JMNavigationBar()
-        title = "AR Connect"
+        FirebaseClient.fetchObservableUser(withUid: currentUser!.uid).subscribe(onNext: { (user) in
+            self.title = user.name
+        })
+        
+        
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
         
@@ -119,12 +125,33 @@ class MainViewController: UIViewController {
         cardDetailViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
     }
     
-    private func setConnectionRequestObserver() {
-        FirebaseClient.observeUidValue(forKey: "requestingUser") { (requestingUser) in
+    private func setObservers() {
+        // Setting connection request observer
+        FirebaseClient.displayRequestingUserObservable().subscribe(onNext: { (requestingUser) in
             let connectRequestVC = ConnectRequestViewController()
             connectRequestVC.requestingUser = requestingUser
             self.present(connectRequestVC, animated: true, completion: nil)
-        }
+        }).disposed(by: self.bag)
+//        FirebaseClient.createRequestingUserObservable()?.subscribe(onNext: { (requestingUser) in
+//            let connectRequestVC = ConnectRequestViewController()
+//            connectRequestVC.requestingUser = requestingUser
+//            self.present(connectRequestVC, animated: true, completion: nil)
+//        }).disposed(by: self.bag)
+        
+        // Setting online status observer
+        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { (connected) in
+            guard let uid = self.currentUser?.uid else { return }
+            FirebaseClient.usersRef.child(uid).updateChildValues(["isOnline": connected])
+        }).disposed(by: self.bag)
+        
+    }
+    private func setConnectionRequestObserver() {
+//            FirebaseClient.fetchObservableUser(withUid: uid).subscribe(onNext: { (requestingUser) in
+//                let connectRequestVC = ConnectRequestViewController()
+//                connectRequestVC.requestingUser = requestingUser
+//                self.present(connectRequestVC, animated: true, completion: nil)
+//            }).disposed(by: self.bag)
+//        }).disposed(by: bag)
     }
     
     /// Log out current user and return to login screen
@@ -134,6 +161,7 @@ class MainViewController: UIViewController {
             AppDelegate.shared.rootViewController.switchToLogout()
         }
     }
+        
     
     /// When connect to user, transition into AR Session state
     @objc private func handleSessionStart(notification: NSNotification) {

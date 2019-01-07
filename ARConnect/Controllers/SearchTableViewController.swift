@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import RxSwift
 
 protocol SearchTableViewControllerDelegate: class {
     func updateCoordinatesDuringPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
@@ -20,6 +21,8 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     
     weak var delegate: SearchTableViewControllerDelegate!
     var users: [LocalUser]?
+    
+    let bag = DisposeBag()
     let cellId = "cellId"
 
     let drawerIconView: UIView = {
@@ -50,10 +53,18 @@ class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        FirebaseClient.fetchUsers(handler: { fetchedUsers in
+//        FirebaseClient.fetchUsers(handler: { fetchedUsers in
+//            self.users = fetchedUsers
+//            self.tableView.reloadData()
+//        })
+        
+        FirebaseClient.fetchObservableUsers().subscribe(onNext: { (fetchedUsers) in
             self.users = fetchedUsers
             self.tableView.reloadData()
-        })
+        }, onError: { (error) in
+            self.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+        }).disposed(by: bag)
+        
         view.addSubview(drawerIconView)
         searchUsersTextField.delegate = self
         view.addSubview(searchUsersTextField)
