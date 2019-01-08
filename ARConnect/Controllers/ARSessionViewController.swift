@@ -10,7 +10,7 @@ import UIKit
 import ARKit
 import MapKit
 
-class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpdateDelegate {
+final class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpdateDelegate {
     
     var startLocation: CLLocation!
     var currentLocation: CLLocation!
@@ -75,7 +75,7 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpda
     private func addTargetNode() {
         let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
         node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-        let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: targetLocation)
+        let arCoordinates = LocationHelper.getARCoordinates(from: currentLocation, to: targetLocation)
         node.position = SCNVector3(arCoordinates.0, 0, -arCoordinates.1)
         sceneView.scene.rootNode.addChildNode(node)
     }
@@ -86,7 +86,7 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpda
         for i in 0..<10 {
             let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
             node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-            let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: CLLocation(coordinate: tripCoordinates[i]))
+            let arCoordinates = LocationHelper.getARCoordinates(from: currentLocation, to: CLLocation(coordinate: tripCoordinates[i]))
             print(arCoordinates.0, arCoordinates.1)
             node.position = SCNVector3(arCoordinates.0, 0, arCoordinates.1)
             #warning("Update this function to display nodes")
@@ -110,7 +110,7 @@ class ARSessionViewController: UIViewController, ARSCNViewDelegate, LocationUpda
         var current = steps.first!
         var stepsWithIntermediaries = steps
         for (index,step) in steps.enumerated() {
-            let stepPoints = LocationModel.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+            let stepPoints = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
             stepsWithIntermediaries.insert(contentsOf: stepPoints, at: index)
         }        
         tripCoordinates = stepsWithIntermediaries

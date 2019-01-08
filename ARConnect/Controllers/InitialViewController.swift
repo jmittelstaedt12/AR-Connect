@@ -8,7 +8,7 @@
 
 import UIKit
 
-class InitialViewController: UIViewController {
+final class InitialViewController: UIViewController {
 
     let logo: UIImageView = {
         let imageView = UIImageView()

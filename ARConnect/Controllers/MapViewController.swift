@@ -10,7 +10,7 @@ import UIKit
 import MapKit
 import Firebase
 
-class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
+final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
     
     var currentLocation: CLLocation?
     let currentUser = Auth.auth().currentUser
@@ -67,7 +67,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         guard let currentLocation = currentLocation else { return }
         let coordinate = CLLocationCoordinate2D(latitude: 40.68790581546788, longitude: -73.92998578213969)
         print(currentLocation.coordinate, coordinate)
-        NavigationModel.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate, handler: { result in
+        NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate, handler: { result in
             if let error = result.error {
                 self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
                 return

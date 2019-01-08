@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-struct LocationModel {
+struct LocationHelper {
     
     static func calculateCoordinates(from start: CLLocationCoordinate2D, withBearing bearing: Double, andDistance distance: Double) -> CLLocationCoordinate2D {
 //      From https://www.movable-type.co.uk/scripts/latlong.html :

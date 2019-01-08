@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class SplashViewController: UIViewController {
+final class SplashViewController: UIViewController {
 
     private let activityIndicator = UIActivityIndicatorView(style: .whiteLarge)
     

@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class LoginViewController: UIViewController, KeyboardHandler {
+final class LoginViewController: UIViewController, KeyboardHandler {
 
     var keyboardWillAnimate = true
     
@@ -119,7 +119,7 @@ class LoginViewController: UIViewController, KeyboardHandler {
     /// Request to login to database and segue into MainVC
     @objc private func logIn() {
         guard let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
-            self.createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
+            createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
         FirebaseClient.logInToDB(email: email, password: password, controller: self)

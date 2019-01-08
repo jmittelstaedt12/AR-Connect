@@ -12,7 +12,7 @@ import Firebase
 import SystemConfiguration
 import RxSwift
 
-class MainViewController: UIViewController {
+final class MainViewController: UIViewController {
     
     var currentUser : User?
     var childSearchVCTopConstraint: NSLayoutConstraint?
@@ -23,7 +23,7 @@ class MainViewController: UIViewController {
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     let mapViewController = MapViewController()
     let searchViewController = SearchTableViewController()
-    let cardDetailViewController = CellDetailViewController()
+    let cardDetailViewController = CardDetailViewController()
     
     let viewARSessionButton: ARSessionButton = {
         let btn = ARSessionButton(type: .system)
@@ -66,16 +66,11 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         currentUser = Auth.auth().currentUser!
-        #warning("uncomment this line later")
-        FirebaseClient.usersRef.child(currentUser!.uid).child("connectedTo").onDisconnectSetValue("")
-        setConnectionRequestObserver()
+        if Auth.auth().currentUser == nil { AppDelegate.shared.rootViewController.switchToLogout() }
+        else { currentUser = Auth.auth().currentUser! }
+        FirebaseClient.setOnDisconnectUpdates(withUid: currentUser!.uid)
         setObservers()
 //        navigationController?.navigationBar = JMNavigationBar()
-        FirebaseClient.fetchObservableUser(withUid: currentUser!.uid).subscribe(onNext: { (user) in
-            self.title = user.name
-        })
-        
-        
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
         
@@ -126,17 +121,11 @@ class MainViewController: UIViewController {
     }
     
     private func setObservers() {
-        // Setting connection request observer
-        FirebaseClient.displayRequestingUserObservable().subscribe(onNext: { (requestingUser) in
-            let connectRequestVC = ConnectRequestViewController()
-            connectRequestVC.requestingUser = requestingUser
-            self.present(connectRequestVC, animated: true, completion: nil)
+        
+        // Set one time connection for nav bar title
+        FirebaseClient.fetchObservableUser(withUid: currentUser!.uid).subscribe(onNext: { (user) in
+            self.title = user.name
         }).disposed(by: self.bag)
-//        FirebaseClient.createRequestingUserObservable()?.subscribe(onNext: { (requestingUser) in
-//            let connectRequestVC = ConnectRequestViewController()
-//            connectRequestVC.requestingUser = requestingUser
-//            self.present(connectRequestVC, animated: true, completion: nil)
-//        }).disposed(by: self.bag)
         
         // Setting online status observer
         FirebaseClient.createAmOnlineObservable().subscribe(onNext: { (connected) in
@@ -144,14 +133,12 @@ class MainViewController: UIViewController {
             FirebaseClient.usersRef.child(uid).updateChildValues(["isOnline": connected])
         }).disposed(by: self.bag)
         
-    }
-    private func setConnectionRequestObserver() {
-//            FirebaseClient.fetchObservableUser(withUid: uid).subscribe(onNext: { (requestingUser) in
-//                let connectRequestVC = ConnectRequestViewController()
-//                connectRequestVC.requestingUser = requestingUser
-//                self.present(connectRequestVC, animated: true, completion: nil)
-//            }).disposed(by: self.bag)
-//        }).disposed(by: bag)
+        // Setting connection request observer
+        FirebaseClient.displayRequestingUserObservable().subscribe(onNext: { (requestingUser) in
+            let connectRequestVC = ConnectRequestViewController()
+            connectRequestVC.user = requestingUser
+            self.present(connectRequestVC, animated: true, completion: nil)
+        }).disposed(by: self.bag)
     }
     
     /// Log out current user and return to login screen
@@ -169,7 +156,7 @@ class MainViewController: UIViewController {
         viewARSessionButton.isHidden = false
         endConnectSessionButton.isHidden = false
         guard let location = mapViewController.locationService.locationManager.location else{
-            self.createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
+            createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
             return
         }
         arSessionViewController = ARSessionViewController()

@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class CellDetailViewController: UIViewController {
+final class CardDetailViewController: UIViewController {
     
     @IBOutlet weak var cancelButton: UIButton!
     @IBOutlet weak var userImageView: UIImageView!
@@ -49,17 +49,16 @@ class CellDetailViewController: UIViewController {
     }
     
     @IBAction func connectToUser(_ sender: UIButton) {
-        if let userForCellUid = userForCell?.uid, let currentUid = currentUser?.uid{
+        if let userForCellUid = userForCell?.uid, let currentUid = currentUser?.uid {
             let userForCellRef = FirebaseClient.usersRef.child(userForCellUid)
             let currentUserRef = FirebaseClient.usersRef.child(currentUid)
             userForCellRef.updateChildValues(["requestingUser": currentUid])
             currentUserRef.updateChildValues(["pendingRequest" : true])
+            let connectPendingVC = ConnectPendingViewController()
+            connectPendingVC.user = userForCell
+            present(connectPendingVC, animated: true, completion: nil)
         }
-        FirebaseClient.observePending {
-            print("ended pending")
-        }
-        self.view.isHidden = true
-        
+        view.isHidden = true
     }
     
     @IBAction func messageUser(_ sender: UIButton) {

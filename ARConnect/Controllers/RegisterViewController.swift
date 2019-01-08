@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class RegisterViewController: UIViewController, KeyboardHandler {
+final class RegisterViewController: UIViewController, KeyboardHandler {
     
     var keyboardWillAnimate = true
     
@@ -181,7 +181,7 @@ class RegisterViewController: UIViewController, KeyboardHandler {
     /// Request to register user in database
     @objc private func handleRegister() {
         guard let name = nameTextField.text, !name.isEmpty, let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
-            self.createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
+            createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
         FirebaseClient.createNewUser(name: name, email: email, password: password, controller: self)

@@ -13,7 +13,7 @@ import RxSwift
 
 fileprivate struct FIRObservables {
     var usersObservable: Observable<[LocalUser]>?
-    var requestingUserObservable: Observable<String>?
+    var requestingUserUidObservable: Observable<String>?
     var pendingRequestObservable: Observable<Bool>?
     var amOnlineObservable: Observable<Bool>?
 }
@@ -87,6 +87,14 @@ struct FirebaseClient {
         return true
     }
     
+    static func setOnDisconnectUpdates(withUid uid: String) {
+        let userRef = usersRef.child(uid)
+        userRef.child("connectedTo").onDisconnectSetValue("")
+        userRef.child("isOnline").onDisconnectSetValue(false)
+        userRef.child("pendingRequest").onDisconnectSetValue(false)
+        userRef.child("requestingUser").onDisconnectSetValue("")
+    }
+    
     static func rxFirebaseSingleEvent(forRef ref: DatabaseReference, andEvent event: DataEventType) -> Observable<DataSnapshot> {
         return Observable.create { (observer) -> Disposable in
             ref.observeSingleEvent(of: event, with: { (snapshot) in
@@ -139,7 +147,7 @@ struct FirebaseClient {
                         user.name = userDictionary["name"] as? String
                         user.email = userDictionary["email"] as? String
                         return user
-                }
+                    }
                 for (i,k) in dictionary.keys.enumerated(){
                     users[i].uid = k
                 }
@@ -149,38 +157,21 @@ struct FirebaseClient {
         return observables.usersObservable!
     }
     
-    static func displayRequestingUserObservable() -> Observable<LocalUser> {
-//        you are not already in a session
-//        you do not already have a request pending from someone else
-//        you are online
-//        requesting user is online
-        let requestingUidObservable = observables.requestingUserObservable ?? createConnectionRequestUidObservable()
-        let isOnlineObservable = requestingUidObservable?.flatMap { createUserOnlineObservable(withUid: $0) }
-        let pendingObservable = observables.pendingRequestObservable ?? createPendingRequestObservable()
-        let amOnlineObservable = observables.amOnlineObservable ?? createAmOnlineObservable()
-        return Observable.combineLatest(isOnlineObservable!, pendingObservable!, amOnlineObservable) { isOnline, amPending, amOnline -> Bool in
-            return isOnline && !amPending && amOnline && Auth.auth().currentUser != nil
-            }.filter { $0 }
-            .flatMap { _ -> Observable<LocalUser> in
-                return createRequestingUserObservable()!
-            }
-    }
-    
     /// Create observable that fetches requesting user
     static func createRequestingUserObservable() -> Observable<LocalUser>? {
-        let requestingUserObservable = observables.requestingUserObservable ?? createConnectionRequestUidObservable()
+        let requestingUserObservable = observables.requestingUserUidObservable ?? createConnectionRequestUidObservable()
         return requestingUserObservable?.flatMap { fetchObservableUser(withUid: $0) }
     }
     
     /// Create observable to monitor incoming request user uid's
     static func createConnectionRequestUidObservable() -> Observable<String>? {
-        if let observable = observables.requestingUserObservable { return observable }
+        if let observable = observables.requestingUserUidObservable { return observable }
         guard let uid = Auth.auth().currentUser?.uid else { return nil }
-        observables.requestingUserObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser"), andEvent: .value)
+        observables.requestingUserUidObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser"), andEvent: .value)
             .map { $0.value as! String }
             .filter { !$0.isEmpty }
             .share()
-        return observables.requestingUserObservable
+        return observables.requestingUserUidObservable
     }
     
     /// Create observable from current pending status
@@ -207,6 +198,24 @@ struct FirebaseClient {
             .map { $0.value as! Bool }
             .share()
         return observables.amOnlineObservable!
+    }
+    
+    static func displayRequestingUserObservable() -> Observable<LocalUser> {
+        let requestingUidObservable = observables.requestingUserUidObservable ?? createConnectionRequestUidObservable() // get requesting uid
+        let isOnlineObservable = requestingUidObservable?.flatMap { createUserOnlineObservable(withUid: $0) }        // requesting user is online
+        let pendingObservable = observables.pendingRequestObservable ?? createPendingRequestObservable()             // you are not awaiting a response from someone else
+        let amOnlineObservable = observables.amOnlineObservable ?? createAmOnlineObservable()                        // you are online
+        return Observable.combineLatest(isOnlineObservable!, pendingObservable!, amOnlineObservable) { isOnline, amPending, amOnline -> Bool in
+            return isOnline && !amPending && amOnline && Auth.auth().currentUser != nil
+            }.filter { $0 }
+            .flatMap { _ -> Observable<LocalUser> in
+                return createRequestingUserObservable()!
+        }
+    }
+    
+    static func createCalledUserResponseObservable() {
+        #warning("Create user response observable")
+        return
     }
     
     /// Check for connection initialized
@@ -247,18 +256,4 @@ struct FirebaseClient {
         }
         observedReferences.append(userRef)
     }
-//    static func checkOnline(handler: @escaping ((Bool) -> Void)) {
-//        let connectedRef = Database.database().reference(withPath: ".info/connected")
-//        connectedRef.observe(.value) { (snapshot) in
-//            guard let uid = Auth.auth().currentUser?.uid else { return }
-//            let connected = snapshot.value as? Bool ?? false
-//            if connected {
-//                usersRef.child(uid).updateChildValues(["isOnline" : true])
-//            }else {
-//                usersRef.child(uid).updateChildValues(["isOnline" : false])
-//            }
-//            handler(connected)
-//        }
-//        observedReferences.append(connectedRef)
-//    }
 }

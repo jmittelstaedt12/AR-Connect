@@ -17,7 +17,7 @@ protocol SearchTableViewControllerDelegate: class {
     func setChildUserDetailVCVisible(withUser user: LocalUser)
 }
 
-class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
+final class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
     
     weak var delegate: SearchTableViewControllerDelegate!
     var users: [LocalUser]?

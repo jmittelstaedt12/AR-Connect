@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MessageViewController: UIViewController {
+final class MessageViewController: UIViewController {
 
     var user: LocalUser!
     override func viewDidLoad() {

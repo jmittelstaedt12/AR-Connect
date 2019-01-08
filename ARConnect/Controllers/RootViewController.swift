@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class RootViewController: UIViewController {
+final class RootViewController: UIViewController {
 
     private var current: UIViewController
     
@@ -91,7 +91,20 @@ extension UIViewController {
     func createAndDisplayAlert(withTitle title: String, body: String) {
         let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+        alert.show()
+//        self.present(alert, animated: true, completion: nil)
+    }
+}
+
+public extension UIAlertController {
+    func show() {
+        let win = UIWindow(frame: UIScreen.main.bounds)
+        let vc = UIViewController()
+        vc.view.backgroundColor = .clear
+        win.rootViewController = vc
+        win.windowLevel = UIWindow.Level.alert + 1
+        win.makeKeyAndVisible()
+        vc.present(self, animated: true, completion: nil)
     }
 }
 
