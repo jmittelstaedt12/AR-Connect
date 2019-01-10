@@ -9,4 +9,4 @@ Features:
 * MapKit
 * Coordinate to AR scene conversions
 
-*Currently in development*
+*Currently in development.. stay tuned for updates!*
