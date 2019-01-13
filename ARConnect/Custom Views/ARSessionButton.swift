@@ -27,5 +27,9 @@ class ARSessionButton: UIButton {
         translatesAutoresizingMaskIntoConstraints = false
         isHidden = true
     }
+    
+    deinit {
+        print("AR Session button deinit")
+    }
 
 }

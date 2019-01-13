@@ -8,6 +8,11 @@
 
 import UIKit
 import Firebase
+import RxSwift
+
+protocol CardDetailDelegate: class {
+    func subscribeToCallUserObservable(forUser user: LocalUser)
+}
 
 final class CardDetailViewController: UIViewController {
     
@@ -17,9 +22,12 @@ final class CardDetailViewController: UIViewController {
     @IBOutlet weak var messageButton: UIButton!
     @IBOutlet weak var connectButton: UIButton!
     
-    let currentUser = Auth.auth().currentUser
+    weak var delegate: CardDetailDelegate!
     
-    var userForCell: LocalUser? {
+    let currentUser = Auth.auth().currentUser
+    let bag = DisposeBag()
+    
+    var userForCell: LocalUser! {
         didSet {
             nameLabel.text = userForCell?.name
         }
@@ -35,30 +43,26 @@ final class CardDetailViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
         view.layer.cornerRadius = 5
-        view.isHidden = true
     }
 
-    func setupUIElements() {
+    private func setupUIElements() {
         cancelButton.setTitle("Cancel", for: .normal)
         messageButton.setTitle("Message", for: .normal)
         connectButton.setTitle("Connect", for: .normal)
     }
     
     @IBAction func onCancel(_ sender: UIButton) {
-        view.isHidden = true
+        willMove(toParent: nil)
+        view.removeFromSuperview()
+        removeFromParent()
     }
     
     @IBAction func connectToUser(_ sender: UIButton) {
-        if let userForCellUid = userForCell?.uid, let currentUid = currentUser?.uid {
-            let userForCellRef = FirebaseClient.usersRef.child(userForCellUid)
-            let currentUserRef = FirebaseClient.usersRef.child(currentUid)
-            userForCellRef.updateChildValues(["requestingUser": currentUid])
-            currentUserRef.updateChildValues(["pendingRequest" : true])
-            let connectPendingVC = ConnectPendingViewController()
-            connectPendingVC.user = userForCell
-            present(connectPendingVC, animated: true, completion: nil)
-        }
-        view.isHidden = true
+        delegate.subscribeToCallUserObservable(forUser: userForCell)
+        willMove(toParent: nil)
+        view.removeFromSuperview()
+        removeFromParent()
+        
     }
     
     @IBAction func messageUser(_ sender: UIButton) {

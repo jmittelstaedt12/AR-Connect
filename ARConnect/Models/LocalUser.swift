@@ -9,7 +9,7 @@
 import UIKit
 
 class LocalUser: NSObject{
-//    var profileImage: UIImage?
+    var profileImage: UIImage?
     var name: String?
     var email: String?
     var uid: String?

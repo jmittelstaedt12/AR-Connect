@@ -17,14 +17,14 @@ protocol SearchTableViewControllerDelegate: class {
     func setChildUserDetailVCVisible(withUser user: LocalUser)
 }
 
-final class SearchTableViewController: UIViewController, UIGestureRecognizerDelegate {
+final class SearchTableViewController: UIViewController {
     
     weak var delegate: SearchTableViewControllerDelegate!
     var users: [LocalUser]?
+    var panGestureRecognizer: UIPanGestureRecognizer?
     
     let bag = DisposeBag()
-    let cellId = "cellId"
-
+    
     let drawerIconView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.gray
@@ -45,19 +45,22 @@ final class SearchTableViewController: UIViewController, UIGestureRecognizerDele
     
     let tableView: UITableView = {
         let tb = UITableView()
+        tb.rowHeight = 63.5
         tb.translatesAutoresizingMaskIntoConstraints = false
         tb.alwaysBounceVertical = false
         return tb
     }()
     
+    enum ExpansionState: CGFloat {
+        case expanded
+        case compressed
+    }
+    private var shouldHandleGesture: Bool = true
+    var expansionState = ExpansionState.compressed
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-//        FirebaseClient.fetchUsers(handler: { fetchedUsers in
-//            self.users = fetchedUsers
-//            self.tableView.reloadData()
-//        })
-        
         FirebaseClient.fetchObservableUsers().subscribe(onNext: { (fetchedUsers) in
             self.users = fetchedUsers
             self.tableView.reloadData()
@@ -70,7 +73,7 @@ final class SearchTableViewController: UIViewController, UIGestureRecognizerDele
         view.addSubview(searchUsersTextField)
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
+        tableView.register(UINib(nibName: "UserTableViewCell", bundle: nil), forCellReuseIdentifier: "userCell")
         view.addSubview(tableView)
         setupPanGestureRecognizer()
         setupViews()
@@ -86,14 +89,16 @@ final class SearchTableViewController: UIViewController, UIGestureRecognizerDele
     
     /// Configure pan gesture recognizer for use in MainViewController
     private func setupPanGestureRecognizer(){
-        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(onSearchViewControllerPan(sender:)))
-        panGestureRecognizer.cancelsTouchesInView = false
-        panGestureRecognizer.delegate = self
-        self.view.addGestureRecognizer(panGestureRecognizer)
+        let panGR = UIPanGestureRecognizer(target: self, action: #selector(onSearchViewControllerPan(sender:)))
+        panGR.cancelsTouchesInView = false
+        panGR.delegate = self
+        self.panGestureRecognizer = panGR
+        view.addGestureRecognizer(panGestureRecognizer!)
     }
     
     /// Run on child instance of SearchViewController pan gesture
     @objc private func onSearchViewControllerPan(sender: UIPanGestureRecognizer) {
+        guard shouldHandleGesture else { return }
         let translationPoint = sender.translation(in: view.superview)
         let velocity = sender.velocity(in: view.superview)
         switch sender.state {
@@ -134,35 +139,55 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
-        guard let user = users?[indexPath.row] else{
+        let cell = tableView.dequeueReusableCell(withIdentifier: "userCell", for: indexPath) as! UserTableViewCell
+        guard let user = users?[indexPath.row] else {
             return cell
         }
-        cell.textLabel?.text = user.name
-        cell.detailTextLabel?.text = user.email
+        cell.selectionStyle = .none
+        cell.profileImageView!.image = user.profileImage ?? nil
+        cell.nameLabel.text = user.name
+        cell.usernameLabel.text = user.email
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let cell = tableView.cellForRow(at: indexPath), let email = cell.detailTextLabel, let user = users?.first(where: {$0.email == email.text}) else{
-            return;
-        }
+        guard let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell, let email = cell.usernameLabel, let user = users?.first(where: {$0.email == email.text}) else { return }
         cell.isSelected = false
         delegate.setChildUserDetailVCVisible(withUser: user)
+    }
+}
+
+extension SearchTableViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer else { return true }
+        let velocity = panGestureRecognizer.velocity(in: view.superview)
+        tableView.panGestureRecognizer.isEnabled = true
+        if otherGestureRecognizer == tableView.panGestureRecognizer {
+            switch expansionState {
+            case .compressed:
+                return false
+            case .expanded:
+                if velocity.y > 0.0 {
+                    if tableView.contentOffset.y > 0.0 {
+                        shouldHandleGesture = false
+                        return true
+                    }
+                    shouldHandleGesture = true
+                    tableView.panGestureRecognizer.isEnabled = false
+                    return false
+                } else {
+                    shouldHandleGesture = false
+                    return true
+                }
+            }
+        }
+        return false
     }
 }
 
 extension SearchTableViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
-    }
-}
-
-extension SearchTableViewController: UIScrollViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView.contentOffset.y <= 0 {
-            onSearchViewControllerPan(sender: scrollView.panGestureRecognizer)
-        }
     }
 }
 

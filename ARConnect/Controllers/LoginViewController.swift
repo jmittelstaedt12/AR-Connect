@@ -10,8 +10,9 @@ import UIKit
 import Firebase
 
 final class LoginViewController: UIViewController, KeyboardHandler {
-
-    var keyboardWillAnimate = true
+    
+    var keyboardWillShow = true
+    var keyboardWillHide = false
     
     let arConnectLabel: UILabel = {
         let lbl = UILabel()
@@ -95,31 +96,27 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         // set x, y, width, and height constraints for arConnectLabel
         arConnectLabel.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 100, left: 32, bottom: 0, right: -32))
         arConnectLabel.dimensionAnchors(height: 40)
+        
         emailTextField.edgeAnchors(top: arConnectLabel.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 60, left: 16, bottom: 0, right: -16))
         emailTextField.dimensionAnchors(height: 40)
+        
         passwordTextField.edgeAnchors(top: emailTextField.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 16, left: 16, bottom: 0, right: -16))
         passwordTextField.dimensionAnchors(height: 40)
+        
         logInButton.edgeAnchors(top: passwordTextField.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
         logInButton.dimensionAnchors(height: 40, width: view.frame.width, widthMultiplier: 1/3)
         logInButton.centerAnchors(centerX: view.centerXAnchor)
+        
         signUpButton.edgeAnchors(top: logInButton.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
         signUpButton.dimensionAnchors(height: 40, width: view.frame.width, widthMultiplier: 1/3)
         signUpButton.centerAnchors(centerX: view.centerXAnchor)
     }
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        logInButton.isEnabled = false
-        signUpButton.isEnabled = false
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        logInButton.isEnabled = true
-        signUpButton.isEnabled = true
-    }
     /// Request to login to database and segue into MainVC
     @objc private func logIn() {
         guard let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
             createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
+            
             return
         }
         FirebaseClient.logInToDB(email: email, password: password, controller: self)
@@ -132,40 +129,42 @@ final class LoginViewController: UIViewController, KeyboardHandler {
 
 
 protocol KeyboardHandler: class {
-    var keyboardWillAnimate: Bool { get set }
+    var keyboardWillShow: Bool { get set }
+    var keyboardWillHide: Bool { get set }
     func startObservingKeyboardChanges()
     func keyboardWillShow(notification: Notification)
     func keyboardWillHide(notification: Notification)
 }
 
 extension KeyboardHandler where Self: UIViewController{
-    
+
     /// Add observers for keyboardWillShow and keyboardWillHide
     func startObservingKeyboardChanges() {
-//        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) { (notification) in
-//            self.keyboardWillShow(notification: notification)
-//        }
-//        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) { (notification) in
-//            self.keyboardWillHide(notification: notification)
-//        }
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) { (notification) in
+            self.keyboardWillShow(notification: notification)
+        }
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) { (notification) in
+            self.keyboardWillHide(notification: notification)
+        }
     }
-    
+
     /// When keyboard appears, animate view upwards
     func keyboardWillShow(notification: Notification) {
-        guard keyboardWillAnimate, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
-
+        guard keyboardWillShow, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
         UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
             self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y-100, width: self.view.bounds.width, height: self.view.bounds.height)
         }, completion: nil)
-        keyboardWillAnimate = false
+        keyboardWillShow = false
+        keyboardWillHide = true
     }
-    
+
     /// When keyboard hides, animate view downwards
     func keyboardWillHide(notification: Notification){
-        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
+        guard keyboardWillHide, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
         UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
             self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y+100, width: self.view.bounds.width, height: self.view.bounds.height)
         }, completion: nil)
-        keyboardWillAnimate = true
+        keyboardWillHide = false
+        keyboardWillShow = true
     }
 }

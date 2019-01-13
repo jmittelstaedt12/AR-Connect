@@ -9,9 +9,7 @@
 import UIKit
 import Firebase
 
-final class RegisterViewController: UIViewController, KeyboardHandler {
-    
-    var keyboardWillAnimate = true
+final class RegisterViewController: UIViewController {
     
     let cancelButton: UIButton = {
         let btn = UIButton()
@@ -93,8 +91,6 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         nameTextField.delegate = self
         emailTextField.delegate = self
         passwordTextField.delegate = self
-        
-        startObservingKeyboardChanges()
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -131,8 +127,7 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         inputsContainerView.addSubview(emailSeparatorView)
         
         // Set constraints for input container view subviews
-        nameTextField.leadingAnchor.constraint(equalTo: inputsContainerView.leadingAnchor, constant: 12).isActive = true
-        nameTextField.topAnchor.constraint(equalTo: inputsContainerView.topAnchor).isActive = true
+        nameTextField.edgeAnchors(top: inputsContainerView.topAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
         nameTextField.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor, constant: -12).isActive = true
         nameTextField.heightAnchor.constraint(equalTo: inputsContainerView.heightAnchor, multiplier: 1/3).isActive = true
         
@@ -185,6 +180,20 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
             return
         }
         FirebaseClient.createNewUser(name: name, email: email, password: password, controller: self)
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        UIView.animate(withDuration: 0.26) {
+            self.view.frame.origin.y -= 100
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        UIView.animate(withDuration: 0.26) {
+            self.view.frame.origin.y += 100
+            self.view.layoutIfNeeded()
+        }
     }
 }
 

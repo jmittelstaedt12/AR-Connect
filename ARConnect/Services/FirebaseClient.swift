@@ -14,7 +14,7 @@ import RxSwift
 fileprivate struct FIRObservables {
     var usersObservable: Observable<[LocalUser]>?
     var requestingUserUidObservable: Observable<String>?
-    var pendingRequestObservable: Observable<Bool>?
+    var requestIsPendingObservable: Observable<Bool>?
     var amOnlineObservable: Observable<Bool>?
 }
 
@@ -25,6 +25,21 @@ struct FirebaseClient {
     static let usersRef = Database.database().reference().child("Users")
     static var observedReferences = [DatabaseReference]()
     
+    enum UserUnavailableError: LocalizedError {
+        case isOffline
+        case unavailable
+        case amOffline
+        public var errorDescription: String? {
+            switch self {
+            case .isOffline:
+                return NSLocalizedString("User is offline", comment: "")
+            case .unavailable:
+                return NSLocalizedString("User is unavailable", comment: "")
+            case .amOffline:
+                return NSLocalizedString("You are offline", comment: "")
+            }
+        }
+    }
     
     /// Request to authorize a new user and add them to database
     static func createNewUser(name: String, email: String,password: String, controller: UIViewController) {
@@ -73,18 +88,21 @@ struct FirebaseClient {
     }
     
     /// Log out current user and return to login screen
-    static func logoutOfDB(controller: UIViewController) -> Bool {
+    static func logoutOfDB() throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
         for ref in observedReferences {
             ref.removeAllObservers()
         }
-        do{
+        do {
             try Auth.auth().signOut()
-        }catch let logoutError {
-            print(logoutError)
-            controller.createAndDisplayAlert(withTitle: "Log out error", body: logoutError.localizedDescription)
-            return false
+            observables = FIRObservables()
+            usersRef.child(uid).updateChildValues(["connectedTo" : "",
+                                                   "isOnline" : false,
+                                                   "pendingRequest" : false,
+                                                   "requestingUser" : ""])
+        } catch let logoutError {
+            throw logoutError
         }
-        return true
     }
     
     static func setOnDisconnectUpdates(withUid uid: String) {
@@ -153,68 +171,107 @@ struct FirebaseClient {
                 }
                 return users
             }
-            .share()
         return observables.usersObservable!
     }
     
     /// Create observable that fetches requesting user
     static func createRequestingUserObservable() -> Observable<LocalUser>? {
-        let requestingUserObservable = observables.requestingUserUidObservable ?? createConnectionRequestUidObservable()
+        let requestingUserObservable = observables.requestingUserUidObservable ?? createRequestingUserUidObservable()
         return requestingUserObservable?.flatMap { fetchObservableUser(withUid: $0) }
     }
     
     /// Create observable to monitor incoming request user uid's
-    static func createConnectionRequestUidObservable() -> Observable<String>? {
+    static func createRequestingUserUidObservable() -> Observable<String>? {
         if let observable = observables.requestingUserUidObservable { return observable }
         guard let uid = Auth.auth().currentUser?.uid else { return nil }
         observables.requestingUserUidObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser"), andEvent: .value)
             .map { $0.value as! String }
             .filter { !$0.isEmpty }
-            .share()
         return observables.requestingUserUidObservable
     }
     
     /// Create observable from current pending status
-    static func createPendingRequestObservable() -> Observable<Bool>? {
-        if let observable = observables.pendingRequestObservable { return observable }
+    static func createRequestIsPendingObservable() -> Observable<Bool>? {
+        if let observable = observables.requestIsPendingObservable { return observable }
         guard let uid = Auth.auth().currentUser?.uid else { return nil }
-        observables.pendingRequestObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("pendingRequest"), andEvent: .value)
+        observables.requestIsPendingObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("pendingRequest"), andEvent: .value)
             .map { $0.value as! Bool }
-            .share()
-        return observables.pendingRequestObservable
+        return observables.requestIsPendingObservable
     }
     
-    /// Create single event observable for user with uid
+    /// Create single event observable for user online with uid
     static func createUserOnlineObservable(withUid uid: String) -> Observable<Bool> {
         return rxFirebaseSingleEvent(forRef: usersRef.child(uid).child("isOnline"), andEvent: .value)
             .filter { $0.value is Bool }
             .map { $0.value as! Bool }
     }
     
-    /// Create obserable for if you are currently online
+    /// Create obserable to monitor if you are currently online
     static func createAmOnlineObservable() -> Observable<Bool> {
         if let observable = observables.amOnlineObservable { return observable }
         observables.amOnlineObservable = rxFirebaseListener(forRef: Database.database().reference(withPath: ".info/connected"), andEvent: .value)
+            .filter { $0.value is Bool }
             .map { $0.value as! Bool }
-            .share()
         return observables.amOnlineObservable!
     }
     
-    static func displayRequestingUserObservable() -> Observable<LocalUser> {
-        let requestingUidObservable = observables.requestingUserUidObservable ?? createConnectionRequestUidObservable() // get requesting uid
-        let isOnlineObservable = requestingUidObservable?.flatMap { createUserOnlineObservable(withUid: $0) }        // requesting user is online
-        let pendingObservable = observables.pendingRequestObservable ?? createPendingRequestObservable()             // you are not awaiting a response from someone else
+    /// Create observable to check if user is available to connect
+    static func createUserAvailableObservable(withUid uid: String) -> Observable<Bool> {
+        let isOnlineObservable = createUserOnlineObservable(withUid: uid)
+        let notInSessionObservable = rxFirebaseSingleEvent(forRef: usersRef.child(uid).child("connectedTo"), andEvent: .value)
+            .filter { $0.value is String }
+            .map {$0.value as! String }
+            .map { $0.isEmpty }
+        
+        let isPendingObservable = rxFirebaseSingleEvent(forRef: usersRef.child(uid).child("pendingRequest"), andEvent: .value)
+            .filter { $0.value is Bool }
+            .map { $0.value as! Bool }
+        
+        return Observable.combineLatest(isOnlineObservable, notInSessionObservable, isPendingObservable) {
+            if !$0 { throw UserUnavailableError.isOffline }
+            if !$1 || $2 { throw UserUnavailableError.unavailable }
+            return $0 && $1 && !$2
+        }
+    }
+    
+    static func createCallUserObservable(withUid uid: String) -> Observable<Bool> {
+        let isAvailableObservable = createUserAvailableObservable(withUid: uid)
+        let amOnlineObservable  = createAmOnlineObservable()
+        return Observable.combineLatest(isAvailableObservable, amOnlineObservable) {
+            if !$1 { throw UserUnavailableError.amOffline }
+            return $0 && $1
+        }
+    }
+    
+    static func willDisplayRequestingUserObservable() -> Observable<LocalUser> {
+        let requestingUidObservable = observables.requestingUserUidObservable ?? createRequestingUserUidObservable() // get requesting uid
+        let isOnlineObservable = requestingUidObservable?.flatMap { createUserOnlineObservable(withUid: $0) }        // requesting user is available
+        let pendingObservable = observables.requestIsPendingObservable ?? createRequestIsPendingObservable()             // you are not awaiting a response from someone else
         let amOnlineObservable = observables.amOnlineObservable ?? createAmOnlineObservable()                        // you are online
         return Observable.combineLatest(isOnlineObservable!, pendingObservable!, amOnlineObservable) { isOnline, amPending, amOnline -> Bool in
             return isOnline && !amPending && amOnline && Auth.auth().currentUser != nil
             }.filter { $0 }
             .flatMap { _ -> Observable<LocalUser> in
                 return createRequestingUserObservable()!
-        }
+            }
     }
+    
     
     static func createCalledUserResponseObservable() {
         #warning("Create user response observable")
+        
+        // well we need to be subscribed to a response from the user
+        // we can only observe them or ourselves
+        // lets evaluate both approaches
+        // observe the requested user:
+        // success: requesting user field becomes blank and connectedTo is populated with our uid
+        // failure: requesting user field becomes blank
+        // obersve ourselves
+        // success: pending becomes false and connectedTo is populated with their uid
+        // failure: pending becomes false
+        
+        // So as host, we could flatMap requesting user field -> connectedTo
+        
         return
     }
     
