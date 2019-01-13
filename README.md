@@ -1,6 +1,13 @@
 # AR-Connect
 
-AR-Connect is an iOS application for meeting up with friends. It uses the
-ARKit framework to display your friend's location in your iOS device's camera display.
+AR-Connect is an iOS application for helping users find their friends in augmented reality.
 
-Currently in development.. *stay tuned for updates!*
+Features:
+* ARKit
+* Firebase
+* RxSwift
+* Core Location
+* MapKit
+* Coordinate to AR scene conversions
+
+*Currently in development.. stay tuned for updates!*
