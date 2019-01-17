@@ -23,6 +23,7 @@ final class ConnectRequestViewController: ConnectViewController {
         super.viewDidLoad()
         view.addSubview(acceptButton)
         setViewLayouts()
+        setObservers()
     }
     
     override func setViewLayouts() {
@@ -45,13 +46,22 @@ final class ConnectRequestViewController: ConnectViewController {
         cancelButton.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
     }
     
+    private func setObservers() {
+        FirebaseClient.createCallDroppedObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] isPending in
+            guard let self = self, let uid = Auth.auth().currentUser?.uid else { return }
+            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
+            self.createAndDisplayAlert(withTitle: "Call Dropped", body: "Ending call")
+            self.dismiss(animated: true, completion: nil)
+        }).disposed(by: bag)
+    }
+    
     override func handleResponse(sender: UIButton) {
         guard let requestUid = user.uid, let uid = Auth.auth().currentUser?.uid else {
             self.dismiss(animated: true, completion: nil)
             return
         }
         if sender.title(for: .normal) == "Confirm" {
-            FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid,"requestingUser" : ""])
+            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : "", "connectedTo" : requestUid])
             FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid]) { (error, ref) in
                 if let err = error {
                     print(err.localizedDescription)
@@ -69,7 +79,6 @@ final class ConnectRequestViewController: ConnectViewController {
         } else {            
             FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
         }
-        FirebaseClient.usersRef.child(requestUid).updateChildValues(["pendingRequest" : false])
         self.dismiss(animated: true, completion: nil)
     }
 

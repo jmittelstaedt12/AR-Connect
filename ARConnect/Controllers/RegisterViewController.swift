@@ -19,9 +19,11 @@ final class RegisterViewController: UIViewController {
         return btn
     }()
     
-    let profileImageView: UIImageView = {
+    lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.backgroundColor = .gray
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onImageViewTap)))
+        imageView.isUserInteractionEnabled = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -169,6 +171,13 @@ final class RegisterViewController: UIViewController {
         return view
     }
     
+    @objc private func onImageViewTap() {
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true, completion: nil)
+    }
+    
     @objc private func onCancel() {
         self.dismiss(animated: true, completion: nil)
     }
@@ -179,7 +188,16 @@ final class RegisterViewController: UIViewController {
             createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
-        FirebaseClient.createNewUser(name: name, email: email, password: password, controller: self)
+        let image = profileImageView.image?.pngData()
+        do {
+            try FirebaseClient.createNewUser(name: name, email: email, password: password, pngData: image, handler: { [weak self] in
+                self?.dismiss(animated: true, completion: nil)
+                AppDelegate.shared.rootViewController.switchToMainScreen()
+            })
+        }
+        catch let error {
+            createAndDisplayAlert(withTitle: "Error Creating New User", body: error.localizedDescription)
+        }
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -195,6 +213,20 @@ final class RegisterViewController: UIViewController {
             self.view.layoutIfNeeded()
         }
     }
+}
+
+extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let image = info[UIImagePickerController.InfoKey.init(rawValue: "UIImagePickerControllerEditedImage")] as? UIImage { profileImageView.image = image }
+        else if let image = info[UIImagePickerController.InfoKey.init(rawValue: "UIImagePickerControllerOriginalImage")] as? UIImage { profileImageView.image = image }
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
 }
 
 extension UIColor {

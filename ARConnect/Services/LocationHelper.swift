@@ -8,6 +8,8 @@
 
 import UIKit
 import MapKit
+import simd
+import ARKit
 
 struct LocationHelper {
     
@@ -22,10 +24,10 @@ struct LocationHelper {
         return CLLocationCoordinate2D(latitude: lat2.toDegrees(), longitude: lon2.toDegrees())
     }
     
-    static func createIntermediaryCoordinates(from start: CLLocationCoordinate2D,to end: CLLocationCoordinate2D, withInterval interval: Double) -> [CLLocationCoordinate2D] {
+    static func createIntermediaryCoordinates(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D, withInterval interval: Double) -> [CLLocationCoordinate2D] {
         let bearing = calculateBearing(from: start, to: end)
         let totalDistance = Double(CLLocation(coordinate: start).distance(from: CLLocation(coordinate: end)))
-        let points = Array(stride(from: interval, to: totalDistance, by: interval)).map { calculateCoordinates(from: start, withBearing: bearing, andDistance: $0) }
+        let points = [start] + Array(stride(from: interval, to: totalDistance-interval, by: interval)).map { calculateCoordinates(from: start, withBearing: bearing, andDistance: $0) }
         return points
     }
     
@@ -43,11 +45,9 @@ struct LocationHelper {
     }
     
     /// Do polar coordinate conversion to cartesian coordinates for ARKit grid system
-    static func getARCoordinates(from current: CLLocation,to target: CLLocation) -> (Double, Double) {
-        #warning("why is this returning a tuple and not coordinates?")
-        let bearing = calculateBearing(from: current.coordinate, to: target.coordinate)
-        let distance = current.distance(from: target)
-        return (distance*cos(bearing),distance*sin(bearing))
+    static func getARCoordinates(from current: CLLocation,to target: CLLocation) -> SCNVector3 {
+        let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: current, location: target)
+        return SCNVector3(x: transform.columns.3.x, y: transform.columns.3.y, z: transform.columns.3.z)
     }
 }
 

@@ -7,9 +7,11 @@
 //
 
 import UIKit
+import RxSwift
 
 class ConnectViewController: UIViewController {
     
+    let bag = DisposeBag()
     var user: LocalUser! {
         willSet {
             if let name = newValue?.name {

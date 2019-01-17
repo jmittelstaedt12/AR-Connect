@@ -61,7 +61,7 @@ final class MainViewController: UIViewController {
         currentUser = Auth.auth().currentUser!
         if Auth.auth().currentUser == nil { AppDelegate.shared.rootViewController.switchToLogout() }
         else { currentUser = Auth.auth().currentUser! }
-        FirebaseClient.setOnDisconnectUpdates(withUid: currentUser!.uid)
+        FirebaseClient.setOnDisconnectUpdates(forUid: currentUser!.uid)
         setObservers()
 //        navigationController?.navigationBar = JMNavigationBar()
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
@@ -103,21 +103,21 @@ final class MainViewController: UIViewController {
     private func setObservers() {
         
         // Set one time connection for nav bar title
-        FirebaseClient.fetchObservableUser(withUid: currentUser!.uid).subscribe(onNext: { (user) in
-            self.title = user.name
+        FirebaseClient.fetchObservableUser(forUid: currentUser!.uid).subscribe(onNext: { [weak self] user in
+            self?.title = user.name
         }).disposed(by: self.bag)
         
         // Setting online status observer
-        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { (connected) in
-            guard let uid = self.currentUser?.uid else { return }
+        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] connected in
+            guard let uid = self?.currentUser?.uid else { return }
             FirebaseClient.usersRef.child(uid).updateChildValues(["isOnline": connected])
         }).disposed(by: self.bag)
         
         // Setting connection request observer
-        FirebaseClient.willDisplayRequestingUserObservable().subscribe(onNext: { (requestingUser) in
+        FirebaseClient.willDisplayRequestingUserObservable()?.subscribe(onNext: { [weak self] requestingUser in
             let connectRequestVC = ConnectRequestViewController()
             connectRequestVC.user = requestingUser
-            self.present(connectRequestVC, animated: true, completion: nil)
+            self?.present(connectRequestVC, animated: true, completion: nil)
         }).disposed(by: self.bag)
     }
     
@@ -134,6 +134,9 @@ final class MainViewController: UIViewController {
     
     /// When connect to user, transition into AR Session state
     @objc private func handleSessionStart(notification: NSNotification) {
+        searchViewController?.willMove(toParent: nil)
+        searchViewController?.view.removeFromSuperview()
+        searchViewController?.removeFromParent()
         searchViewController = nil
         viewARSessionButton = ARSessionButton(type: .system)
         endConnectSessionButton = ARSessionButton(type: .system)
@@ -157,6 +160,7 @@ final class MainViewController: UIViewController {
         arSessionViewController = ARSessionViewController()
         arSessionViewController!.startLocation = location
         arSessionViewController!.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.00001, longitude: location.coordinate.longitude+0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
+        
         arSessionViewController!.currentLocation = location
         arSessionViewController!.tripCoordinates = mapViewController.tripCoordinates
         mapViewController.delegate = arSessionViewController
@@ -277,15 +281,15 @@ extension MainViewController: SearchTableViewControllerDelegate {
 
 extension MainViewController: CardDetailDelegate {
     func subscribeToCallUserObservable(forUser user: LocalUser) {
-        FirebaseClient.createCallUserObservable(withUid: user.uid!).subscribe(onNext: { (canComplete) in
+        FirebaseClient.createCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
             if canComplete {
                 FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest" : true])
                 FirebaseClient.usersRef.child(user.uid!).updateChildValues(["requestingUser" : Auth.auth().currentUser!.uid])
                 let connectPendingVC = ConnectPendingViewController()
                 connectPendingVC.user = user
-                self.present(connectPendingVC, animated: true, completion: nil)
+                self?.present(connectPendingVC, animated: true, completion: nil)
             } else {
-                self.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
+                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
             }
         }, onError: { (error) in
             self.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)

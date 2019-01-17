@@ -61,11 +61,11 @@ final class SearchTableViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        FirebaseClient.fetchObservableUsers().subscribe(onNext: { (fetchedUsers) in
-            self.users = fetchedUsers
-            self.tableView.reloadData()
-        }, onError: { (error) in
-            self.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+        FirebaseClient.fetchObservableUsers().subscribe(onNext: { [weak self] fetchedUsers in
+            self?.users = fetchedUsers
+            self?.tableView.reloadData()
+        }, onError: { [weak self] error in
+            self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
         }).disposed(by: bag)
         
         view.addSubview(drawerIconView)

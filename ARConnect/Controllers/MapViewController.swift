@@ -47,40 +47,35 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     }
     
     @objc private func setupMapForConnection(notification: NSNotification) {
-        #warning("UNCOMMENT CODE AND DELETE COORDINATE IN FINAL BUILD")
-//        guard let userInfo = notification.userInfo else {
-//            print("No user attached")
-//            return
-//        }
-//        let user = userInfo["user"] as! LocalUser
-//        let user = userInfo["user"] as! LocalUser
-//        FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> (Void) in
-//            guard let lat = latitude, let lon = longitude else {
-//                print("coordinates not available")
-//                return
-//            }
-//            let annotation = MKPointAnnotation()
-//            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-//            annotation.coordinate = coordinate
-//            self.map.addAnnotation(annotation)
-//        }
         guard let currentLocation = currentLocation else { return }
-        let coordinate = CLLocationCoordinate2D(latitude: 40.68790581546788, longitude: -73.92998578213969)
-        print(currentLocation.coordinate, coordinate)
-        NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate, handler: { result in
-            if let error = result.error {
-                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+        guard let userInfo = notification.userInfo else {
+            print("No user attached")
+            return
+        }
+        let user = userInfo["user"] as! LocalUser
+        FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> (Void) in
+            guard let lat = latitude, let lon = longitude else {
+                print("coordinates not available")
                 return
             }
-            guard let line = result.line, let steps = result.steps else {
-                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
-                return
-            }
-            self.draw(polyline: line)
-            self.tripCoordinates.append(contentsOf: steps.map { $0.polyline.coordinate })
-            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-            
-        })
+            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            print(currentLocation.coordinate, coordinate)
+            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate, handler: { result in
+                if let error = result.error {
+                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+                    return
+                }
+                guard let line = result.line, let steps = result.steps else {
+                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
+                    return
+                }
+                self.draw(polyline: line)
+                self.tripCoordinates.append(contentsOf: steps.map { $0.polyline.coordinate })
+                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+                
+            })
+        }
+//        let coordinate = CLLocationCoordinate2D(latitude: 40.68790581546788, longitude: -73.92998578213969)
     }
     
     func draw(polyline line: MKPolyline) {

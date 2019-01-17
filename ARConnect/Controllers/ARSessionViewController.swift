@@ -42,8 +42,6 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
         
         sceneView.delegate = self
         sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin]
-        
-//        addTargetNode()
         createNodes()
     }
     
@@ -71,34 +69,30 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
         dismissButton.dimensionAnchors(height: 30, width: 60)
     }
     
-    /// Place node in current AR Session at target location
-    private func addTargetNode() {
-        let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
-        node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-        let arCoordinates = LocationHelper.getARCoordinates(from: currentLocation, to: targetLocation)
-        node.position = SCNVector3(arCoordinates.0, 0, -arCoordinates.1)
-        sceneView.scene.rootNode.addChildNode(node)
-    }
+//    /// Place node in current AR Session at target location
+//    private func addTargetNode() {
+//        let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
+//        node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+//        let arCoordinates = LocationHelper.getARCoordinates(from: currentLocation, to: targetLocation)
+//        node.position = SCNVector3(arCoordinates.latitude, 0, -arCoordinates.longitude)
+//        sceneView.scene.rootNode.addChildNode(node)
+//    }
     
     
     private func createNodes() {
         if tripCoordinates.count < 10 { return }
-        for i in 0..<10 {
+        for i in 0..<tripCoordinates.count {
+            if i > 1 {
+                print(CLLocation(coordinate: tripCoordinates[i]).distance(from: CLLocation(coordinate: tripCoordinates[i-1])))
+            }
             let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
             node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-            let arCoordinates = LocationHelper.getARCoordinates(from: currentLocation, to: CLLocation(coordinate: tripCoordinates[i]))
-            print(arCoordinates.0, arCoordinates.1)
-            node.position = SCNVector3(arCoordinates.0, 0, arCoordinates.1)
-            #warning("Update this function to display nodes")
-//            sceneView.scene.rootNode.addChildNode(node)
+            let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: currentLocation, location: CLLocation(coordinate: tripCoordinates[i]))
+            node.position = SCNVector3(x: transform.columns.3.x, y: transform.columns.3.y, z: transform.columns.3.z)
+            let anchor = ARAnchor(transform: transform)
+            sceneView.session.add(anchor: anchor)
+            sceneView.scene.rootNode.addChildNode(node)
         }
-//        for nodeLocation in locations {
-//            let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
-//            node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-//            let arCoordinates = LocationModel.getARCoordinates(from: currentLocation, to: nodeLocation)
-//            node.position = SCNVector3(arCoordinates.0, 0, arCoordinates.1)
-//            sceneView.scene.rootNode.addChildNode(node)
-//        }
     }
     
     func didReceiveLocationUpdate(to location: CLLocation) {
@@ -108,12 +102,15 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
     func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D]) {
         guard !steps.isEmpty else { return }
         var current = steps.first!
-        var stepsWithIntermediaries = steps
-        for (index,step) in steps.enumerated() {
-            let stepPoints = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-            stepsWithIntermediaries.insert(contentsOf: stepPoints, at: index)
-        }        
-        tripCoordinates = stepsWithIntermediaries
+        print(steps.count)
+        print(steps)
+        tripCoordinates = steps.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+            let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+            current = step
+            return coordinates
+        }
+        print(tripCoordinates)
+        createNodes()
     }
     
     @objc private func dismissARSession() {

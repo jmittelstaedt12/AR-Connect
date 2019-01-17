@@ -8,11 +8,10 @@
 
 import UIKit
 import Firebase
-import RxSwift
 
 final class ConnectPendingViewController: ConnectViewController {
     
-    let bag = DisposeBag()
+    var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,28 +19,6 @@ final class ConnectPendingViewController: ConnectViewController {
         setViewLayouts()
         setObservers()
         setTimer()
-    }
-    
-    private func setObservers() {
-        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { (amOnline) in
-            if !amOnline {
-                self.dismiss(animated: true) {
-                    self.createAndDisplayAlert(withTitle: "Network Error", body: "Requested user not found")
-                }
-            }
-        }).disposed(by: bag)
-        
-//        FirebaseClient.createCalledUserResponseObservable().subscribe(onNext: { (response) in
-//
-//        }).disposed(by: bag)
-    }
-    
-    private func setTimer() {
-        Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { (timer) in
-            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest" : false])
-            self.createAndDisplayAlert(withTitle: "Call Timed Out", body: "\(self.user.name ?? "User") did not respond")
-            self.dismiss(animated: true, completion: nil)
-        }
     }
     
     override func setViewLayouts() {
@@ -60,11 +37,43 @@ final class ConnectPendingViewController: ConnectViewController {
         cancelButton.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
     }
     
+    private func setObservers() {
+        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] amOnline in
+            if !amOnline {
+                self?.dismiss(animated: true) {
+                    self?.createAndDisplayAlert(withTitle: "Network Error", body: "You are offline")
+                }
+            }
+        }).disposed(by: bag)
+        
+        FirebaseClient.createCalledUserResponseObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] didConnect in
+            if didConnect {
+                // initialize AR session
+                guard let self = self else { return }
+                let name = Notification.Name(rawValue: NotificationConstants.connectionNotificationKey)
+                NotificationCenter.default.post(name: name, object: nil, userInfo: ["user" : self.user as Any])
+            } else {
+                FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest" : false])
+                self?.createAndDisplayAlert(withTitle: "Call Ending", body: "\(self?.user.name ?? "User") is unavailable")
+            }
+            self?.dismiss(animated: true, completion: nil)
+        }).disposed(by: bag)
+    }
+    
+    private func setTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] timer in
+            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest" : false])
+            self?.createAndDisplayAlert(withTitle: "Call Timed Out", body: "\(self?.user.name ?? "User") did not respond")
+            self?.dismiss(animated: true, completion: nil)
+        }
+    }
+    
     override func handleResponse(sender: UIButton) {
         if sender.title(for: .normal) == "Cancel" {
             let uid = Auth.auth().currentUser!.uid
             FirebaseClient.usersRef.child(uid).updateChildValues(["pendingRequest" : false])
-            self.dismiss(animated: true, completion: nil)
+            timer?.invalidate()
+            dismiss(animated: true, completion: nil)
         }
     }
 }

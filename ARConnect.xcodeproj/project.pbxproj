@@ -125,9 +125,9 @@
 				19D7E68E21C426920046D737 /* Extensions */,
 				1981CB6821A604C600B69138 /* Constants.swift */,
 				19913A21216CEE6300174187 /* Controllers */,
-				19913A2D216D39C400174187 /* Models */,
-				19D7E68821C41DF60046D737 /* Services */,
 				19DC1D9721C29C200079AD25 /* Custom Views */,
+				19D7E68821C41DF60046D737 /* Services */,
+				19913A2D216D39C400174187 /* Models */,
 				19913A0D216CED7500174187 /* AppDelegate.swift */,
 				19D7E68921C41E190046D737 /* Assets */,
 				19D7E68B21C41E380046D737 /* Storyboards */,
@@ -191,6 +191,15 @@
 			path = "Inherited Classes";
 			sourceTree = "<group>";
 		};
+		19A5C09C21EB86E700C2FD74 /* UserTableViewCell */ = {
+			isa = PBXGroup;
+			children = (
+				19997E8C21E65F4A0023C3EC /* UserTableViewCell.swift */,
+				19997E8D21E65F4A0023C3EC /* UserTableViewCell.xib */,
+			);
+			path = UserTableViewCell;
+			sourceTree = "<group>";
+		};
 		19D7E68821C41DF60046D737 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -235,8 +244,7 @@
 				19DC1D9521C29C110079AD25 /* JMButton.swift */,
 				19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */,
 				19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */,
-				19997E8C21E65F4A0023C3EC /* UserTableViewCell.swift */,
-				19997E8D21E65F4A0023C3EC /* UserTableViewCell.xib */,
+				19A5C09C21EB86E700C2FD74 /* UserTableViewCell */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";

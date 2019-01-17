@@ -25,7 +25,6 @@ class ARSessionButton: UIButton {
         backgroundColor = .white
         layer.cornerRadius = 5
         translatesAutoresizingMaskIntoConstraints = false
-        isHidden = true
     }
     
     deinit {
