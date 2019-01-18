@@ -63,15 +63,15 @@ final class ConnectPendingViewController: ConnectViewController {
     private func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] timer in
             FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest" : false])
-            self?.createAndDisplayAlert(withTitle: "Call Timed Out", body: "\(self?.user.name ?? "User") did not respond")
-            self?.dismiss(animated: true, completion: nil)
+            guard let self = self else { return }
+            self.createAndDisplayAlert(withTitle: "Call Timed Out", body: "\(self.user.name ?? "User") did not respond")
+            self.dismiss(animated: true, completion: nil)
         }
     }
     
     override func handleResponse(sender: UIButton) {
         if sender.title(for: .normal) == "Cancel" {
-            let uid = Auth.auth().currentUser!.uid
-            FirebaseClient.usersRef.child(uid).updateChildValues(["pendingRequest" : false])
+            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest" : false])
             timer?.invalidate()
             dismiss(animated: true, completion: nil)
         }

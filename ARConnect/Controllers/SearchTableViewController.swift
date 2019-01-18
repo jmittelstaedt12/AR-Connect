@@ -47,7 +47,7 @@ final class SearchTableViewController: UIViewController {
         let tb = UITableView()
         tb.rowHeight = 63.5
         tb.translatesAutoresizingMaskIntoConstraints = false
-        tb.alwaysBounceVertical = false
+        tb.bounces = false
         return tb
     }()
     
@@ -67,7 +67,6 @@ final class SearchTableViewController: UIViewController {
         }, onError: { [weak self] error in
             self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
         }).disposed(by: bag)
-        
         view.addSubview(drawerIconView)
         searchUsersTextField.delegate = self
         view.addSubview(searchUsersTextField)
@@ -106,6 +105,7 @@ final class SearchTableViewController: UIViewController {
             delegate.updateCoordinatesDuringPan(to: translationPoint, withVelocity: velocity)
         case .ended:
             delegate.updateCoordinatesAfterPan(to: translationPoint, withVelocity: velocity)
+            tableView.panGestureRecognizer.isEnabled = true
         default:
             return
         }
@@ -144,16 +144,33 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
             return cell
         }
         cell.selectionStyle = .none
-        cell.profileImageView!.image = user.profileImage ?? nil
         cell.nameLabel.text = user.name
         cell.usernameLabel.text = user.email
+        cell.profileImageView.image = UIImage(named: "person-placeholder")
+        guard let url = user.profileUrl else { return cell }
+        NetworkRequests.profilePictureNetworkRequest(withUrl: url) { (data) in
+            DispatchQueue.main.async {
+                cell.profileImageView.image = UIImage(data: data)
+            }
+        }
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell, let email = cell.usernameLabel, let user = users?.first(where: {$0.email == email.text}) else { return }
+        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell, let email = cell.usernameLabel, let user = users?.first(where: {$0.email == email.text}) else { return }
         cell.isSelected = false
         delegate.setChildUserDetailVCVisible(withUser: user)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if tableView.contentOffset.y == 0.0 {
+            shouldHandleGesture = true
+            tableView.panGestureRecognizer.isEnabled = false
+        }
+    }
+    
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        shouldHandleGesture = true
     }
 }
 

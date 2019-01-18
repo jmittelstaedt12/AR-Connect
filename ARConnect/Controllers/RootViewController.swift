@@ -47,6 +47,7 @@ final class RootViewController: UIViewController {
     
     // If a user signs in, display the main map screen
     func switchToMainScreen() {
+//        let mainScreen = UINavigationController(rootViewController: TestingViewController())
         let mainScreen = UINavigationController(rootViewController: MainViewController())
         animateFadeTransition(to: mainScreen)
     }

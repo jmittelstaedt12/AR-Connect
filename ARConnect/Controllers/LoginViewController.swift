@@ -26,7 +26,7 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     
     let emailTextField: UITextField = {
         let tf = UITextField()
-        tf.placeholder = "Username"
+        tf.placeholder = "Email"
         tf.textColor = .black
         tf.backgroundColor = .white
         tf.textAlignment = NSTextAlignment.center
@@ -116,7 +116,6 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     @objc private func logIn() {
         guard let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
             createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
-            
             return
         }
         FirebaseClient.logInToDB(email: email, password: password, controller: self)

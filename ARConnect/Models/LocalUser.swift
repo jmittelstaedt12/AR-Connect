@@ -9,9 +9,10 @@
 import UIKit
 
 class LocalUser: NSObject {
-    var profileImage: UIImage?
     var name: String!
     var email: String!
     var uid: String!
+    var profileUrl: URL?
+    var profileImage: UIImage?
     var connectedUid: String?
 }

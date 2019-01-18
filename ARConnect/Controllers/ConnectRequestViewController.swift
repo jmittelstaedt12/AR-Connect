@@ -52,7 +52,7 @@ final class ConnectRequestViewController: ConnectViewController {
             FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
             self.createAndDisplayAlert(withTitle: "Call Dropped", body: "Ending call")
             self.dismiss(animated: true, completion: nil)
-        }).disposed(by: bag)
+            }).disposed(by: bag)
     }
     
     override func handleResponse(sender: UIButton) {
@@ -76,10 +76,9 @@ final class ConnectRequestViewController: ConnectViewController {
                     NotificationCenter.default.post(name: name, object: nil, userInfo: ["user" : self.user as Any])
                 })
             }
-        } else {            
+        } else {
             FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
         }
         self.dismiss(animated: true, completion: nil)
     }
-
 }

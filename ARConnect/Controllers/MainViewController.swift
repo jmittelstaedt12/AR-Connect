@@ -58,7 +58,6 @@ final class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentUser = Auth.auth().currentUser!
         if Auth.auth().currentUser == nil { AppDelegate.shared.rootViewController.switchToLogout() }
         else { currentUser = Auth.auth().currentUser! }
         FirebaseClient.setOnDisconnectUpdates(forUid: currentUser!.uid)
@@ -95,7 +94,8 @@ final class MainViewController: UIViewController {
         guard let searchVC = searchViewController else { return }
         searchVC.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
         childSearchVCTopConstraint = searchVC.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
-        setChildSearchVCState(toState: .compressed)
+        searchVC.expansionState = .compressed
+        setChildSearchVCState(toState: searchVC.expansionState)
         childSearchVCTopConstraint?.isActive = true
         searchVC.view.dimensionAnchors(height: 400)
     }
@@ -106,7 +106,7 @@ final class MainViewController: UIViewController {
         FirebaseClient.fetchObservableUser(forUid: currentUser!.uid).subscribe(onNext: { [weak self] user in
             self?.title = user.name
         }).disposed(by: self.bag)
-        
+
         // Setting online status observer
         FirebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] connected in
             guard let uid = self?.currentUser?.uid else { return }
@@ -262,7 +262,9 @@ extension MainViewController: SearchTableViewControllerDelegate {
     
 //    /// Animate transition to expanded from compressed
     func animateToExpanded() {
-        setChildSearchVCState(toState: .expanded)
+        guard let searchVC = searchViewController else { return }
+        searchVC.expansionState = .expanded
+        setChildSearchVCState(toState: searchVC.expansionState)
         animateTopConstraint()
     }
     

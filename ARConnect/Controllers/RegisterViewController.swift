@@ -9,7 +9,11 @@
 import UIKit
 import Firebase
 
-final class RegisterViewController: UIViewController {
+final class RegisterViewController: UIViewController, KeyboardHandler {
+    
+    var keyboardWillShow = true
+    var keyboardWillHide = false
+    
     
     let cancelButton: UIButton = {
         let btn = UIButton()
@@ -93,6 +97,8 @@ final class RegisterViewController: UIViewController {
         nameTextField.delegate = self
         emailTextField.delegate = self
         passwordTextField.delegate = self
+        
+        startObservingKeyboardChanges()
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -108,7 +114,7 @@ final class RegisterViewController: UIViewController {
         cancelButton.dimensionAnchors(height: 32, width: 32)
         
         // Set constraints for profile image view
-        profileImageView.edgeAnchors(top: cancelButton.bottomAnchor, bottom: inputsContainerView.topAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: -16, right: 0))
+        profileImageView.edgeAnchors(top: view.topAnchor, bottom: inputsContainerView.topAnchor, padding: UIEdgeInsets(top: 48, left: 0, bottom: -16, right: 0))
         profileImageView.centerAnchors(centerX: view.centerXAnchor)
         profileImageView.widthAnchor.constraint(equalTo: profileImageView.heightAnchor).isActive = true
         
@@ -200,19 +206,19 @@ final class RegisterViewController: UIViewController {
         }
     }
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        UIView.animate(withDuration: 0.26) {
-            self.view.frame.origin.y -= 100
-            self.view.layoutIfNeeded()
-        }
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        UIView.animate(withDuration: 0.26) {
-            self.view.frame.origin.y += 100
-            self.view.layoutIfNeeded()
-        }
-    }
+//    func textFieldDidBeginEditing(_ textField: UITextField) {
+//        UIView.animate(withDuration: 0.26) {
+//            self.view.frame.origin.y -= 100
+//            self.view.layoutIfNeeded()
+//        }
+//    }
+//
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//        UIView.animate(withDuration: 0.26) {
+//            self.view.frame.origin.y += 100
+//            self.view.layoutIfNeeded()
+//        }
+//    }
 }
 
 extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
