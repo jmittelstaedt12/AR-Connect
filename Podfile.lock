@@ -46,6 +46,7 @@ PODS:
     - RxSwift (~> 4.0)
   - RxSwift (4.4.0):
     - RxAtomic (~> 4.4)
+  - SwiftLint (0.29.2)
 
 DEPENDENCIES:
   - Firebase/Auth
@@ -54,6 +55,7 @@ DEPENDENCIES:
   - Firebase/Storage
   - RxCocoa (~> 4.4)
   - RxSwift (~> 4.4)
+  - SwiftLint
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -71,6 +73,7 @@ SPEC REPOS:
     - RxAtomic
     - RxCocoa
     - RxSwift
+    - SwiftLint
 
 SPEC CHECKSUMS:
   Firebase: d6861c2059d8c32d1e6dd8932e22ada346d90a3a
@@ -87,7 +90,8 @@ SPEC CHECKSUMS:
   RxAtomic: eacf60db868c96bfd63320e28619fe29c179656f
   RxCocoa: df63ebf7b9a70d6b4eeea407ed5dd4efc8979749
   RxSwift: 5976ecd04fc2fefd648827c23de5e11157faa973
+  SwiftLint: 47df60bdea6e7e902b193b6596db8683aafd86a3
 
-PODFILE CHECKSUM: 930f23025c64c3fcd21e8d0c13b82089e1873db4
+PODFILE CHECKSUM: 7dbcc674eb262f1c78343a3b5f754617451c1e8f
 
 COCOAPODS: 1.5.3

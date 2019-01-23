@@ -18,13 +18,13 @@ protocol SearchTableViewControllerDelegate: class {
 }
 
 final class SearchTableViewController: UIViewController {
-    
+
     weak var delegate: SearchTableViewControllerDelegate!
     var users: [LocalUser]?
     var panGestureRecognizer: UIPanGestureRecognizer?
-    
+
     let bag = DisposeBag()
-    
+
     let drawerIconView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.gray
@@ -32,32 +32,32 @@ final class SearchTableViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     let searchUsersTextField: UITextField = {
-        let tf = UITextField()
-        tf.backgroundColor = .white
-        tf.placeholder = "Find a friend"
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.layer.borderColor = UIColor.black.cgColor
-        tf.layer.cornerRadius = 5
-        return tf
+        let textField = UITextField()
+        textField.backgroundColor = .white
+        textField.placeholder = "Find a friend"
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.layer.borderColor = UIColor.black.cgColor
+        textField.layer.cornerRadius = 5
+        return textField
     }()
-    
+
     let tableView: UITableView = {
-        let tb = UITableView()
-        tb.rowHeight = 63.5
-        tb.translatesAutoresizingMaskIntoConstraints = false
-        tb.bounces = false
-        return tb
+        let tableView = UITableView()
+        tableView.rowHeight = 63.5
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.bounces = false
+        return tableView
     }()
-    
+
     enum ExpansionState: CGFloat {
         case expanded
         case compressed
     }
     private var shouldHandleGesture: Bool = true
     var expansionState = ExpansionState.compressed
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -66,8 +66,8 @@ final class SearchTableViewController: UIViewController {
             self?.tableView.reloadData()
             DispatchQueue.global(qos: .background).async { sleep(30) }
         }, onError: { [weak self] error in
-            self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
-        }).disposed(by: bag)
+                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+            }).disposed(by: bag)
         view.addSubview(drawerIconView)
         searchUsersTextField.delegate = self
         view.addSubview(searchUsersTextField)
@@ -80,22 +80,22 @@ final class SearchTableViewController: UIViewController {
         let logoutButton = UIBarButtonItem(title: "Dismiss", style: .plain, target: self, action: #selector(dismissVC))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
     }
-    
+
     private func setupView() {
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = UIColor(white: 5/6, alpha: 1.0)
+        view.backgroundColor = UIColor(white: 5 / 6, alpha: 1.0)
         view.layer.cornerRadius = 5
     }
-    
+
     /// Configure pan gesture recognizer for use in MainViewController
-    private func setupPanGestureRecognizer(){
+    private func setupPanGestureRecognizer() {
         let panGR = UIPanGestureRecognizer(target: self, action: #selector(onSearchViewControllerPan(sender:)))
         panGR.cancelsTouchesInView = false
         panGR.delegate = self
         self.panGestureRecognizer = panGR
         view.addGestureRecognizer(panGestureRecognizer!)
     }
-    
+
     /// Run on child instance of SearchViewController pan gesture
     @objc private func onSearchViewControllerPan(sender: UIPanGestureRecognizer) {
         guard shouldHandleGesture else { return }
@@ -113,7 +113,7 @@ final class SearchTableViewController: UIViewController {
             return
         }
     }
-    
+
     /// Set dimensions and constraints for subviews
     private func setupViews() {
         drawerIconView.edgeAnchors(top: view.topAnchor, padding: UIEdgeInsets(top: 6, left: 00, bottom: 0, right: 0))
@@ -121,26 +121,25 @@ final class SearchTableViewController: UIViewController {
         drawerIconView.dimensionAnchors(height: 3, width: 32)
         searchUsersTextField.edgeAnchors(top: drawerIconView.bottomAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 6, left: 10, bottom: 0, right: -10))
         searchUsersTextField.dimensionAnchors(height: 30)
-        tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor,  bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
+        tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
-    
+
     /// If user taps on text field from compressed, expand before editing
     func textFieldDidBeginEditing(_ textField: UITextField) {
         delegate.animateToExpanded()
     }
 
-    @objc private func dismissVC(){
+    @objc private func dismissVC() {
         dismiss(animated: true, completion: nil)
     }
 }
 
-
 extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource {
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return users?.count ?? 0
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "userCell", for: indexPath) as! UserTableViewCell
         guard let user = users?[indexPath.row] else {
@@ -166,20 +165,20 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
         }
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell, let email = cell.usernameLabel, let user = users?.first(where: {$0.email == email.text}) else { return }
+        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell, let email = cell.usernameLabel, let user = users?.first(where: { $0.email == email.text }) else { return }
         cell.isSelected = false
         delegate.setChildUserDetailVCVisible(withUser: user)
     }
-    
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if tableView.contentOffset.y == 0.0 {
             shouldHandleGesture = true
             tableView.panGestureRecognizer.isEnabled = false
         }
     }
-    
+
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         shouldHandleGesture = true
     }
@@ -215,7 +214,7 @@ extension SearchTableViewController: UIGestureRecognizerDelegate {
 
 extension SearchTableViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
+
     }
 }
 
@@ -223,7 +222,7 @@ class UserCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

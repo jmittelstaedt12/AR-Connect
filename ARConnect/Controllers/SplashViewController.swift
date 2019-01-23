@@ -12,7 +12,7 @@ import Firebase
 final class SplashViewController: UIViewController {
 
     private let activityIndicator = UIActivityIndicatorView(style: .whiteLarge)
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white

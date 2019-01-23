@@ -9,7 +9,7 @@
 import UIKit
 
 struct ColorConstants {
-    static let primaryColor = UIColor(r: 23, g: 212, b: 132)
+    static let primaryColor = UIColor(red: 23, green: 212, blue: 132)
 }
 
 struct LocationConstants {

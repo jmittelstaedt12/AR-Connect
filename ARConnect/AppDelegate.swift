@@ -13,19 +13,19 @@ import Firebase
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
-        window?.rootViewController =  RootViewController()
+        window?.rootViewController = RootViewController()
         FirebaseApp.configure()
         // Override point for customization after application launch.
         let navigationBarAppearance = UINavigationBar.appearance()
-        navigationBarAppearance.isTranslucent       = true
-        navigationBarAppearance.barTintColor        = UIColor.gray
-        navigationBarAppearance.alpha               = 0.9
-        navigationBarAppearance.tintColor           = UIColor.white
+        navigationBarAppearance.isTranslucent = true
+        navigationBarAppearance.barTintColor = UIColor.gray
+        navigationBarAppearance.alpha = 0.9
+        navigationBarAppearance.tintColor = UIColor.white
         navigationBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
         return true
     }
@@ -57,9 +57,8 @@ extension AppDelegate {
     static var shared: AppDelegate {
         return UIApplication.shared.delegate as! AppDelegate
     }
-    
+
     var rootViewController: RootViewController {
         return window!.rootViewController as! RootViewController
     }
 }
-

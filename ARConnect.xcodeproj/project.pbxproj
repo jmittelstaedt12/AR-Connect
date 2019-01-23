@@ -148,8 +148,8 @@
 				19948E11216FB7FB008C39DA /* SplashViewController.swift */,
 				19D736B121CAE15D00D6D92A /* InitialViewController.swift */,
 				19913A26216CF7A100174187 /* LoginViewController.swift */,
-				19913A11216CED7600174187 /* RegisterViewController.swift */,
 				19913A2B216D2FBF00174187 /* MainViewController.swift */,
+				19913A11216CED7600174187 /* RegisterViewController.swift */,
 				1981CB6621A5FB3D00B69138 /* MapViewController.swift */,
 				19BE2A04218A665C007304CF /* SearchTableViewController.swift */,
 				19913A24216CF46100174187 /* ARSessionViewController.swift */,
@@ -284,6 +284,7 @@
 				19913A07216CED7500174187 /* Frameworks */,
 				19913A08216CED7500174187 /* Resources */,
 				3449924C954A9D71FC7039C6 /* [CP] Embed Pods Frameworks */,
+				192F10B221F8D6AB00827FF7 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -346,6 +347,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		192F10B221F8D6AB00827FF7 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/SwiftLint/swiftlint\"\n";
+		};
 		3449924C954A9D71FC7039C6 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

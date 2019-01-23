@@ -13,12 +13,12 @@ class JMNavigationBar: UINavigationBar {
         super.init(frame: frame)
         setupNavigationBar()
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupNavigationBar()
     }
-    
+
     private func setupNavigationBar() {
         isTranslucent = true
         barTintColor = UIColor.gray

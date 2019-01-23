@@ -10,7 +10,7 @@ import UIKit
 import RxSwift
 
 class ConnectViewController: UIViewController {
-    
+
     let bag = DisposeBag()
     var user: LocalUser! {
         willSet {
@@ -19,21 +19,19 @@ class ConnectViewController: UIViewController {
             }
         }
     }
-    
     let requestingUserImageView: UIImageView = {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .lightGray
         return view
     }()
-    
     let requestingUserNameLabel: UILabel = {
         let lbl = UILabel()
         lbl.textColor = .black
         lbl.translatesAutoresizingMaskIntoConstraints = false
         return lbl
     }()
-    
+
     let cancelButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
@@ -41,7 +39,7 @@ class ConnectViewController: UIViewController {
         btn.addTarget(self, action: #selector(handleResponse(sender:)), for: .touchUpInside)
         return btn
     }()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -49,8 +47,8 @@ class ConnectViewController: UIViewController {
         view.addSubview(requestingUserNameLabel)
         view.addSubview(cancelButton)
     }
-    
+
     func setViewLayouts() { fatalError("this method must be overridden") }
-    
+
     @objc func handleResponse(sender: UIButton) { fatalError("this method must be overridden") }
 }

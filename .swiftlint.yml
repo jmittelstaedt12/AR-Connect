@@ -1,0 +1,6 @@
+disabled_rules:
+  - line_length
+  - force_cast
+  - large_tuple
+excluded:
+  - Pods

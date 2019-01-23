@@ -10,11 +10,11 @@ import UIKit
 import MapKit
 
 struct LocationService {
-    
+
     let locationManager = CLLocationManager()
-    
+
     /// Set up behavior for MKMapView object
-    func setMapProperties(for map: MKMapView,in view: UIView) {
+    func setMapProperties(for map: MKMapView, in view: UIView) {
         map.frame = view.frame
         map.center = view.center
         map.showsUserLocation = true

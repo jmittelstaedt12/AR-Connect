@@ -9,9 +9,9 @@
 import MapKit
 
 struct NavigationClient {
-    
+
     /// Calls directions request for two locations and returns their polyline and the steps between them
-    static func requestLineAndSteps(from start: CLLocationCoordinate2D,to end: CLLocationCoordinate2D, handler: @escaping(((line: MKPolyline?, steps: [MKRoute.Step]?, error: Error?)) -> Void)) {
+    static func requestLineAndSteps(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D, handler: @escaping(((line: MKPolyline?, steps: [MKRoute.Step]?, error: Error?)) -> Void)) {
         var result: (line: MKPolyline?, steps: [MKRoute.Step]?, error: Error?)
         let directionsRequest = MKDirections.Request()
         directionsRequest.source = MKMapItem(placemark: MKPlacemark(coordinate: start))

@@ -14,19 +14,18 @@ class JMButton: UIButton {
         super.init(frame: frame)
         setupButton()
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupButton()
     }
-    
+
     private func setupButton() {
-//        setTitleColor(UIColor.black, for: .normal)
+        //        setTitleColor(UIColor.black, for: .normal)
         titleLabel?.textColor                           = .black
         backgroundColor                                 = .white
         layer.cornerRadius                              = 5
         translatesAutoresizingMaskIntoConstraints       = false
         isHidden                                        = false
     }
-    
 }
