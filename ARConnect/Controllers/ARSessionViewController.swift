@@ -16,11 +16,13 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
     var currentLocation: CLLocation!
     var targetLocation: CLLocation!
     var tripCoordinates: [CLLocationCoordinate2D] = []
-    let sceneView : ARSCNView = {
-        let view = ARSCNView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
+    
+    var sceneView : ARSCNView? {
+        willSet {
+            newValue?.translatesAutoresizingMaskIntoConstraints = false
+            newValue?.debugOptions = [ARSCNDebugOptions.showWorldOrigin]
+        }
+    }
     
     let dismissButton : UIButton = {
         let btn = UIButton(type: .system)
@@ -34,38 +36,37 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.addSubview(sceneView)
+        sceneView = ARSCNView()
+        sceneView!.delegate = self
+        configureARSession()
+        view.addSubview(sceneView!)
         view.addSubview(dismissButton)
         setupSceneView()
         setupDismissButton()
-        
-        sceneView.delegate = self
-        sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin]
+        didReceiveTripSteps(tripCoordinates)
         createNodes()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.worldAlignment = ARWorldTrackingConfiguration.WorldAlignment.gravityAndHeading
-        sceneView.session.run(configuration)
+    override func viewWillDisappear(_ animated: Bool) {
+//        sceneView?.removeFromSuperview()
+//        sceneView = nil
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        sceneView.session.pause()
+    private func configureARSession() {
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.worldAlignment = ARWorldTrackingConfiguration.WorldAlignment.gravityAndHeading
+        sceneView!.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
     }
+    
     
     /// Set auto layout anchors for scene view
     private func setupSceneView() {
-        sceneView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+        sceneView!.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
     }
     
     /// Set auto layout anchors for dismiss AR Session button
     private func setupDismissButton() {
-        dismissButton.edgeAnchors(top: sceneView.topAnchor, leading: sceneView.leadingAnchor, padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
+        dismissButton.edgeAnchors(top: sceneView!.topAnchor, leading: sceneView!.leadingAnchor, padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
         dismissButton.dimensionAnchors(height: 30, width: 60)
     }
     
@@ -88,10 +89,10 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
             let node = SCNNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0))
             node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
             let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: currentLocation, location: CLLocation(coordinate: tripCoordinates[i]))
-            node.position = SCNVector3(x: transform.columns.3.x, y: transform.columns.3.y, z: transform.columns.3.z)
+            node.position = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
             let anchor = ARAnchor(transform: transform)
-            sceneView.session.add(anchor: anchor)
-            sceneView.scene.rootNode.addChildNode(node)
+            sceneView!.session.add(anchor: anchor)
+            sceneView!.scene.rootNode.addChildNode(node)
         }
     }
     
@@ -114,7 +115,7 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
     }
     
     @objc private func dismissARSession() {
-        dismiss(animated: true, completion: nil)
+        dismiss(animated: true,completion: nil)
     }
     // MARK: - ARSCNViewDelegate
     
@@ -141,5 +142,4 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, Locati
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
     }
-
 }

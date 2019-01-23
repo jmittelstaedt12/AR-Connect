@@ -26,9 +26,5 @@ class ARSessionButton: UIButton {
         layer.cornerRadius = 5
         translatesAutoresizingMaskIntoConstraints = false
     }
-    
-    deinit {
-        print("AR Session button deinit")
-    }
 
 }

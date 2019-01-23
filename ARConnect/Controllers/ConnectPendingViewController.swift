@@ -76,4 +76,5 @@ final class ConnectPendingViewController: ConnectViewController {
             dismiss(animated: true, completion: nil)
         }
     }
+    
 }

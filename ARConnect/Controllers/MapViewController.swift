@@ -10,6 +10,11 @@ import UIKit
 import MapKit
 import Firebase
 
+protocol LocationUpdateDelegate: AnyObject {
+    func didReceiveLocationUpdate(to location: CLLocation)
+    func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D])
+}
+
 final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
     
     var currentLocation: CLLocation?
@@ -18,6 +23,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     weak var delegate: LocationUpdateDelegate?
     var tripCoordinates: [CLLocationCoordinate2D] = []
+    private var pathOverlay: MKOverlay?
     
     let map : MKMapView = {
         let map = MKMapView()
@@ -69,6 +75,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
                     self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
                     return
                 }
+                self.pathOverlay = line
                 self.draw(polyline: line)
                 self.tripCoordinates.append(contentsOf: steps.map { $0.polyline.coordinate })
                 self.delegate?.didReceiveTripSteps(self.tripCoordinates)
@@ -79,8 +86,13 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     }
     
     func draw(polyline line: MKPolyline) {
-        self.map.addOverlay(line)
-        self.map.setVisibleMapRect(MKMapRect(origin: line.boundingMapRect.origin, size: MKMapSize(width: line.boundingMapRect.size.width, height: line.boundingMapRect.size.height)), edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
+        map.addOverlay(line)
+        map.setVisibleMapRect(MKMapRect(origin: line.boundingMapRect.origin, size: MKMapSize(width: line.boundingMapRect.size.width, height: line.boundingMapRect.size.height)), edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
+    }
+    
+    func resetMap() {
+        if let overlay = pathOverlay { map.removeOverlay(overlay) }
+        if let currentCoordinate = currentLocation?.coordinate { map.setCenter(currentCoordinate, animated: true) }
     }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -103,9 +115,4 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-}
-
-protocol LocationUpdateDelegate: AnyObject {
-    func didReceiveLocationUpdate(to location: CLLocation)
-    func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D])
 }

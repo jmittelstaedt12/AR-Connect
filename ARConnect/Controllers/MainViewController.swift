@@ -16,8 +16,8 @@ final class MainViewController: UIViewController {
     
     var currentUser : User?
     var childSearchVCTopConstraint: NSLayoutConstraint?
+    var childSearchVCHeightConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
-    var arSessionViewController: ARSessionViewController?
     let bag = DisposeBag()
 
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
@@ -34,9 +34,17 @@ final class MainViewController: UIViewController {
     var endConnectSessionButton: ARSessionButton? {
         willSet {
             newValue?.setTitle("End", for: .normal)
-            newValue?.addTarget(self, action: #selector(endARSession), for: .touchUpInside)
+            newValue?.addTarget(self, action: #selector(handleSessionEnd), for: .touchUpInside)
         }
     }
+    
+    var expandedHeight: CGFloat = 400 {
+        willSet {
+            childSearchVCHeightConstraint?.constant = newValue
+            childSearchVCTopConstraint?.constant = -newValue
+        }
+    }
+    let compressedHeight: CGFloat = 50
     
     private func setChildSearchVCState(toState state: SearchTableViewController.ExpansionState) {
         guard let tc = childSearchVCTopConstraint else {
@@ -45,16 +53,13 @@ final class MainViewController: UIViewController {
         switch state {
         case .compressed:
             tc.constant = -50
-            searchViewControllerPreviousYCoordinate = view.bounds.height - 50
+            searchViewControllerPreviousYCoordinate = view.bounds.height - compressedHeight
         case .expanded:
             tc.constant = -400
-            searchViewControllerPreviousYCoordinate = view.bounds.height - 400
+            searchViewControllerPreviousYCoordinate = view.bounds.height - expandedHeight
         }
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,6 +79,7 @@ final class MainViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(handleSessionStart(notification:)), name: connectNotificationName, object: nil)
     }
     
+    
     /// Add all subviews and child view controllers to main view controller
     private func addSubviewsAndChildVCs() {
         addChild(mapViewController)
@@ -85,6 +91,7 @@ final class MainViewController: UIViewController {
         searchVC.didMove(toParent: self)
     }
     
+    
     /// Setup auto layout anchors, dimensions, and other position properties for subviews
     private func setupSubviewsAndChildVCs() {
         // Setup auto layout anchors for map view
@@ -94,11 +101,14 @@ final class MainViewController: UIViewController {
         guard let searchVC = searchViewController else { return }
         searchVC.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
         childSearchVCTopConstraint = searchVC.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
+        childSearchVCHeightConstraint = searchVC.view.heightAnchor.constraint(equalToConstant: expandedHeight)
+        childSearchVCTopConstraint?.isActive = true
+        childSearchVCHeightConstraint?.isActive = true
         searchVC.expansionState = .compressed
         setChildSearchVCState(toState: searchVC.expansionState)
-        childSearchVCTopConstraint?.isActive = true
-        searchVC.view.dimensionAnchors(height: 400)
+        searchVC.view.dimensionAnchors(height: 450)
     }
+    
     
     private func setObservers() {
         
@@ -121,6 +131,7 @@ final class MainViewController: UIViewController {
         }).disposed(by: self.bag)
     }
     
+    
     /// Log out current user and return to login screen
     @objc private func logout() {
         do {
@@ -134,13 +145,18 @@ final class MainViewController: UIViewController {
     
     /// When connect to user, transition into AR Session state
     @objc private func handleSessionStart(notification: NSNotification) {
+        
+        guard let currentUid = Auth.auth().currentUser?.uid, let user = notification.userInfo?["user"] as? LocalUser else { return }
+        
+        FirebaseClient.usersRef.child(currentUid).updateChildValues(["isPending" : false, "isConnected" : true, "connectedTo" : user.uid])
+        
         searchViewController?.willMove(toParent: nil)
         searchViewController?.view.removeFromSuperview()
         searchViewController?.removeFromParent()
         searchViewController = nil
         viewARSessionButton = ARSessionButton(type: .system)
         endConnectSessionButton = ARSessionButton(type: .system)
-        
+       
         view.addSubview(viewARSessionButton!)
         view.addSubview(endConnectSessionButton!)
         
@@ -153,28 +169,15 @@ final class MainViewController: UIViewController {
         
         view.updateConstraintsIfNeeded()
         
-        guard let location = mapViewController.locationService.locationManager.location else {
-            createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
-            return
-        }
-        arSessionViewController = ARSessionViewController()
-        arSessionViewController!.startLocation = location
-        arSessionViewController!.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.00001, longitude: location.coordinate.longitude+0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
-        
-        arSessionViewController!.currentLocation = location
-        arSessionViewController!.tripCoordinates = mapViewController.tripCoordinates
-        mapViewController.delegate = arSessionViewController
+        FirebaseClient.createEndSessionObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] _ in
+            self?.handleSessionEnd()
+            }).disposed(by: bag)
     }
     
-    /// Segue into AR Connect session
-    @objc private func startARSession() {
-        guard let arSessionVC = arSessionViewController else { return }
-        present(arSessionVC, animated: true, completion: nil)
-    }
     
-    @objc private func endARSession() {
-        #warning("TODO: write end session logic")
-        arSessionViewController = nil
+    @objc private func handleSessionEnd() {
+        viewARSessionButton?.removeFromSuperview()
+        endConnectSessionButton?.removeFromSuperview()
         viewARSessionButton = nil
         endConnectSessionButton = nil
         searchViewController = SearchTableViewController()
@@ -182,12 +185,33 @@ final class MainViewController: UIViewController {
         addChild(searchViewController!)
         view.addSubview(searchViewController!.view)
         searchViewController!.didMove(toParent: self)
+        setupSubviewsAndChildVCs()
+        mapViewController.resetMap()
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        FirebaseClient.usersRef.child(currentUid).updateChildValues(["connectedTo" : "", "isConnected" : false])
     }
+    
+    /// Segue into AR Connect session
+    @objc private func startARSession() {
+        guard let location = mapViewController.locationService.locationManager.location else {
+            createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
+            return
+        }
+        let arSessionVC = ARSessionViewController()
+        arSessionVC.startLocation = location
+        arSessionVC.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.00001, longitude: location.coordinate.longitude+0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
+        arSessionVC.currentLocation = location
+        arSessionVC.tripCoordinates = mapViewController.tripCoordinates
+        mapViewController.delegate = arSessionVC
+        present(arSessionVC, animated: true, completion: nil)
+    }
+    
     
     deinit {
         NotificationCenter.default.removeObserver(self)
         mapViewController.locationService.locationManager.stopUpdatingLocation()
     }
+    
 }
 
 
@@ -204,28 +228,32 @@ extension MainViewController: SearchTableViewControllerDelegate {
         let newTopConstraint = previousYCoordinate + translationPoint.y
         let compressedYCoordinate = view.bounds.height - 50
         let expandedYCoordinate = view.bounds.height - 400
-        if newTopConstraint >= expandedYCoordinate - 20 && newTopConstraint <= compressedYCoordinate + 20 {
+        if newTopConstraint >= expandedYCoordinate - 20 && newTopConstraint <= compressedYCoordinate + 40 {
             topConstraint.constant = constraintOffset+translationPoint.y
+        } else if newTopConstraint < expandedYCoordinate && newTopConstraint >= expandedYCoordinate - 40 {
+            expandedHeight = 400 + abs(newTopConstraint - expandedYCoordinate)
         }
         searchVC.view.isUserInteractionEnabled = false
     }
     
+    
     /// When release pan, update coordinates to compressed or expanded depending on velocity
     func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint) {
         guard let searchVC = searchViewController, let previousYCoordinate = searchViewControllerPreviousYCoordinate else { return }
+        expandedHeight = 400
         let newTopConstraint = previousYCoordinate + translationPoint.y
         let compressedYCoordinate = view.frame.height-50
         let expandedYCoordinate = view.frame.height-400
-        let velocityThreshold: CGFloat = 300
+        let velocityThreshold: CGFloat = 100
         if abs(velocity.y) < velocityThreshold {
             if previousYCoordinate == compressedYCoordinate {
-                if newTopConstraint <= compressedYCoordinate-100 {
+                if newTopConstraint <= compressedYCoordinate-125 {
                     searchVC.expansionState = .expanded
                 } else {
                     searchVC.expansionState = .compressed
                 }
             } else {
-                if newTopConstraint >= expandedYCoordinate+100 {
+                if newTopConstraint >= expandedYCoordinate+125 {
                     searchVC.expansionState = .compressed
                 } else {
                     searchVC.expansionState = .expanded
@@ -240,7 +268,7 @@ extension MainViewController: SearchTableViewControllerDelegate {
                     searchVC.expansionState = .compressed
                 }
             } else {
-                if newTopConstraint >= expandedYCoordinate{
+                if newTopConstraint >= expandedYCoordinate {
                     searchVC.expansionState = .compressed
                 } else {
                     searchVC.expansionState = .expanded
@@ -251,22 +279,25 @@ extension MainViewController: SearchTableViewControllerDelegate {
         animateTopConstraint()
     }
     
+    
     /// Animate transition to compressed or expanded and make view interactive again
     private func animateTopConstraint() {
         guard let searchVC = searchViewController else { return }
-        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
+        UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 4, options: .curveEaseOut, animations: {
             self.view.layoutIfNeeded()
         })
         searchVC.view.isUserInteractionEnabled = true
     }
     
-//    /// Animate transition to expanded from compressed
+    
+    /// Animate transition to expanded from compressed
     func animateToExpanded() {
         guard let searchVC = searchViewController else { return }
         searchVC.expansionState = .expanded
         setChildSearchVCState(toState: searchVC.expansionState)
         animateTopConstraint()
     }
+    
     
     /// Make card for tapped user visible in view
     func setChildUserDetailVCVisible(withUser user: LocalUser) {
@@ -279,9 +310,12 @@ extension MainViewController: SearchTableViewControllerDelegate {
         cardDetailVC.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
         view.updateConstraintsIfNeeded()
     }
+    
 }
 
+
 extension MainViewController: CardDetailDelegate {
+    
     func subscribeToCallUserObservable(forUser user: LocalUser) {
         FirebaseClient.createCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
             if canComplete {
@@ -297,4 +331,5 @@ extension MainViewController: CardDetailDelegate {
             self.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
         }).disposed(by: bag)
     }
+    
 }

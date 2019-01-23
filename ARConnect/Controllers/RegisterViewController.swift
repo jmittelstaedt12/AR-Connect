@@ -89,6 +89,9 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         view.addSubview(profileImageView)
         view.addSubview(inputsContainerView)
         view.addSubview(registerButton)
+        inputsContainerView.addSubview(nameTextField)
+        inputsContainerView.addSubview(emailTextField)
+        inputsContainerView.addSubview(passwordTextField)
         
         setSubviewConstraints()
         
@@ -105,7 +108,6 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         return .lightContent
     }
     
-    #warning("TODO: very boring subview refactor")
     
     private func setSubviewConstraints() {
         
@@ -116,18 +118,14 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         // Set constraints for profile image view
         profileImageView.edgeAnchors(top: view.topAnchor, bottom: inputsContainerView.topAnchor, padding: UIEdgeInsets(top: 48, left: 0, bottom: -16, right: 0))
         profileImageView.centerAnchors(centerX: view.centerXAnchor)
-        profileImageView.widthAnchor.constraint(equalTo: profileImageView.heightAnchor).isActive = true
+        profileImageView.dimensionAnchors(width: profileImageView.heightAnchor)
         
         // Set constraints for input container view
         inputsContainerView.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
         inputsContainerView.dimensionAnchors(height: 150)
-        inputsContainerView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24).isActive = true
+        inputsContainerView.dimensionAnchors(width: view.widthAnchor, widthConstant: -24)
         
-        // Add views to input container view
-        inputsContainerView.addSubview(nameTextField)
-        inputsContainerView.addSubview(emailTextField)
-        inputsContainerView.addSubview(passwordTextField)
-        guard let nameSeparatorView = nameSeparatorView, let emailSeparatorView = emailSeparatorView else{
+        guard let nameSeparatorView = nameSeparatorView, let emailSeparatorView = emailSeparatorView else {
             print("Error creating separator views")
             return
         }
@@ -136,37 +134,31 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         
         // Set constraints for input container view subviews
         nameTextField.edgeAnchors(top: inputsContainerView.topAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
-        nameTextField.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor, constant: -12).isActive = true
-        nameTextField.heightAnchor.constraint(equalTo: inputsContainerView.heightAnchor, multiplier: 1/3).isActive = true
+        nameTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1/3, width: inputsContainerView.widthAnchor, widthConstant: -12)
         
-        //need x, y, width, height constraints
-        nameSeparatorView.leadingAnchor.constraint(equalTo: inputsContainerView.leadingAnchor).isActive = true
-        nameSeparatorView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor).isActive = true
-        nameSeparatorView.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor).isActive = true
-        nameSeparatorView.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        // Set constraints for separator view
+        nameSeparatorView.edgeAnchors(top: nameTextField.bottomAnchor, leading: inputsContainerView.leadingAnchor)
+        nameSeparatorView.dimensionAnchors(width: inputsContainerView.widthAnchor)
+        nameSeparatorView.dimensionAnchors(height: 1)
         
-        //need x, y, width, height constraints
-        emailTextField.leadingAnchor.constraint(equalTo: inputsContainerView.leadingAnchor, constant: 12).isActive = true
-        emailTextField.topAnchor.constraint(equalTo: nameSeparatorView.bottomAnchor).isActive = true
-        emailTextField.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor, constant: -12).isActive = true
-        emailTextField.heightAnchor.constraint(equalTo: inputsContainerView.heightAnchor, multiplier: 1/3).isActive = true
+        // Set constraints for email text field
+        emailTextField.edgeAnchors(top: nameSeparatorView.bottomAnchor, leading: inputsContainerView.leadingAnchor)
+        emailTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1/3, width: inputsContainerView.widthAnchor, widthConstant: -12)
         
-        //need x, y, width, height constraints
-        emailSeparatorView.leadingAnchor.constraint(equalTo: inputsContainerView.leadingAnchor).isActive = true
-        emailSeparatorView.topAnchor.constraint(equalTo: emailTextField.bottomAnchor).isActive = true
-        emailSeparatorView.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor).isActive = true
-        emailSeparatorView.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        // Set constraints for email separator view
+        emailSeparatorView.edgeAnchors(top: emailTextField.bottomAnchor, leading: inputsContainerView.leadingAnchor)
+        emailSeparatorView.dimensionAnchors(width: inputsContainerView.widthAnchor)
+        emailSeparatorView.dimensionAnchors(height: 1)
         
-        //need x, y, width, height constraints
-        passwordTextField.leadingAnchor.constraint(equalTo: inputsContainerView.leadingAnchor, constant: 12).isActive = true
-        passwordTextField.topAnchor.constraint(equalTo: emailSeparatorView.bottomAnchor).isActive = true
-        passwordTextField.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor, constant: -12).isActive = true
-        passwordTextField.heightAnchor.constraint(equalTo: inputsContainerView.heightAnchor, multiplier: 1/3).isActive = true
+        // Set constraints for password text field
+        passwordTextField.edgeAnchors(top: emailSeparatorView.bottomAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
+        passwordTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1/3, width: inputsContainerView.widthAnchor, widthConstant: -12)
         
-        registerButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        registerButton.topAnchor.constraint(equalTo: inputsContainerView.bottomAnchor, constant: 12).isActive = true
-        registerButton.widthAnchor.constraint(equalTo: inputsContainerView.widthAnchor).isActive = true
-        registerButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        // Set constraints for register button
+        registerButton.centerAnchors(centerX: view.centerXAnchor)
+        registerButton.edgeAnchors(top: inputsContainerView.bottomAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
+        registerButton.dimensionAnchors(width: inputsContainerView.widthAnchor)
+        registerButton.dimensionAnchors(height: 50)
     }
     
     /// Returns line separator views to be placed between text fields

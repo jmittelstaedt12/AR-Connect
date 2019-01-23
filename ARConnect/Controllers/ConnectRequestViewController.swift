@@ -61,20 +61,20 @@ final class ConnectRequestViewController: ConnectViewController {
             return
         }
         if sender.title(for: .normal) == "Confirm" {
-            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : "", "connectedTo" : requestUid])
-            FirebaseClient.usersRef.child(uid).updateChildValues(["connectedTo" : requestUid]) { (error, ref) in
+            FirebaseClient.usersRef.child(uid).updateChildValues(["isConnected" : true, "connectedTo" : requestUid]) { (error, _) in
                 if let err = error {
                     print(err.localizedDescription)
                     return
                 }
-                FirebaseClient.usersRef.child(requestUid).updateChildValues(["connectedTo" : uid], withCompletionBlock: { (error, ref) in
+                FirebaseClient.usersRef.child(requestUid).updateChildValues(["isConnected" : true]) { (error, _) in
                     if let err = error {
                         print(err.localizedDescription)
                         return
                     }
+                    FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])
                     let name = Notification.Name(rawValue: NotificationConstants.connectionNotificationKey)
-                    NotificationCenter.default.post(name: name, object: nil, userInfo: ["user" : self.user as Any])
-                })
+                    NotificationCenter.default.post(name: name, object: nil, userInfo: ["user" : self.user])
+                }
             }
         } else {
             FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser" : ""])

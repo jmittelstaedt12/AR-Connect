@@ -15,4 +15,5 @@ class LocalUser: NSObject {
     var profileUrl: URL?
     var profileImage: UIImage?
     var connectedUid: String?
+    var isOnline: Bool!
 }

@@ -45,6 +45,12 @@ final class RootViewController: UIViewController {
         current = new
     }
     
+    // Display the testing view controlelr
+    func switchToTesting() {
+        let testingScreen = UINavigationController(rootViewController: TestingViewController())
+        animateFadeTransition(to: testingScreen)
+    }
+    
     // If a user signs in, display the main map screen
     func switchToMainScreen() {
 //        let mainScreen = UINavigationController(rootViewController: TestingViewController())
@@ -163,6 +169,15 @@ extension UIView {
         }
         if let width = width {
             widthAnchor.constraint(equalToConstant: width*widthMultiplier).isActive = true
+        }
+    }
+    
+    func dimensionAnchors(height: NSLayoutDimension? = nil, heightMultiplier: CGFloat = 1, heightConstant: CGFloat = 0, width: NSLayoutDimension? = nil, widthMultiplier: CGFloat = 1, widthConstant: CGFloat = 0){
+        if let height = height{
+            heightAnchor.constraint(equalTo: height, multiplier: heightMultiplier, constant: heightConstant).isActive = true
+        }
+        if let width = width {
+            widthAnchor.constraint(equalTo: width, multiplier: widthMultiplier, constant: widthConstant).isActive = true
         }
     }
 }

@@ -13,15 +13,20 @@ class UserTableViewCell: UITableViewCell {
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var usernameLabel: UILabel!
+    @IBOutlet weak var isOnlineImageView: UIImageView!
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        setupUI()
         // Initialization code
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
     }
     
+    private func setupUI() {
+        isOnlineImageView.backgroundColor = .lightGray
+        isOnlineImageView.layer.cornerRadius = isOnlineImageView.frame.width/2
+    }
 }

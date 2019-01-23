@@ -64,6 +64,7 @@ final class SearchTableViewController: UIViewController {
         FirebaseClient.fetchObservableUsers().subscribe(onNext: { [weak self] fetchedUsers in
             self?.users = fetchedUsers
             self?.tableView.reloadData()
+            DispatchQueue.global(qos: .background).async { sleep(30) }
         }, onError: { [weak self] error in
             self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
         }).disposed(by: bag)
@@ -102,7 +103,9 @@ final class SearchTableViewController: UIViewController {
         let velocity = sender.velocity(in: view.superview)
         switch sender.state {
         case .changed:
+            searchUsersTextField.isEnabled = false
             delegate.updateCoordinatesDuringPan(to: translationPoint, withVelocity: velocity)
+            searchUsersTextField.isEnabled = true
         case .ended:
             delegate.updateCoordinatesAfterPan(to: translationPoint, withVelocity: velocity)
             tableView.panGestureRecognizer.isEnabled = true
@@ -112,20 +115,20 @@ final class SearchTableViewController: UIViewController {
     }
     
     /// Set dimensions and constraints for subviews
-    private func setupViews(){
+    private func setupViews() {
         drawerIconView.edgeAnchors(top: view.topAnchor, padding: UIEdgeInsets(top: 6, left: 00, bottom: 0, right: 0))
         drawerIconView.centerAnchors(centerX: view.centerXAnchor)
         drawerIconView.dimensionAnchors(height: 3, width: 32)
         searchUsersTextField.edgeAnchors(top: drawerIconView.bottomAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 6, left: 10, bottom: 0, right: -10))
         searchUsersTextField.dimensionAnchors(height: 30)
-        tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
+        tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor,  bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
     
     /// If user taps on text field from compressed, expand before editing
     func textFieldDidBeginEditing(_ textField: UITextField) {
-            delegate.animateToExpanded()
-        }
-    
+        delegate.animateToExpanded()
+    }
+
     @objc private func dismissVC(){
         dismiss(animated: true, completion: nil)
     }
@@ -146,11 +149,19 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
         cell.selectionStyle = .none
         cell.nameLabel.text = user.name
         cell.usernameLabel.text = user.email
-        cell.profileImageView.image = UIImage(named: "person-placeholder")
-        guard let url = user.profileUrl else { return cell }
+        if user.isOnline { cell.isOnlineImageView.backgroundColor = .green }
+        guard let url = user.profileUrl else {
+            cell.profileImageView.image = UIImage(named: "person-placeholder")
+            return cell
+        }
+        if let image = user.profileImage {
+            cell.profileImageView.image = image
+            return cell
+        }
         NetworkRequests.profilePictureNetworkRequest(withUrl: url) { (data) in
             DispatchQueue.main.async {
-                cell.profileImageView.image = UIImage(data: data)
+                user.profileImage = UIImage(data: data)
+                cell.profileImageView.image = user.profileImage
             }
         }
         return cell
