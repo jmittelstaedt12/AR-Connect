@@ -176,7 +176,10 @@ struct FirebaseClient {
         //            .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
         .filter { $0.value is [String: AnyObject] }
             .map { snapshot in
-                let dictionary = snapshot.value as! [String: AnyObject]
+                var dictionary = snapshot.value as! [String: AnyObject]
+                if let uid = Auth.auth().currentUser?.uid {
+                    dictionary.removeValue(forKey: uid)
+                }
                 let users = dictionary.values
                     .filter { $0 is [String: AnyObject] }
                     .map { $0 as! [String: AnyObject] }
