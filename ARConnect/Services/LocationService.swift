@@ -14,15 +14,13 @@ struct LocationService {
     let locationManager = CLLocationManager()
 
     /// Set up behavior for MKMapView object
-    func setMapProperties(for map: MKMapView, in view: UIView) {
+    static func setMapProperties(for map: MKMapView, in view: UIView, atCoordinate coordinate: CLLocationCoordinate2D, withCoordinateSpan span: Double) {
         map.frame = view.frame
         map.center = view.center
         map.showsUserLocation = true
-        if let coordinate = locationManager.location?.coordinate {
-            map.setCenter(coordinate, animated: true)
-            map.setUserTrackingMode(.follow, animated: true)
-            let region = MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-            map.setRegion(region, animated: true)
-        }
+        map.setCenter(coordinate, animated: true)
+        map.setUserTrackingMode(.follow, animated: true)
+        let region = MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: span, longitudeDelta: span))
+        map.setRegion(region, animated: true)
     }
 }

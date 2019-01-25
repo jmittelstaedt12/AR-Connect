@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import CoreLocation
+import MapKit
 
 class TestingViewController: UIViewController {
 
@@ -113,8 +113,6 @@ class TestingViewController: UIViewController {
             return
         }
         let arSessionVC = ARSessionViewController()
-        arSessionVC.startLocation = location
-        arSessionVC.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude + 0.00001, longitude: location.coordinate.longitude + 0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
         arSessionVC.currentLocation = location
         arSessionVC.tripCoordinates = mapViewController.tripCoordinates
 

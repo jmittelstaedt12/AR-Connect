@@ -10,15 +10,11 @@ import UIKit
 import ARKit
 import MapKit
 
-final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, LocationUpdateDelegate {
+final class ARSessionViewController: UIViewController {
 
-    var startLocation: CLLocation!
     var currentLocation: CLLocation!
-    var targetLocation: CLLocation!
     var tripCoordinates: [CLLocationCoordinate2D] = []
     var worldAlignment: ARWorldTrackingConfiguration.WorldAlignment!
-    var mapView: MKMapView?
-
 
     private var nodes: [JMNode] = []
     private var anchors: [ARAnchor] = []
@@ -28,7 +24,6 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         didSet {
             sceneView.translatesAutoresizingMaskIntoConstraints = false
             sceneView.delegate = self
-            sceneView.session.delegate = self
             sceneView.showsStatistics = true
             sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin]
         }
@@ -48,7 +43,7 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         return btn
     }()
 
-    var leftTapGestureRecognizer: UITapGestureRecognizer? {
+    var tapGestureRecognizer: UITapGestureRecognizer? {
         willSet {
             guard let gesture = newValue else { return }
             gesture.addTarget(self, action: #selector(didTap(sender:)))
@@ -56,6 +51,8 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
             sceneView.addGestureRecognizer(gesture)
         }
     }
+
+    var mapView: JMMKMapView?
 
     var finishedSettingNorthButton: ARSessionButton? {
         willSet {
@@ -83,6 +80,10 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         didReceiveTripSteps(tripCoordinates)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        mapView?.compassButton.isHidden = false
+    }
+
     private func addSubviews() {
         view.addSubview(sceneView)
         view.addSubview(dismissButton)
@@ -91,9 +92,10 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
 
     private func setupSubviews() {
         sceneView!.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
-        bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+                               bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
 
-        dismissButton.edgeAnchors(top: sceneView!.topAnchor, leading: sceneView!.leadingAnchor, padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
+        dismissButton.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                  padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
         dismissButton.dimensionAnchors(height: 30, width: 60)
 
         if worldAlignment == .gravity {
@@ -109,15 +111,26 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         node.geometry?.firstMaterial?.diffuse.contents = UIColor.green
         node.position = SCNVector3(0, 0, -10)
         sceneView.scene.rootNode.addChildNode(node)
-        leftTapGestureRecognizer = UITapGestureRecognizer()
+        tapGestureRecognizer = UITapGestureRecognizer()
         finishedSettingNorthButton = ARSessionButton(type: .system)
         view.addSubview(finishedSettingNorthButton!)
+        mapView = JMMKMapView()
+        view.addSubview(mapView!)
+        mapView?.isUserInteractionEnabled = false
+        let coordinateForMap = CLLocationCoordinate2D(latitude: currentLocation.coordinate.latitude+0.001, longitude: currentLocation.coordinate.longitude)
+        LocationService.setMapProperties(for: mapView!, in: view, atCoordinate: coordinateForMap, withCoordinateSpan: 0.02)
     }
 
     private func setupSubviewsForTrueNorthCalibration() {
-        finishedSettingNorthButton?.edgeAnchors(bottom: sceneView.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -32, right: 0))
+        finishedSettingNorthButton?.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor,
+                                                padding: UIEdgeInsets(top: 0, left: 0, bottom: -32, right: 0))
         finishedSettingNorthButton?.centerAnchors(centerX: sceneView.centerXAnchor)
         finishedSettingNorthButton?.dimensionAnchors(height: 48, width: 80)
+
+        mapView?.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: -12))
+        mapView?.dimensionAnchors(height: 150, width: 100)
+        mapView?.compassButton.edgeAnchors(top: mapView?.topAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
+        mapView?.compassButton.centerAnchors(centerX: mapView?.centerXAnchor)
     }
 
     @objc func didTap(sender: UITapGestureRecognizer) {
@@ -135,6 +148,10 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         for node in childNodes {
             node.removeFromParentNode()
         }
+        if let tap = tapGestureRecognizer { view.removeGestureRecognizer(tap) }
+        tapGestureRecognizer = nil
+        mapView?.removeFromSuperview()
+        mapView = nil
 
         requestNorthCalibrationButton = ARSessionButton(type: .system)
         view.addSubview(requestNorthCalibrationButton!)
@@ -193,6 +210,14 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         sceneView?.session.setWorldOrigin(relativeTransform: simd_mul(rotation, matrix_identity_float4x4))
     }
 
+    @objc private func dismissARSession() {
+        dismiss(animated: true, completion: nil)
+    }
+
+}
+
+extension ARSessionViewController: LocationUpdateDelegate {
+
     func didReceiveLocationUpdate(to location: CLLocation) {
         currentLocation = location
         updateNodesAndAnchors()
@@ -210,19 +235,9 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         createNodesAndAnchors()
     }
 
-    @objc private func dismissARSession() {
-        dismiss(animated: true, completion: nil)
-    }
-    // MARK: - ARSCNViewDelegate
+}
 
-    /*
-     // Override to create and configure nodes for anchors added to the view's session.
-     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-     let node = SCNNode()
-     
-     return node
-     }
-     */
+extension ARSessionViewController: ARSCNViewDelegate {
 
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
@@ -238,4 +253,5 @@ final class ARSessionViewController: UIViewController, ARSCNViewDelegate, ARSess
         // Reset tracking and/or remove existing anchors if consistent tracking is required
 
     }
+
 }

@@ -61,13 +61,13 @@ final class SearchTableViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-//        FirebaseClient.fetchObservableUsers().subscribe(onNext: { [weak self] fetchedUsers in
-//            self?.users = fetchedUsers
-//            self?.tableView.reloadData()
-//            DispatchQueue.global(qos: .background).async { sleep(30) }
-//        }, onError: { [weak self] error in
-//                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
-//            }).disposed(by: bag)
+        FirebaseClient.fetchObservableUsers().subscribe(onNext: { [weak self] fetchedUsers in
+            self?.users = fetchedUsers
+            self?.tableView.reloadData()
+            DispatchQueue.global(qos: .background).async { sleep(30) }
+        }, onError: { [weak self] error in
+                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+            }).disposed(by: bag)
         view.addSubview(drawerIconView)
         searchUsersTextField.delegate = self
         view.addSubview(searchUsersTextField)

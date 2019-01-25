@@ -194,11 +194,19 @@ final class MainViewController: UIViewController {
             return
         }
         let arSessionVC = ARSessionViewController()
-        arSessionVC.startLocation = location
-        arSessionVC.targetLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: location.coordinate.latitude + 0.00001, longitude: location.coordinate.longitude + 0.00001), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
         arSessionVC.currentLocation = location
         arSessionVC.tripCoordinates = mapViewController.tripCoordinates
+
+        switch mapViewController.shouldUseAlignment {
+        case .gravity:
+            createAndDisplayAlert(withTitle: "Poor Heading Accuracy", body: "Tap left and right side of the screen to adjust direction of True North")
+            arSessionVC.worldAlignment = .gravity
+        case .gravityAndHeading:
+            arSessionVC.worldAlignment = .gravityAndHeading
+        }
+
         mapViewController.delegate = arSessionVC
+        mapViewController.locationService.locationManager.stopUpdatingHeading()
         present(arSessionVC, animated: true, completion: nil)
     }
 

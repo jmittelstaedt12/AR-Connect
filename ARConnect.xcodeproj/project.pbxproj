@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		192C58AB21F9089600162543 /* JMNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192C58AA21F9089600162543 /* JMNode.swift */; };
 		1937026521727136008B46EE /* LocationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937026421727136008B46EE /* LocationHelper.swift */; };
+		194CADB821FABA4100204E28 /* JMMKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194CADB721FABA4100204E28 /* JMMKMapView.swift */; };
 		1958B81221F12CD800B1840F /* TestingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1958B81121F12CD800B1840F /* TestingViewController.swift */; };
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
 		1981CB6921A604C600B69138 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* Constants.swift */; };
@@ -51,6 +52,7 @@
 /* Begin PBXFileReference section */
 		192C58AA21F9089600162543 /* JMNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMNode.swift; sourceTree = "<group>"; };
 		1937026421727136008B46EE /* LocationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationHelper.swift; sourceTree = "<group>"; };
+		194CADB721FABA4100204E28 /* JMMKMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMMKMapView.swift; sourceTree = "<group>"; };
 		1958B81121F12CD800B1840F /* TestingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingViewController.swift; sourceTree = "<group>"; };
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		1981CB6821A604C600B69138 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -252,8 +254,9 @@
 				19DC1D9521C29C110079AD25 /* JMButton.swift */,
 				19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */,
 				19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */,
-				19A5C09C21EB86E700C2FD74 /* UserTableViewCell */,
+				194CADB721FABA4100204E28 /* JMMKMapView.swift */,
 				192C58AA21F9089600162543 /* JMNode.swift */,
+				19A5C09C21EB86E700C2FD74 /* UserTableViewCell */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";
@@ -458,6 +461,7 @@
 				19DD8D4B219486E200C01EDC /* CardDetailViewController.swift in Sources */,
 				1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */,
 				19DC1D9921C341350079AD25 /* LocationService.swift in Sources */,
+				194CADB821FABA4100204E28 /* JMMKMapView.swift in Sources */,
 				19D7E69421C445550046D737 /* MatrixOperations.swift in Sources */,
 				19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */,
 			);
