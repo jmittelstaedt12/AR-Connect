@@ -23,7 +23,27 @@ final class ConnectRequestViewController: ConnectViewController {
         super.viewDidLoad()
         view.addSubview(acceptButton)
         setViewLayouts()
-        setObservers()
+//        setObservers()
+
+        guard let requestUid = user.uid, let uid = Auth.auth().currentUser?.uid else {
+            return
+        }
+        FirebaseClient.usersRef.child(uid).updateChildValues(["isConnected": true, "connectedTo": requestUid]) { (error, _) in
+            if let err = error {
+                print(err.localizedDescription)
+                return
+            }
+            FirebaseClient.usersRef.child(requestUid).updateChildValues(["isConnected": true]) { (error, _) in
+                if let err = error {
+                    print(err.localizedDescription)
+                    return
+                }
+                FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser": ""])
+                let name = Notification.Name(rawValue: NotificationConstants.connectionNotificationKey)
+                NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user])
+            }
+        }
+        self.dismiss(animated: true, completion: nil)
     }
 
     override func setViewLayouts() {

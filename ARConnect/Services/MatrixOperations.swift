@@ -44,7 +44,7 @@ struct MatrixOperations {
     static func transformMatrix(for matrix: simd_float4x4, originLocation: CLLocation, location: CLLocation) -> simd_float4x4 {
         let distance = Float(location.distance(from: originLocation))
         let bearing = LocationHelper.calculateBearing(from: originLocation.coordinate, to: location.coordinate)
-        let position = vector_float4(0.0, 0.0, -distance, 0.0)
+        let position = vector_float4(0.0, -0.5, -distance, 0.0)
         let translationMatrix = self.translationMatrix(with: matrix_identity_float4x4, for: position)
         let rotationMatrix = self.rotateAroundY(with: matrix_identity_float4x4, for: Float(bearing))
         let transformMatrix = simd_mul(rotationMatrix, translationMatrix)

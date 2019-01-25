@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		192C58AB21F9089600162543 /* JMNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192C58AA21F9089600162543 /* JMNode.swift */; };
 		1937026521727136008B46EE /* LocationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937026421727136008B46EE /* LocationHelper.swift */; };
 		1958B81221F12CD800B1840F /* TestingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1958B81121F12CD800B1840F /* TestingViewController.swift */; };
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
@@ -48,6 +49,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		192C58AA21F9089600162543 /* JMNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMNode.swift; sourceTree = "<group>"; };
 		1937026421727136008B46EE /* LocationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationHelper.swift; sourceTree = "<group>"; };
 		1958B81121F12CD800B1840F /* TestingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingViewController.swift; sourceTree = "<group>"; };
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -251,6 +253,7 @@
 				19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */,
 				19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */,
 				19A5C09C21EB86E700C2FD74 /* UserTableViewCell */,
+				192C58AA21F9089600162543 /* JMNode.swift */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";
@@ -427,6 +430,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				192C58AB21F9089600162543 /* JMNode.swift in Sources */,
 				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
 				19997E8E21E65F4A0023C3EC /* UserTableViewCell.swift in Sources */,
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,

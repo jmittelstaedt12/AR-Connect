@@ -1,5 +1,5 @@
 //
-//  MapViewController.swift
+//  MainViewController.swift
 //  ARConnect
 //
 //  Created by Jacob Mittelstaedt on 10/9/18.
@@ -96,7 +96,7 @@ final class MainViewController: UIViewController {
     /// Setup auto layout anchors, dimensions, and other position properties for subviews
     private func setupSubviewsAndChildVCs() {
         // Setup auto layout anchors for map view
-        mapViewController.view.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+        mapViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
 
         // Setup auto layout anchors for searchViewController
         guard let searchVC = searchViewController else { return }
@@ -107,7 +107,6 @@ final class MainViewController: UIViewController {
         childSearchVCHeightConstraint?.isActive = true
         searchVC.expansionState = .compressed
         setChildSearchVCState(toState: searchVC.expansionState)
-        searchVC.view.dimensionAnchors(height: 450)
     }
 
     private func setObservers() {

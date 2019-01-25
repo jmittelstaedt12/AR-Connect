@@ -18,25 +18,45 @@ protocol LocationUpdateDelegate: AnyObject {
 final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
 
     var currentLocation: CLLocation?
-    let currentUser = Auth.auth().currentUser
+//    let currentUser = Auth.auth().currentUser
     let locationService = LocationService()
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     weak var delegate: LocationUpdateDelegate?
     var tripCoordinates: [CLLocationCoordinate2D] = []
     private var pathOverlay: MKOverlay?
+    var headingAccuracy = [Double](repeating: 360.0, count: 4)
+    var locationAccuracy = [Double](repeating: 100.0, count: 4)
+    var recentLocationIndex = 0
+    var bestReadingAccuracy = 30.1
+    enum WorldAlignment {
+        case gravity
+        case gravityAndHeading
+    }
+
+    var shouldUseAlignment = WorldAlignment.gravity
 
     let map: MKMapView = {
         let map = MKMapView()
         map.mapType = .standard
         map.isZoomEnabled = true
         map.isScrollEnabled = true
+        map.showsCompass = false
         map.translatesAutoresizingMaskIntoConstraints = false
         return map
     }()
 
+    var compassButton: MKCompassButton!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = map
+
+        compassButton = MKCompassButton(mapView: map)
+        compassButton.compassVisibility = .visible
+        compassButton.translatesAutoresizingMaskIntoConstraints = false
+        map.addSubview(compassButton)
+        compassButton.edgeAnchors(top: map.topAnchor, leading: map.leadingAnchor, padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
+
         map.delegate = self
         setupLocationModel()
         NotificationCenter.default.addObserver(self, selector: #selector(setupMapForConnection(notification:)), name: connectNotificationName, object: nil)
@@ -47,47 +67,82 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         locationService.locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
             locationService.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationService.locationManager.startUpdatingHeading()
             locationService.locationManager.startUpdatingLocation()
         }
         locationService.setMapProperties(for: map, in: super.view)
     }
 
-    @objc private func setupMapForConnection(notification: NSNotification) {
-        guard let currentLocation = currentLocation else { return }
-        guard let userInfo = notification.userInfo else {
-            print("No user attached")
-            return
-        }
-        let user = userInfo["user"] as! LocalUser
-        FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
-            guard let lat = latitude, let lon = longitude else {
-                print("coordinates not available")
+    private func setTestingConnection(location: CLLocation) {
+        let coordinate = CLLocationCoordinate2D(latitude: 40.68890581546788, longitude: -73.92998578213969)
+        NavigationClient.requestLineAndSteps(from: location.coordinate, to: coordinate, handler: { result in
+            if let error = result.error {
+                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
                 return
             }
-            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            print(currentLocation.coordinate, coordinate)
-            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate, handler: { result in
-                if let error = result.error {
-                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-                    return
-                }
-                guard let line = result.line, let steps = result.steps else {
-                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
-                    return
-                }
-                self.pathOverlay = line
-                self.draw(polyline: line)
-                self.tripCoordinates.append(contentsOf: steps.map { $0.polyline.coordinate })
-                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+            guard let line = result.line, let steps = result.steps else {
+                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
+                return
+            }
+            self.pathOverlay = line
+            self.draw(polyline: line)
+            for index in 0..<line.pointCount {
+                self.tripCoordinates.append(line.points()[index].coordinate)
+            }
+//            self.tripCoordinates.append(contentsOf: steps.map { $0.polyline.coordinate })
+            var current = self.tripCoordinates.first!
+            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+                current = step
+                return coordinates
+            }
+            for coord in self.tripCoordinates {
+                let anno = MKPointAnnotation()
+                anno.coordinate = coord
+                self.map.addAnnotation(anno)
+            }
+//            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
 
-            })
-        }
+        })
+    }
+
+    @objc private func setupMapForConnection(notification: NSNotification) {
+//        guard let currentLocation = currentLocation else { return }
+//        guard let userInfo = notification.userInfo else {
+//            print("No user attached")
+//            return
+//        }
+//        let user = userInfo["user"] as! LocalUser
+//        FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
+//            guard let lat = latitude, let lon = longitude else {
+//                print("coordinates not available")
+//                return
+//            }
+//            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+//            print(currentLocation.coordinate, coordinate)
+//            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate, handler: { result in
+//                if let error = result.error {
+//                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+//                    return
+//                }
+//                guard let line = result.line, let steps = result.steps else {
+//                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
+//                    return
+//                }
+//                self.pathOverlay = line
+//                self.draw(polyline: line)
+//                self.tripCoordinates.append(contentsOf: steps.map { $0.polyline.coordinate })
+//                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+//
+//            })
+//        }
         //        let coordinate = CLLocationCoordinate2D(latitude: 40.68790581546788, longitude: -73.92998578213969)
     }
 
     func draw(polyline line: MKPolyline) {
         map.addOverlay(line)
-        map.setVisibleMapRect(MKMapRect(origin: line.boundingMapRect.origin, size: MKMapSize(width: line.boundingMapRect.size.width, height: line.boundingMapRect.size.height)), edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
+        map.setVisibleMapRect(MKMapRect(origin: line.boundingMapRect.origin, size: MKMapSize(width: line.boundingMapRect.size.width,
+                height: line.boundingMapRect.size.height)), edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
     }
 
     func resetMap() {
@@ -105,11 +160,36 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         return polylineRenderer
     }
 
+    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        guard let locValue = manager.location else { return }
+        headingAccuracy[recentLocationIndex] = newHeading.headingAccuracy
+        locationAccuracy[recentLocationIndex] = locValue.horizontalAccuracy
+        recentLocationIndex = (recentLocationIndex + 1) % 4
+        print(headingAccuracy,locationAccuracy)
+        if headingAccuracy.contains(where: { $0 <= 30 }) && locationAccuracy.contains(where: { $0 <= 30 }) {
+            shouldUseAlignment = .gravityAndHeading
+        } else {
+            shouldUseAlignment = .gravity
+        }
+
+//        guard let delegate = delegate, newHeading.headingAccuracy < bestHeadingAccuracy, let locValue = manager.location, locValue.horizontalAccuracy <= 65 else { return }
+//        print(newHeading.headingAccuracy, locValue.horizontalAccuracy)
+//        currentLocation = locValue
+//        delegate.didReceiveLocationUpdate(to: locValue)
+//        bestHeadingAccuracy = newHeading.headingAccuracy
+//        print(bestHeadingAccuracy)
+//        manager.stopUpdatingHeading()
+    }
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let locValue = manager.location, let user = currentUser else { return }
-        currentLocation = locValue
+//        guard let locValue = manager.location, let user = currentUser else { return }
+        guard let locValue = manager.location, locValue.horizontalAccuracy < bestReadingAccuracy else { return }
+        print(locValue.horizontalAccuracy)
+        if currentLocation == nil { setTestingConnection(location: locValue) }
         delegate?.didReceiveLocationUpdate(to: locValue)
-        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude": locValue.coordinate.latitude, "longitude": locValue.coordinate.longitude])
+        currentLocation = locValue
+        bestReadingAccuracy = locValue.horizontalAccuracy
+//        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude": locValue.coordinate.latitude, "longitude": locValue.coordinate.longitude])
     }
 
     deinit {
