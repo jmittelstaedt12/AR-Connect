@@ -171,9 +171,7 @@ struct FirebaseClient {
     /// Fetch all the users currently in the database as an observable
     static func fetchObservableUsers() -> Observable<[LocalUser]> {
         if let observable = observables.usersObservable { return observable }
-        #warning("add timer to this observable")
         observables.usersObservable = rxFirebaseListener(forRef: usersRef, andEvent: .value)
-        //            .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
         .filter { $0.value is [String: AnyObject] }
             .map { snapshot in
                 var dictionary = snapshot.value as! [String: AnyObject]
@@ -197,6 +195,7 @@ struct FirebaseClient {
                 return users
             }
             .share(replay: 1)
+        
         return observables.usersObservable!
     }
 
@@ -332,7 +331,7 @@ struct FirebaseClient {
         let isInSessionObservable = createIsInSessionObservable(forUid: uid)
         return Observable.combineLatest(amInSessionObservable, isInSessionObservable) { return !$0 || !$1 }
             .filter { $0 }
-            .take(1)
+        .take(1)
     }
 
     static func fetchCoordinates(uid: String, handler: @escaping((Double?, Double?) -> Void)) {

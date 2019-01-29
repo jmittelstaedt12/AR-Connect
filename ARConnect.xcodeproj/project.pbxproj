@@ -35,6 +35,10 @@
 		19997E8E21E65F4A0023C3EC /* UserTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8C21E65F4A0023C3EC /* UserTableViewCell.swift */; };
 		19997E8F21E65F4A0023C3EC /* UserTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19997E8D21E65F4A0023C3EC /* UserTableViewCell.xib */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
+		19D53CBB21FCC7F1000984FE /* JMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBA21FCC7F1000984FE /* JMTextField.swift */; };
+		19D53CBD21FCC961000984FE /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBC21FCC961000984FE /* UIView+Extension.swift */; };
+		19D53CBF21FCC99E000984FE /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBE21FCC99E000984FE /* UIViewController+Extension.swift */; };
+		19D53CC121FCC9ED000984FE /* UIAlertController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CC021FCC9ED000984FE /* UIAlertController+Extension.swift */; };
 		19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */; };
 		19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D736B121CAE15D00D6D92A /* InitialViewController.swift */; };
 		19D7E68D21C41E9E0046D737 /* ARSessionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */; };
@@ -80,6 +84,10 @@
 		19997E8C21E65F4A0023C3EC /* UserTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableViewCell.swift; sourceTree = "<group>"; };
 		19997E8D21E65F4A0023C3EC /* UserTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UserTableViewCell.xib; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
+		19D53CBA21FCC7F1000984FE /* JMTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMTextField.swift; sourceTree = "<group>"; };
+		19D53CBC21FCC961000984FE /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
+		19D53CBE21FCC99E000984FE /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
+		19D53CC021FCC9ED000984FE /* UIAlertController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIAlertController+Extension.swift"; sourceTree = "<group>"; };
 		19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMNavigationBar.swift; sourceTree = "<group>"; };
 		19D736B121CAE15D00D6D92A /* InitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialViewController.swift; sourceTree = "<group>"; };
 		19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionButton.swift; sourceTree = "<group>"; };
@@ -129,13 +137,12 @@
 		19913A0C216CED7500174187 /* ARConnect */ = {
 			isa = PBXGroup;
 			children = (
-				19997E7E21E404FD0023C3EC /* Inherited Classes */,
-				19D7E68E21C426920046D737 /* Extensions */,
-				1981CB6821A604C600B69138 /* Constants.swift */,
 				19913A21216CEE6300174187 /* Controllers */,
-				19DC1D9721C29C200079AD25 /* Custom Views */,
 				19D7E68821C41DF60046D737 /* Services */,
 				19913A2D216D39C400174187 /* Models */,
+				19D7E68E21C426920046D737 /* Extensions */,
+				19DC1D9721C29C200079AD25 /* Custom Views */,
+				1981CB6821A604C600B69138 /* Constants.swift */,
 				19913A0D216CED7500174187 /* AppDelegate.swift */,
 				19D7E68921C41E190046D737 /* Assets */,
 				19D7E68B21C41E380046D737 /* Storyboards */,
@@ -162,6 +169,7 @@
 				199383C62195EE99001BE7FD /* CardDetailViewController */,
 				199383C72195EEAA001BE7FD /* MessageViewController */,
 				1958B81121F12CD800B1840F /* TestingViewController.swift */,
+				19997E7E21E404FD0023C3EC /* Inherited Controllers */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -192,12 +200,12 @@
 			path = MessageViewController;
 			sourceTree = "<group>";
 		};
-		19997E7E21E404FD0023C3EC /* Inherited Classes */ = {
+		19997E7E21E404FD0023C3EC /* Inherited Controllers */ = {
 			isa = PBXGroup;
 			children = (
 				19997E8821E500560023C3EC /* ConnectViewController.swift */,
 			);
-			path = "Inherited Classes";
+			path = "Inherited Controllers";
 			sourceTree = "<group>";
 		};
 		19A5C09C21EB86E700C2FD74 /* UserTableViewCell */ = {
@@ -244,6 +252,9 @@
 			isa = PBXGroup;
 			children = (
 				19D7E69121C43C5D0046D737 /* CLLocation+Extension.swift */,
+				19D53CBC21FCC961000984FE /* UIView+Extension.swift */,
+				19D53CBE21FCC99E000984FE /* UIViewController+Extension.swift */,
+				19D53CC021FCC9ED000984FE /* UIAlertController+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -251,6 +262,7 @@
 		19DC1D9721C29C200079AD25 /* Custom Views */ = {
 			isa = PBXGroup;
 			children = (
+				19D53CBA21FCC7F1000984FE /* JMTextField.swift */,
 				19DC1D9521C29C110079AD25 /* JMButton.swift */,
 				19D7E68C21C41E9E0046D737 /* ARSessionButton.swift */,
 				19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */,
@@ -433,11 +445,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				19D53CBD21FCC961000984FE /* UIView+Extension.swift in Sources */,
 				192C58AB21F9089600162543 /* JMNode.swift in Sources */,
 				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
 				19997E8E21E65F4A0023C3EC /* UserTableViewCell.swift in Sources */,
+				19D53CBF21FCC99E000984FE /* UIViewController+Extension.swift in Sources */,
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
 				19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */,
+				19D53CBB21FCC7F1000984FE /* JMTextField.swift in Sources */,
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
 				19D7E69221C43C5D0046D737 /* CLLocation+Extension.swift in Sources */,
 				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,
@@ -454,6 +469,7 @@
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
 				19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */,
+				19D53CC121FCC9ED000984FE /* UIAlertController+Extension.swift in Sources */,
 				198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */,
 				19997E8721E4F6970023C3EC /* ConnectPendingViewController.swift in Sources */,
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,

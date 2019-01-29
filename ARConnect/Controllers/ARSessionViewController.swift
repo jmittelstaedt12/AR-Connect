@@ -17,13 +17,13 @@ final class ARSessionViewController: UIViewController {
     var worldAlignment: ARWorldTrackingConfiguration.WorldAlignment!
 
     private var nodes: [JMNode] = []
-    private var anchors: [ARAnchor] = []
     private var settingNorth = false
 
     var sceneView: ARSCNView! {
         didSet {
             sceneView.translatesAutoresizingMaskIntoConstraints = false
             sceneView.delegate = self
+            sceneView.session.delegate = self
             sceneView.showsStatistics = true
             sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin]
         }
@@ -33,6 +33,7 @@ final class ARSessionViewController: UIViewController {
         didSet {
             configuration.worldAlignment = worldAlignment
             configuration.planeDetection = .horizontal
+            configuration.isLightEstimationEnabled = true
         }
     }
 
@@ -87,7 +88,11 @@ final class ARSessionViewController: UIViewController {
     private func addSubviews() {
         view.addSubview(sceneView)
         view.addSubview(dismissButton)
-        if worldAlignment == .gravity { addSubviewsForTrueNorthCalibration() }
+
+        /// If the heading accuracy is too low, setup view for setting true north manually
+        if worldAlignment == .gravity {
+            addSubviewsForTrueNorthCalibration()
+        }
     }
 
     private func setupSubviews() {
@@ -105,8 +110,9 @@ final class ARSessionViewController: UIViewController {
         }
     }
 
+    /// Add all necessary subviews to allow for true north calibration
     private func addSubviewsForTrueNorthCalibration() {
-        settingNorth = true
+        settingNorth = true     // Prevent nodes from being created while calibrating
         let node = JMNode(geometry: SCNSphere(radius: 0.1))
         node.geometry?.firstMaterial?.diffuse.contents = UIColor.green
         node.position = SCNVector3(0, 0, -10)
@@ -133,6 +139,8 @@ final class ARSessionViewController: UIViewController {
         mapView?.compassButton.centerAnchors(centerX: mapView?.centerXAnchor)
     }
 
+    /// Respond to taps during calibration. Will change north direction by +=5 degrees depending on
+    /// which side of the screen was tapped
     @objc func didTap(sender: UITapGestureRecognizer) {
         if sender.location(in: sceneView).x < sceneView.bounds.width / 2 {
             rotateWorldOrigin(withAngle: -5.0.toRadians())
@@ -148,7 +156,9 @@ final class ARSessionViewController: UIViewController {
         for node in childNodes {
             node.removeFromParentNode()
         }
-        if let tap = tapGestureRecognizer { view.removeGestureRecognizer(tap) }
+        if let tap = tapGestureRecognizer {
+            view.removeGestureRecognizer(tap)
+        }
         tapGestureRecognizer = nil
         mapView?.removeFromSuperview()
         mapView = nil
@@ -214,6 +224,10 @@ final class ARSessionViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
 
+    deinit {
+        print("deinitialized")
+    }
+
 }
 
 extension ARSessionViewController: LocationUpdateDelegate {
@@ -238,7 +252,6 @@ extension ARSessionViewController: LocationUpdateDelegate {
 }
 
 extension ARSessionViewController: ARSCNViewDelegate {
-
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
 
@@ -252,6 +265,14 @@ extension ARSessionViewController: ARSCNViewDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
 
+    }
+
+}
+
+extension ARSessionViewController: ARSessionDelegate {
+
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+//        print(frame.lightEstimate?.ambientIntensity)
     }
 
 }

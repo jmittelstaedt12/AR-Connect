@@ -26,8 +26,8 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         return lbl
     }()
 
-    let emailTextField: UITextField = {
-        let textField = UITextField()
+    let emailTextField: JMTextField = {
+        let textField = JMTextField()
         textField.placeholder = "Email"
         textField.textColor = .black
         textField.backgroundColor = .white
@@ -36,8 +36,8 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         return textField
     }()
 
-    let passwordTextField: UITextField = {
-        let textField = UITextField()
+    let passwordTextField: JMTextField = {
+        let textField = JMTextField()
         textField.placeholder = "Password"
         textField.textColor = .black
         textField.backgroundColor = .white

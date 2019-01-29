@@ -43,6 +43,8 @@ final class CardDetailViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
         view.layer.cornerRadius = 5
+        view.layer.borderColor = UIColor.blue.cgColor
+        view.layer.borderWidth = 1
     }
 
     private func setupUIElements() {

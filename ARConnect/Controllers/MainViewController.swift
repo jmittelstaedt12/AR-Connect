@@ -147,9 +147,13 @@ final class MainViewController: UIViewController {
 
         FirebaseClient.usersRef.child(currentUid).updateChildValues(["isPending": false, "isConnected": true, "connectedTo": user.uid])
 
+        if searchViewController == nil {
+            print("no search vc")
+        }
         searchViewController?.willMove(toParent: nil)
         searchViewController?.view.removeFromSuperview()
         searchViewController?.removeFromParent()
+
         searchViewController = nil
         viewARSessionButton = ARSessionButton(type: .system)
         endConnectSessionButton = ARSessionButton(type: .system)
@@ -164,7 +168,7 @@ final class MainViewController: UIViewController {
         // Setup auto layout anchors for endConnectSession button
         endConnectSessionButton!.edgeAnchors(bottom: mapViewController.view.bottomAnchor, trailing: mapViewController.view.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
 
-        view.updateConstraintsIfNeeded()
+        view.layoutIfNeeded()
 
         FirebaseClient.createEndSessionObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] _ in
             self?.handleSessionEnd()
@@ -172,6 +176,7 @@ final class MainViewController: UIViewController {
     }
 
     @objc private func handleSessionEnd() {
+        guard searchViewController == nil else { return }
         viewARSessionButton?.removeFromSuperview()
         endConnectSessionButton?.removeFromSuperview()
         viewARSessionButton = nil
@@ -229,9 +234,9 @@ extension MainViewController: SearchTableViewControllerDelegate {
         let newTopConstraint = previousYCoordinate + translationPoint.y
         let compressedYCoordinate = view.bounds.height - 50
         let expandedYCoordinate = view.bounds.height - 400
-        if newTopConstraint >= expandedYCoordinate - 20 && newTopConstraint <= compressedYCoordinate + 40 {
+        if newTopConstraint >= expandedYCoordinate && newTopConstraint <= compressedYCoordinate + 40 {
             topConstraint.constant = constraintOffset + translationPoint.y
-        } else if newTopConstraint < expandedYCoordinate && newTopConstraint >= expandedYCoordinate - 40 {
+        } else if newTopConstraint <= expandedYCoordinate && newTopConstraint >= expandedYCoordinate - 40 {
             expandedHeight = 400 + abs(newTopConstraint - expandedYCoordinate)
         }
         searchVC.view.isUserInteractionEnabled = false

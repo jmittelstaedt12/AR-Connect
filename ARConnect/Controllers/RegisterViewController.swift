@@ -42,8 +42,8 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         return view
     }()
 
-    let nameTextField: UITextField = {
-        let textField = UITextField()
+    let nameTextField: JMTextField = {
+        let textField = JMTextField()
         textField.placeholder = "Username"
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -51,8 +51,8 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
 
     var nameSeparatorView: UIView?
 
-    let emailTextField: UITextField = {
-        let textField = UITextField()
+    let emailTextField: JMTextField = {
+        let textField = JMTextField()
         textField.placeholder = "Email"
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -60,8 +60,8 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
 
     var emailSeparatorView: UIView?
 
-    let passwordTextField: UITextField = {
-        let textField = UITextField()
+    let passwordTextField: JMTextField = {
+        let textField = JMTextField()
         textField.placeholder = "Password"
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.isSecureTextEntry = true
@@ -70,7 +70,7 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
 
     let registerButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.backgroundColor = UIColor(red: 80, green: 101, blue: 161)
+        btn.backgroundColor = .lightGray
         btn.setTitle("Register", for: .normal)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitleColor(UIColor.white, for: .normal)
@@ -81,7 +81,7 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 61, green: 91, blue: 151)
+        view.backgroundColor = ColorConstants.primaryColor
 
         nameSeparatorView = createSeparatorView()
         emailSeparatorView = createSeparatorView()

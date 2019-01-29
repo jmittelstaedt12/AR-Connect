@@ -33,13 +33,14 @@ final class SearchTableViewController: UIViewController {
         return view
     }()
 
-    let searchUsersTextField: UITextField = {
-        let textField = UITextField()
+    let searchUsersTextField: JMTextField = {
+        let textField = JMTextField()
         textField.backgroundColor = .white
         textField.placeholder = "Find a friend"
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.layer.borderColor = UIColor.black.cgColor
         textField.layer.cornerRadius = 5
+        textField.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
         return textField
     }()
 
@@ -64,10 +65,9 @@ final class SearchTableViewController: UIViewController {
         FirebaseClient.fetchObservableUsers().subscribe(onNext: { [weak self] fetchedUsers in
             self?.users = fetchedUsers
             self?.tableView.reloadData()
-            DispatchQueue.global(qos: .background).async { sleep(30) }
         }, onError: { [weak self] error in
-                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
-            }).disposed(by: bag)
+            self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+        }).disposed(by: bag)
         view.addSubview(drawerIconView)
         searchUsersTextField.delegate = self
         view.addSubview(searchUsersTextField)
@@ -131,6 +131,10 @@ final class SearchTableViewController: UIViewController {
 
     @objc private func dismissVC() {
         dismiss(animated: true, completion: nil)
+    }
+
+    deinit {
+        print("deinitialized")
     }
 }
 
