@@ -31,7 +31,7 @@ struct NetworkRequests {
         let originString = "origin=\(coordinate.latitude),\(coordinate.longitude)"
         let destinationString = "&destination=\(destination.latitude),\(destination.longitude)"
         let modeString = "&mode=walking"
-        let keyString = "&key=AIzaSyC4-cZdDc2t--xQ7tF8swf3stVVrEgWrUo"
+        let keyString = "&key=\(SensitiveData.api_key)"
         let fullUrlString = baseUrl+originString+destinationString+modeString+keyString
         guard let url = URL(string: fullUrlString) else { return }
         let configuration = URLSessionConfiguration.default
