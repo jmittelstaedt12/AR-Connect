@@ -27,52 +27,52 @@ struct NetworkRequests {
     }
 
     static func directionsRequest(from coordinate: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D, completion: @escaping ([CLLocationCoordinate2D]?) -> Void) {
-//        let baseUrl = "https://maps.googleapis.com/maps/api/directions/json?"
-//        let originString = "origin=\(coordinate.latitude),\(coordinate.longitude)"
-//        let destinationString = "&destination=\(destination.latitude),\(destination.longitude)"
-//        let modeString = "&mode=walking"
-//        let keyString = "&key=\(SensitiveData.apiKey)"
-//        let fullUrlString = baseUrl+originString+destinationString+modeString+keyString
-//        guard let url = URL(string: fullUrlString) else { return }
-//        let configuration = URLSessionConfiguration.default
-//        configuration.waitsForConnectivity = true
-//        let session = URLSession(configuration: configuration)
-//        session.dataTask(with: URLRequest(url: url)) { (data, _, error) in
-//            if let error = error {
-//                print(error.localizedDescription)
-//            } else {
-//                guard let data = data, let json = try? JSONSerialization.jsonObject(with: data), let dictionary = json as? [String: Any] else {
-//                    print("error getting data")
-//                    return
-//                }
-//
-//                let pointsData = dictionary["routes"]
-//                    .map { $0 as? [Any] ?? [] }
-//                    .map { $0.first as? [String: AnyObject] ?? [:] }
-//                    .map { $0["overview_polyline"] as? [String: AnyObject] ?? [:] }
-//                    .map { $0["points"] as? String ?? "" }
-//                guard let points = pointsData, !points.isEmpty else { return }
-//                print(points)
-//                completion(decodePolyline(points))
-//
-//                //                print(dictionary)
-//                //                let legs = dictionary["routes"]
-//                //                    .map { $0 as? [Any] ?? [] }
-//                //                    .map { $0.first as? [String: AnyObject] ?? [:] }
-//                //                    .map { $0["legs"] as? [Any] ?? [] }
-//                //                    .map { $0.first as? [String: AnyObject] ?? [:] }
-//                //                let steps = legs
-//                //                    .map { $0["steps"] as? [[String: AnyObject]] ?? [] }
-//                //                let polyline = steps?
-//                //                    .map { $0["polyline"] as? [String: AnyObject] ?? [:] }
-//                //                    .map { $0["points"] as? String ?? "" }
-//                //                    .reduce("") { $0 + $1 }
-//                //                guard let line = polyline, !line.isEmpty else { return }
-//                //                print(line)
-//            }
-//        }.resume()
-        let points = "oziwFdgfbMi@oJMBqCZNdC"
-        completion(decodePolyline(points))
+        let baseUrl = "https://maps.googleapis.com/maps/api/directions/json?"
+        let originString = "origin=\(coordinate.latitude),\(coordinate.longitude)"
+        let destinationString = "&destination=\(destination.latitude),\(destination.longitude)"
+        let modeString = "&mode=walking"
+        let keyString = "&key=\(SensitiveData.apiKey)"
+        let fullUrlString = baseUrl+originString+destinationString+modeString+keyString
+        guard let url = URL(string: fullUrlString) else { return }
+        let configuration = URLSessionConfiguration.default
+        configuration.waitsForConnectivity = true
+        let session = URLSession(configuration: configuration)
+        session.dataTask(with: URLRequest(url: url)) { (data, _, error) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                guard let data = data, let json = try? JSONSerialization.jsonObject(with: data), let dictionary = json as? [String: Any] else {
+                    print("error getting data")
+                    return
+                }
+
+                let pointsData = dictionary["routes"]
+                    .map { $0 as? [Any] ?? [] }
+                    .map { $0.first as? [String: AnyObject] ?? [:] }
+                    .map { $0["overview_polyline"] as? [String: AnyObject] ?? [:] }
+                    .map { $0["points"] as? String ?? "" }
+                guard let points = pointsData, !points.isEmpty else { return }
+                print(points)
+                completion(decodePolyline(points))
+
+                //                print(dictionary)
+                //                let legs = dictionary["routes"]
+                //                    .map { $0 as? [Any] ?? [] }
+                //                    .map { $0.first as? [String: AnyObject] ?? [:] }
+                //                    .map { $0["legs"] as? [Any] ?? [] }
+                //                    .map { $0.first as? [String: AnyObject] ?? [:] }
+                //                let steps = legs
+                //                    .map { $0["steps"] as? [[String: AnyObject]] ?? [] }
+                //                let polyline = steps?
+                //                    .map { $0["polyline"] as? [String: AnyObject] ?? [:] }
+                //                    .map { $0["points"] as? String ?? "" }
+                //                    .reduce("") { $0 + $1 }
+                //                guard let line = polyline, !line.isEmpty else { return }
+                //                print(line)
+            }
+        }.resume()
+//        let points = "ewowFrztbMi@a@n@mBkByAy@q@"
+//        completion(decodePolyline(points))
     }
 
     static func decodePolyline(_ encoded: String) -> [CLLocationCoordinate2D]? {
@@ -103,22 +103,6 @@ struct NetworkRequests {
             isLat.toggle()
         }
         return coordinates
-
-        // Functional approach:
-        //        indices.enumerated()
-        //            .map { index -> String in
-        //                let startIndex = encodedValues.index(encodedValues.startIndex, offsetBy: indices[index.offset])
-        //                let endIndex = (index.offset != indices.count-1) ? encodedValues.index(encodedValues.startIndex, offsetBy: indices[index.offset+1]) : encodedValues.endIndex
-        //                return String(encodedValues[startIndex..<endIndex]).unicodeScalars
-        //                    .map { ($0.value - 63) % 32 }
-        //                    .map { String($0, radix: 2) }
-        //                    .map { String(repeating: "0", count: 5-$0.count) + $0 }
-        //                    .reduce("") { $0 + $1 }
-        //            }
-        //            .map { Int($0, radix: 2) ?? 0 }
-        //            .map { ($0 & 1) != 0 ? ~($0 >> 1) : ($0 >> 1) }
-        //            .map { Double($0) / 1E5 }
-
     }
 
 }

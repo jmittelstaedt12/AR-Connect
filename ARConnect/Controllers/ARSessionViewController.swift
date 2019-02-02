@@ -17,6 +17,7 @@ final class ARSessionViewController: UIViewController {
     var distanceTraveled: CLLocationDistance?
     var tripCoordinates: [CLLocationCoordinate2D] = []
     var worldAlignment: ARWorldTrackingConfiguration.WorldAlignment!
+//    var delegate: ARSessionViewControllerDelegate?
 
     private var nodes: [JMNode] = []
     private var settingNorth = false
@@ -42,7 +43,7 @@ final class ARSessionViewController: UIViewController {
     let dismissButton: ARSessionButton = {
         let btn = ARSessionButton(type: .system)
         btn.setTitle("Dismiss", for: .normal)
-        btn.addTarget(nil, action: #selector(dismissARSession), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(dismissARSession), for: .touchUpInside)
         return btn
     }()
 
@@ -80,7 +81,7 @@ final class ARSessionViewController: UIViewController {
         sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
         addSubviews()
         setupSubviews()
-        didReceiveTripSteps(tripCoordinates)
+//        didReceiveTripSteps(tripCoordinates)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -106,6 +107,7 @@ final class ARSessionViewController: UIViewController {
         dismissButton.dimensionAnchors(height: 30, width: 60)
 
         if worldAlignment == .gravity {
+            settingNorth = true
             setupSubviewsForTrueNorthCalibration()
         } else {
             createNodesAndAnchors()
@@ -114,29 +116,30 @@ final class ARSessionViewController: UIViewController {
 
     /// Add all necessary subviews to allow for true north calibration
     private func addSubviewsForTrueNorthCalibration() {
-        settingNorth = true     // Prevent nodes from being created while calibrating
         let node = JMNode(geometry: SCNSphere(radius: 0.1))
         node.geometry?.firstMaterial?.diffuse.contents = UIColor.green
         node.position = SCNVector3(0, 0, -10)
         sceneView.scene.rootNode.addChildNode(node)
         tapGestureRecognizer = UITapGestureRecognizer()
+        view.addGestureRecognizer(tapGestureRecognizer!)
         finishedSettingNorthButton = ARSessionButton(type: .system)
         view.addSubview(finishedSettingNorthButton!)
         mapView = JMMKMapView()
         view.addSubview(mapView!)
         mapView?.isUserInteractionEnabled = false
         let coordinateForMap = CLLocationCoordinate2D(latitude: currentLocation.coordinate.latitude+0.001, longitude: currentLocation.coordinate.longitude)
-        LocationService.setMapProperties(for: mapView!, in: view, atCoordinate: coordinateForMap, withCoordinateSpan: 0.02)
+        LocationService.setMapProperties(for: mapView!, in: view, atCoordinate: coordinateForMap, withCoordinateSpan: 0.01)
     }
 
     private func setupSubviewsForTrueNorthCalibration() {
-        finishedSettingNorthButton?.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor,
-                                                padding: UIEdgeInsets(top: 0, left: 0, bottom: -32, right: 0))
+        finishedSettingNorthButton?.edgeAnchors(bottom: mapView?.topAnchor,
+                                                padding: UIEdgeInsets(top: 0, left: 0, bottom: -16, right: 0))
         finishedSettingNorthButton?.centerAnchors(centerX: sceneView.centerXAnchor)
         finishedSettingNorthButton?.dimensionAnchors(height: 48, width: 80)
 
-        mapView?.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: -12))
-        mapView?.dimensionAnchors(height: 150, width: 100)
+        mapView?.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: 0))
+        mapView?.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
+        mapView?.dimensionAnchors(height: 150, width: 500)
         mapView?.compassButton.edgeAnchors(top: mapView?.topAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
         mapView?.compassButton.centerAnchors(centerX: mapView?.centerXAnchor)
     }
@@ -175,15 +178,14 @@ final class ARSessionViewController: UIViewController {
     }
 
     @objc private func setupViewForNorthCalibration() {
+        settingNorth = true     // Prevent nodes from being created while calibrating
         requestNorthCalibrationButton?.removeFromSuperview()
         requestNorthCalibrationButton = nil
         let childNodes = sceneView.scene.rootNode.childNodes
         for node in childNodes {
             node.removeFromParentNode()
-            if let jmNode = node as? JMNode, let anchor = jmNode.anchor {
-                sceneView.session.remove(anchor: anchor)
-            }
         }
+        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
         addSubviewsForTrueNorthCalibration()
         setupSubviewsForTrueNorthCalibration()
     }
@@ -217,6 +219,12 @@ final class ARSessionViewController: UIViewController {
         }
     }
 
+//    private func setTimerForReconfigure() {
+//        Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
+//
+//        }
+//    }
+
     private func rotateWorldOrigin(withAngle angle: Double) {
         let rotation = MatrixOperations.rotateAroundY(with: matrix_identity_float4x4, for: Float(angle))
         sceneView?.session.setWorldOrigin(relativeTransform: simd_mul(rotation, matrix_identity_float4x4))
@@ -230,6 +238,9 @@ final class ARSessionViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
 
+    deinit {
+        print("deinitialized")
+    }
 }
 
 extension ARSessionViewController: LocationUpdateDelegate {

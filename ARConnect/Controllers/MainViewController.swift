@@ -212,7 +212,7 @@ final class MainViewController: UIViewController {
             arSessionVC.worldAlignment = .gravityAndHeading
         }
 
-        mapViewController.delegate = arSessionVC
+//        mapViewController.delegate = arSessionVC
         mapViewController.locationService.locationManager.stopUpdatingHeading()
         present(arSessionVC, animated: true, completion: nil)
     }

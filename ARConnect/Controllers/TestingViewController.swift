@@ -13,6 +13,7 @@ class TestingViewController: UIViewController {
 
     let mapViewController = MapViewController()
     var searchVC: SearchTableViewController? = SearchTableViewController()
+    weak var arSessionVC: ARSessionViewController?
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var childSearchVCHeightConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
@@ -125,7 +126,9 @@ class TestingViewController: UIViewController {
 //            arSessionVC.worldAlignment = .gravityAndHeading
 //        }
         arSessionVC.worldAlignment = .gravity
-        mapViewController.delegate = arSessionVC
+        
+        self.arSessionVC = arSessionVC
+        mapViewController.delegate = self.arSessionVC
         mapViewController.locationService.locationManager.stopUpdatingHeading()
         present(arSessionVC, animated: true, completion: nil)
     }

@@ -57,9 +57,9 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
             locationService.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationService.locationManager.startUpdatingHeading()
             locationService.locationManager.startUpdatingLocation()
-//            Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
-//                self?.willUpdateCurrentLocation = true
-//            }
+            Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
+                self?.willUpdateCurrentLocation = true
+            }
         }
 
         guard let coordinate = locationService.locationManager.location?.coordinate else { return }
@@ -67,7 +67,6 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     }
 
     private func setTestingConnection(location: CLLocation) {
-//        let coordinate = CLLocationCoordinate2D(latitude: 40.68890581546788, longitude: -73.92998578213969)
         let coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.001,
                                                 longitude: location.coordinate.longitude+0.001)
         NetworkRequests.directionsRequest(from: location.coordinate, to: coordinate) { [weak self] points in
@@ -79,9 +78,12 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
                 current = step
                 return coordinates
             }
-            self.draw(polyline: MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count))
+            DispatchQueue.main.async {
+                self.draw(polyline: MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count))
+            }
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
         }
+
 //        NavigationClient.requestLineAndSteps(from: location.coordinate, to: coordinate, handler: { result in
 //            if let error = result.error {
 //                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
@@ -190,7 +192,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard willUpdateCurrentLocation, let locValue = manager.location, locValue.horizontalAccuracy < 30.0, let user = currentUser else { return }
+        guard willUpdateCurrentLocation, let locValue = manager.location, let user = currentUser else { return }
         FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude": locValue.coordinate.latitude, "longitude": locValue.coordinate.longitude])
 
         if currentLocation == nil { setTestingConnection(location: locValue) }
