@@ -42,53 +42,53 @@ struct FirebaseClient {
     }
 
     /// Request to authorize a new user and add them to database
-    static func createNewUser(name: String, email: String, password: String, pngData: Data?, handler: @escaping (() -> Void)) throws {
-        guard let png = pngData else {
-            registerNewUser(name: name, email: email, password: password)
+    static func createNewUser(user: RegisterUser, handler: @escaping ((Error?) -> Void)) {
+        guard let png = user.pngData else {
+            registerNewUser(user: user, handler: handler)
             return
         }
         let imageName = NSUUID().uuidString
         let storageRef = Storage.storage().reference().child("\(imageName).png")
         storageRef.putData(png, metadata: nil) { (_, error) in
             if let err = error {
-                print(err.localizedDescription)
+                handler(err)
                 return
             }
             storageRef.downloadURL { (url, error) in
                 if let err = error {
-                    print(err.localizedDescription)
+                    handler(err)
                     return
                 }
-                registerNewUser(name: name, email: email, password: password, imageUrl: url?.absoluteString, handler: { handler() })
+                registerNewUser(user: user, imageUrl: url?.absoluteString, handler: handler)
             }
         }
     }
 
-    static func registerNewUser(name: String, email: String, password: String, imageUrl: String? = nil, handler: (() -> Void)? = nil) {
-        Auth.auth().createUser(withEmail: email, password: password) { (data, error) in
+    static func registerNewUser(user: RegisterUser, imageUrl: String? = nil, handler: @escaping ((Error?) -> Void)) {
+        Auth.auth().createUser(withEmail: user.email, password: user.password) { (data, error) in
             if let err = error {
-                print(err.localizedDescription)
+                handler(err)
                 return
             }
             guard let uid = data?.user.uid else { return }
             let usersReference = FirebaseClient.usersRef.child(uid)
-            let values = ["email": email,
-                "name": name,
-                "requestingUser": "",
-                "connectedTo": "",
-                "pendingRequest": false,
-                "isConnected": false,
-                "latitude": 0,
-                "longitude": 0,
-                "profileImageUrl": imageUrl ?? "",
-                "isOnline": false] as [String: Any]
+            let values = ["email": user.email,
+                          "name": "\(user.firstName!) \(user.lastName!)",
+                          "requestingUser": "",
+                          "connectedTo": "",
+                          "pendingRequest": false,
+                          "isConnected": false,
+                          "latitude": 0,
+                          "longitude": 0,
+                          "profileImageUrl": imageUrl ?? "",
+                          "isOnline": false] as [String: Any]
             usersReference.updateChildValues(values, withCompletionBlock: { (error, _) in
-                        if let err = error {
-                            print(err.localizedDescription)
-                            return
-                        }
-                        if let handler = handler { handler() }
-                })
+                if let err = error {
+                    handler(err)
+                    return
+                }
+                handler(nil)
+            })
         }
     }
 
@@ -131,10 +131,11 @@ struct FirebaseClient {
         userRef.child("requestingUser").onDisconnectSetValue("")
     }
 
-    static func rxFirebaseSingleEvent(forRef ref: DatabaseReference, andEvent event: DataEventType) -> Observable<DataSnapshot> {
+    static func rxFirebaseSingleEvent(forRef ref: DatabaseQuery, andEvent event: DataEventType) -> Observable<DataSnapshot> {
         return Observable.create { (observer) -> Disposable in
             ref.observeSingleEvent(of: event, with: { (snapshot) in
                 observer.onNext(snapshot)
+                observer.onCompleted()
             }, withCancel: { (error) in
                     observer.onError(error)
                 })
@@ -142,16 +143,14 @@ struct FirebaseClient {
         }
     }
 
-    static func rxFirebaseListener(forRef ref: DatabaseReference, andEvent event: DataEventType) -> Observable<DataSnapshot> {
+    static func rxFirebaseListener(forRef ref: DatabaseQuery, andEvent event: DataEventType) -> Observable<DataSnapshot> {
         return Observable.create { (observer) -> Disposable in
-            let handle = ref.observe(event, with: { (snapshot) in
+            ref.observe(event, with: { (snapshot) in
                 observer.onNext(snapshot)
             }, withCancel: { (error) in
-                    observer.onError(error)
-                })
-            return Disposables.create {
-                ref.removeObserver(withHandle: handle)
-            }
+                observer.onError(error)
+            })
+            return Disposables.create()
         }
     }
 
@@ -160,7 +159,7 @@ struct FirebaseClient {
             .filter { $0.value is [String: AnyObject] }
             .map { snapshot in
                 let dictionary = snapshot.value as! [String: AnyObject]
-                let user = LocalUser()
+                var user = LocalUser()
                 user.name = dictionary["name"] as? String
                 user.email = dictionary["email"] as? String
                 user.uid = uid
@@ -168,21 +167,26 @@ struct FirebaseClient {
         }
     }
 
+    enum FetchUsersObservableType {
+        case singleEvent
+        case continuous
+    }
+
     /// Fetch all the users currently in the database as an observable
-    static func fetchObservableUsers() -> Observable<[LocalUser]> {
-        if let observable = observables.usersObservable { return observable }
-        observables.usersObservable = rxFirebaseListener(forRef: usersRef, andEvent: .value)
+    static func fetchObservableUsers(withObservableType type: FetchUsersObservableType, queryReference: DatabaseQuery? = nil) -> Observable<[LocalUser]> {
+        if let observable = observables.usersObservable, type == .continuous { return observable }
+        observables.usersObservable = rxFirebaseListener(forRef: queryReference ?? usersRef, andEvent: .value)
         .filter { $0.value is [String: AnyObject] }
             .map { snapshot in
                 var dictionary = snapshot.value as! [String: AnyObject]
                 if let uid = Auth.auth().currentUser?.uid {
                     dictionary.removeValue(forKey: uid)
                 }
-                let users = dictionary.values
+                var users = dictionary.values
                     .filter { $0 is [String: AnyObject] }
                     .map { $0 as! [String: AnyObject] }
                     .map { userDictionary -> LocalUser in
-                        let user = LocalUser()
+                        var user = LocalUser()
                         user.name = userDictionary["name"] as? String
                         user.email = userDictionary["email"] as? String
                         user.isOnline = userDictionary["isOnline"] as? Bool
@@ -195,8 +199,12 @@ struct FirebaseClient {
                 return users
             }
             .share(replay: 1)
-        
-        return observables.usersObservable!
+        switch type {
+        case .continuous:
+            return observables.usersObservable!
+        case .singleEvent:
+            return observables.usersObservable!.take(1)
+        }
     }
 
     /// Create observable that fetches requesting user

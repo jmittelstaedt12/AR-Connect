@@ -9,5 +9,5 @@
 import Foundation
 
 struct SensitiveData {
-    static let api_key = "AIzaSyC4-cZdDc2t--xQ7tF8swf3stVVrEgWrUo"
+    static let apiKey = "AIzaSyCzXQ5aRj19VcSUTLwpqTIMJsvbXjQib9Q"
 }

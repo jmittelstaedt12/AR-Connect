@@ -13,8 +13,7 @@ struct ColorConstants {
 }
 
 struct LocationConstants {
-    static let metersPerRadiansLatitude = 6373000.0
-    static let metersPerRadiansLongitude = 5602900.0
+    static let radius = 6.371 * 1E6
 }
 
 struct NotificationConstants {

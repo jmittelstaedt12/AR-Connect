@@ -17,6 +17,7 @@ protocol LocationUpdateDelegate: AnyObject {
 
 final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
 
+    // MARK: Variables
     var currentLocation: CLLocation?
     let currentUser = Auth.auth().currentUser
     let locationService = LocationService()
@@ -28,7 +29,8 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     var locationAccuracy = [Double](repeating: 100.0, count: 4)
     var recentLocationIndex = 0
     var bestReadingAccuracy = 30.1
-    
+    var willUpdateCurrentLocation = true
+
     let map: JMMKMapView = JMMKMapView()
 
     enum WorldAlignment {
@@ -55,6 +57,9 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
             locationService.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationService.locationManager.startUpdatingHeading()
             locationService.locationManager.startUpdatingLocation()
+//            Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
+//                self?.willUpdateCurrentLocation = true
+//            }
         }
 
         guard let coordinate = locationService.locationManager.location?.coordinate else { return }
@@ -65,34 +70,45 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
 //        let coordinate = CLLocationCoordinate2D(latitude: 40.68890581546788, longitude: -73.92998578213969)
         let coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.001,
                                                 longitude: location.coordinate.longitude+0.001)
-//        NetworkRequests.directionsRequest(from: location.coordinate, to: coordinate)
-        NavigationClient.requestLineAndSteps(from: location.coordinate, to: coordinate, handler: { result in
-            if let error = result.error {
-                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-                return
-            }
-
-            guard let line = result.line else {
-                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
-                return
-            }
-
-            self.pathOverlay = line
-            self.draw(polyline: line)
-
-            guard line.pointCount > 0 else { return }
-            for index in 0..<line.pointCount {
-                self.tripCoordinates.append(line.points()[index].coordinate)
-            }
+        NetworkRequests.directionsRequest(from: location.coordinate, to: coordinate) { [weak self] points in
+            guard let self = self, points != nil else { return }
+            self.tripCoordinates = points!
             var current = self.tripCoordinates.first!
             self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
                 let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
                 current = step
                 return coordinates
             }
+            self.draw(polyline: MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count))
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-
-        })
+        }
+//        NavigationClient.requestLineAndSteps(from: location.coordinate, to: coordinate, handler: { result in
+//            if let error = result.error {
+//                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+//                return
+//            }
+//
+//            guard let line = result.line else {
+//                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
+//                return
+//            }
+//
+////            self.pathOverlay = line
+////            self.draw(polyline: line)
+//
+//            guard line.pointCount > 0 else { return }
+//            for index in 0..<line.pointCount {
+//                self.tripCoordinates.append(line.points()[index].coordinate)
+//            }
+//            var current = self.tripCoordinates.first!
+//            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+//                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+//                current = step
+//                return coordinates
+//            }
+//            self.draw(polyline: MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count))
+//            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+//        })
     }
 
     @objc private func setupMapForConnection(notification: NSNotification) {
@@ -174,15 +190,13 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-
-        guard let locValue = manager.location, let user = currentUser else { return }
+        guard willUpdateCurrentLocation, let locValue = manager.location, locValue.horizontalAccuracy < 30.0, let user = currentUser else { return }
         FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude": locValue.coordinate.latitude, "longitude": locValue.coordinate.longitude])
 
-//        if currentLocation == nil { setTestingConnection(location: locValue) }
-        guard locValue.horizontalAccuracy < bestReadingAccuracy else { return }
+        if currentLocation == nil { setTestingConnection(location: locValue) }
         delegate?.didReceiveLocationUpdate(to: locValue)
         currentLocation = locValue
-        bestReadingAccuracy = locValue.horizontalAccuracy
+//        bestReadingAccuracy = locValue.horizontalAccuracy
     }
 
     deinit {

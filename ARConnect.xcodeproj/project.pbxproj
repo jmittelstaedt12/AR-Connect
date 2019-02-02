@@ -14,7 +14,7 @@
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
 		1981CB6921A604C600B69138 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* Constants.swift */; };
 		1986BBC621F2506900DA9611 /* NetworkRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1986BBC521F2506900DA9611 /* NetworkRequests.swift */; };
-		198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198DA989218A5C230054E1BD /* LocalUser.swift */; };
+		198DA98A218A5C230054E1BD /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198DA989218A5C230054E1BD /* User.swift */; };
 		19913A0E216CED7500174187 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A0D216CED7500174187 /* AppDelegate.swift */; };
 		19913A10216CED7600174187 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 19913A0F216CED7600174187 /* art.scnassets */; };
 		19913A12216CED7600174187 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A11216CED7600174187 /* RegisterViewController.swift */; };
@@ -62,7 +62,7 @@
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		1981CB6821A604C600B69138 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		1986BBC521F2506900DA9611 /* NetworkRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequests.swift; sourceTree = "<group>"; };
-		198DA989218A5C230054E1BD /* LocalUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUser.swift; sourceTree = "<group>"; };
+		198DA989218A5C230054E1BD /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		19913A0A216CED7500174187 /* ARConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19913A0D216CED7500174187 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19913A0F216CED7600174187 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -180,7 +180,7 @@
 		19913A2D216D39C400174187 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				198DA989218A5C230054E1BD /* LocalUser.swift */,
+				198DA989218A5C230054E1BD /* User.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -473,7 +473,7 @@
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
 				19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */,
 				19D53CC121FCC9ED000984FE /* UIAlertController+Extension.swift in Sources */,
-				198DA98A218A5C230054E1BD /* LocalUser.swift in Sources */,
+				198DA98A218A5C230054E1BD /* User.swift in Sources */,
 				19997E8721E4F6970023C3EC /* ConnectPendingViewController.swift in Sources */,
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
 				19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */,

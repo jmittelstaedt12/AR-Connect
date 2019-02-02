@@ -96,27 +96,39 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     /// Set auto layout anchors for all subviews
     private func setSubviewConstraints() {
         // set x, y, width, and height constraints for arConnectLabel
-        arConnectLabel.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 100, left: 32, bottom: 0, right: -32))
+        arConnectLabel.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,
+                                   leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                   trailing: view.safeAreaLayoutGuide.trailingAnchor,
+                                   padding: UIEdgeInsets(top: 100, left: 32, bottom: 0, right: -32))
         arConnectLabel.dimensionAnchors(height: 40)
 
-        emailTextField.edgeAnchors(top: arConnectLabel.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 60, left: 16, bottom: 0, right: -16))
+        emailTextField.edgeAnchors(top: arConnectLabel.bottomAnchor,
+                                   leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                   trailing: view.safeAreaLayoutGuide.trailingAnchor,
+                                   padding: UIEdgeInsets(top: 60, left: 16, bottom: 0, right: -16))
         emailTextField.dimensionAnchors(height: 40)
 
-        passwordTextField.edgeAnchors(top: emailTextField.bottomAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 16, left: 16, bottom: 0, right: -16))
+        passwordTextField.edgeAnchors(top: emailTextField.bottomAnchor,
+                                      leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                      trailing: view.safeAreaLayoutGuide.trailingAnchor,
+                                      padding: UIEdgeInsets(top: 16, left: 16, bottom: 0, right: -16))
         passwordTextField.dimensionAnchors(height: 40)
 
-        logInButton.edgeAnchors(top: passwordTextField.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
+        logInButton.edgeAnchors(top: passwordTextField.bottomAnchor,
+                                padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
         logInButton.dimensionAnchors(height: 40, width: view.frame.width, widthMultiplier: 1 / 3)
         logInButton.centerAnchors(centerX: view.centerXAnchor)
 
-        signUpButton.edgeAnchors(top: logInButton.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
+        signUpButton.edgeAnchors(top: logInButton.bottomAnchor,
+                                 padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
         signUpButton.dimensionAnchors(height: 40, width: view.frame.width, widthMultiplier: 1 / 3)
         signUpButton.centerAnchors(centerX: view.centerXAnchor)
     }
 
     /// Request to login to database and segue into MainVC
     @objc private func logIn() {
-        guard let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
+        guard let email = emailTextField.text, !email.isEmpty,
+            let password = passwordTextField.text, !password.isEmpty else {
             createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
             return
         }
@@ -128,8 +140,12 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     }
 
     deinit {
-        if let keyboardWillShow = keyboardWillShowObserver { NotificationCenter.default.removeObserver(keyboardWillShow) }
-        if let keyboardWillHide = keyboardWillHideObserver { NotificationCenter.default.removeObserver(keyboardWillHide) }
+        if let keyboardWillShow = keyboardWillShowObserver {
+            NotificationCenter.default.removeObserver(keyboardWillShow)
+        }
+        if let keyboardWillHide = keyboardWillHideObserver {
+            NotificationCenter.default.removeObserver(keyboardWillHide)
+        }
     }
 }
 
@@ -147,21 +163,27 @@ extension KeyboardHandler where Self: UIViewController {
 
     /// Add observers for keyboardWillShow and keyboardWillHide
     func startObservingKeyboardChanges() {
-        keyboardWillShowObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) { (notification) in
+        keyboardWillShowObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification,
+                                                                          object: nil, queue: nil) { (notification) in
             self.keyboardWillShow(notification: notification)
         }
 
-        keyboardWillHideObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) { (notification) in
+        keyboardWillHideObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification,
+                                                                          object: nil, queue: nil) { (notification) in
             self.keyboardWillHide(notification: notification)
         }
     }
 
     /// When keyboard appears, animate view upwards
     func keyboardWillShow(notification: Notification) {
-        guard keyboardWillShow, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
+        guard keyboardWillShow, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
+            let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
         UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
-                self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y - 100, width: self.view.bounds.width, height: self.view.bounds.height)
-            }, completion: nil)
+            self.view.frame = CGRect(x: self.view.frame.origin.x,
+                                     y: self.view.frame.origin.y - 100,
+                                     width: self.view.bounds.width,
+                                     height: self.view.bounds.height)
+        }, completion: nil)
         keyboardWillShow = false
         keyboardWillHide = true
     }
@@ -170,8 +192,9 @@ extension KeyboardHandler where Self: UIViewController {
     func keyboardWillHide(notification: Notification) {
         guard keyboardWillHide, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
         UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
-                self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y + 100, width: self.view.bounds.width, height: self.view.bounds.height)
-            }, completion: nil)
+            self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y + 100,
+                                     width: self.view.bounds.width, height: self.view.bounds.height)
+        }, completion: nil)
         keyboardWillHide = false
         keyboardWillShow = true
     }

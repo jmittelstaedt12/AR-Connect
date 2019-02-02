@@ -22,7 +22,7 @@ final class SearchTableViewController: UIViewController {
     weak var delegate: SearchTableViewControllerDelegate!
     var users: [LocalUser]?
     var panGestureRecognizer: UIPanGestureRecognizer?
-
+    private var searchItem: DispatchWorkItem?
     let bag = DisposeBag()
 
     let drawerIconView: UIView = {
@@ -33,15 +33,14 @@ final class SearchTableViewController: UIViewController {
         return view
     }()
 
-    let searchUsersTextField: JMTextField = {
-        let textField = JMTextField()
-        textField.backgroundColor = .white
-        textField.placeholder = "Find a friend"
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.layer.borderColor = UIColor.black.cgColor
-        textField.layer.cornerRadius = 5
-        textField.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
-        return textField
+    let userSearchBar: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.backgroundColor = .white
+        searchBar.placeholder = "Find a friend"
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.layer.borderColor = UIColor.black.cgColor
+        searchBar.layer.cornerRadius = 5
+        return searchBar
     }()
 
     let tableView: UITableView = {
@@ -62,15 +61,10 @@ final class SearchTableViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        FirebaseClient.fetchObservableUsers().subscribe(onNext: { [weak self] fetchedUsers in
-            self?.users = fetchedUsers
-            self?.tableView.reloadData()
-        }, onError: { [weak self] error in
-            self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
-        }).disposed(by: bag)
+//        setObservers()
         view.addSubview(drawerIconView)
-        searchUsersTextField.delegate = self
-        view.addSubview(searchUsersTextField)
+        userSearchBar.delegate = self
+        view.addSubview(userSearchBar)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "UserTableViewCell", bundle: nil), forCellReuseIdentifier: "userCell")
@@ -85,6 +79,15 @@ final class SearchTableViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor(white: 5 / 6, alpha: 1.0)
         view.layer.cornerRadius = 5
+    }
+
+    private func setObservers() {
+        FirebaseClient.fetchObservableUsers(withObservableType: .continuous).subscribe(onNext: { [weak self] fetchedUsers in
+            self?.users = fetchedUsers
+            self?.tableView.reloadData()
+            }, onError: { [weak self] error in
+                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+        }).disposed(by: bag)
     }
 
     /// Configure pan gesture recognizer for use in MainViewController
@@ -103,9 +106,7 @@ final class SearchTableViewController: UIViewController {
         let velocity = sender.velocity(in: view.superview)
         switch sender.state {
         case .changed:
-            searchUsersTextField.isEnabled = false
             delegate.updateCoordinatesDuringPan(to: translationPoint, withVelocity: velocity)
-            searchUsersTextField.isEnabled = true
         case .ended:
             delegate.updateCoordinatesAfterPan(to: translationPoint, withVelocity: velocity)
             tableView.panGestureRecognizer.isEnabled = true
@@ -119,9 +120,9 @@ final class SearchTableViewController: UIViewController {
         drawerIconView.edgeAnchors(top: view.topAnchor, padding: UIEdgeInsets(top: 6, left: 00, bottom: 0, right: 0))
         drawerIconView.centerAnchors(centerX: view.centerXAnchor)
         drawerIconView.dimensionAnchors(height: 3, width: 32)
-        searchUsersTextField.edgeAnchors(top: drawerIconView.bottomAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 6, left: 10, bottom: 0, right: -10))
-        searchUsersTextField.dimensionAnchors(height: 30)
-        tableView.edgeAnchors(top: searchUsersTextField.bottomAnchor, leading: view.leadingAnchor, bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
+        userSearchBar.edgeAnchors(top: drawerIconView.bottomAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 6, left: 10, bottom: 0, right: -10))
+        userSearchBar.dimensionAnchors(height: 30)
+        tableView.edgeAnchors(top: userSearchBar.bottomAnchor, leading: view.leadingAnchor, bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0))
     }
 
     /// If user taps on text field from compressed, expand before editing
@@ -133,11 +134,9 @@ final class SearchTableViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
 
-    deinit {
-        print("deinitialized")
-    }
 }
 
+// MARK: UITableViewDelegate Methods
 extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -146,7 +145,7 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "userCell", for: indexPath) as! UserTableViewCell
-        guard let user = users?[indexPath.row] else {
+        guard var user = users?[indexPath.row] else {
             return cell
         }
         cell.selectionStyle = .none
@@ -188,7 +187,9 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
     }
 }
 
+// MARK: UIGestureRecognizerDelegate Methods
 extension SearchTableViewController: UIGestureRecognizerDelegate {
+
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer else { return true }
         let velocity = panGestureRecognizer.velocity(in: view.superview)
@@ -216,18 +217,31 @@ extension SearchTableViewController: UIGestureRecognizerDelegate {
     }
 }
 
+// MARK: UITextFieldDelegate Methods
 extension SearchTableViewController: UISearchBarDelegate {
+
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        delegate.animateToExpanded()
+    }
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-
+        searchItem?.cancel()
+        guard !searchText.isEmpty else {
+            users = []
+            tableView.reloadData()
+            return
+        }
+        let newWorkItem = DispatchWorkItem {
+            let query = FirebaseClient.usersRef.queryOrdered(byChild: "name").queryStarting(atValue: searchText).queryEnding(atValue: searchText+"\u{f8ff}")
+            FirebaseClient.fetchObservableUsers(withObservableType: .singleEvent, queryReference: query).subscribe(onNext: { [weak self] fetchedUsers in
+                self?.users = fetchedUsers
+                self?.tableView.reloadData()
+            }).disposed(by: self.bag)
+        }
+        searchItem = newWorkItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(250), execute: newWorkItem)
     }
-}
 
-class UserCell: UITableViewCell {
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 }

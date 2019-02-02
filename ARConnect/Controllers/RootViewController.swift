@@ -68,7 +68,9 @@ final class RootViewController: UIViewController {
     private func animateFadeTransition(to new: UIViewController, completion: (() -> Void)? = nil) {
         current.willMove(toParent: nil)
         addChild(new)
-        transition(from: current, to: new, duration: 0.3, options: [.transitionCrossDissolve, .curveEaseOut], animations: nil) { _ in
+        transition(from: current, to: new, duration: 0.3,
+                   options: [.transitionCrossDissolve, .curveEaseOut],
+                   animations: nil) { _ in
             self.current.removeFromParent()
             new.didMove(toParent: self)
             self.current = new

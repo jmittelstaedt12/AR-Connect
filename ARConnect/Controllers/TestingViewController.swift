@@ -56,11 +56,7 @@ class TestingViewController: UIViewController {
 
         searchVC!.delegate = self
 
-        let dummyUser = LocalUser()
-        dummyUser.uid = "123"
-        dummyUser.name = "TempName"
-        dummyUser.email = "email@email.com"
-        dummyUser.isOnline = true
+        let dummyUser = LocalUser(name: "TempName", email: "email@email.com", uid: "123", isOnline: true)
         searchVC!.users = [dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser]
 
         addChild(mapViewController)
@@ -82,7 +78,7 @@ class TestingViewController: UIViewController {
         searchVC!.expansionState = .compressed
         setChildSearchVCState(toState: searchVC!.expansionState)
 
-//        handleSessionStart()
+        handleSessionStart()
     }
 
     /// When connect to user, transition into AR Session state
@@ -105,28 +101,30 @@ class TestingViewController: UIViewController {
         viewARSessionButton!.dimensionAnchors(height: 40, width: 100)
 
         // Setup auto layout anchors for endConnectSession button
-        endConnectSessionButton!.edgeAnchors(bottom: mapViewController.view.bottomAnchor,trailing: mapViewController.view.trailingAnchor,
+        endConnectSessionButton!.edgeAnchors(bottom: mapViewController.view.bottomAnchor, trailing: mapViewController.view.trailingAnchor,
                                              padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
 
         view.updateConstraintsIfNeeded()
     }
 
     @objc private func startARSession() {
-        guard let location = mapViewController.locationService.locationManager.location else {
+        guard let location = mapViewController.currentLocation else {
             createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
             return
         }
         let arSessionVC = ARSessionViewController()
+        arSessionVC.startLocation = location
         arSessionVC.currentLocation = location
         arSessionVC.tripCoordinates = mapViewController.tripCoordinates
 
-        switch mapViewController.shouldUseAlignment {
-        case .gravity:
-            createAndDisplayAlert(withTitle: "Poor Heading Accuracy", body: "Tap left and right side of the screen to adjust direction of True North")
-            arSessionVC.worldAlignment = .gravity
-        case .gravityAndHeading:
-            arSessionVC.worldAlignment = .gravityAndHeading
-        }
+//        switch mapViewController.shouldUseAlignment {
+//        case .gravity:
+//            createAndDisplayAlert(withTitle: "Poor Heading Accuracy", body: "Tap left and right side of the screen to adjust direction of True North")
+//            arSessionVC.worldAlignment = .gravity
+//        case .gravityAndHeading:
+//            arSessionVC.worldAlignment = .gravityAndHeading
+//        }
+        arSessionVC.worldAlignment = .gravity
         mapViewController.delegate = arSessionVC
         mapViewController.locationService.locationManager.stopUpdatingHeading()
         present(arSessionVC, animated: true, completion: nil)

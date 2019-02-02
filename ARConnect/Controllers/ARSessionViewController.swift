@@ -12,7 +12,9 @@ import MapKit
 
 final class ARSessionViewController: UIViewController {
 
+    var startLocation: CLLocation!
     var currentLocation: CLLocation!
+    var distanceTraveled: CLLocationDistance?
     var tripCoordinates: [CLLocationCoordinate2D] = []
     var worldAlignment: ARWorldTrackingConfiguration.WorldAlignment!
 
@@ -189,7 +191,7 @@ final class ARSessionViewController: UIViewController {
     private func createNodesAndAnchors() {
         guard !tripCoordinates.isEmpty, nodes.isEmpty, !settingNorth else { return }
         for coordinate in tripCoordinates {
-            let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: currentLocation, location: CLLocation(coordinate: coordinate))
+            let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: startLocation, location: CLLocation(coordinate: coordinate))
             let node = JMNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0), location: coordinate)
             node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
             node.position = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
@@ -201,10 +203,10 @@ final class ARSessionViewController: UIViewController {
     }
 
     private func updateNodesAndAnchors() {
-        guard !nodes.isEmpty else { return }
+        guard !nodes.isEmpty, !settingNorth else { return }
         nodes = nodes.map { node -> JMNode in
             let newNode = JMNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0), location: node.coordinate)
-            let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: currentLocation, location: CLLocation(coordinate: node.coordinate))
+            let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: startLocation, location: CLLocation(coordinate: node.coordinate))
             newNode.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
             newNode.position = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
             newNode.anchor = ARAnchor(transform: transform)
@@ -220,12 +222,12 @@ final class ARSessionViewController: UIViewController {
         sceneView?.session.setWorldOrigin(relativeTransform: simd_mul(rotation, matrix_identity_float4x4))
     }
 
-    @objc private func dismissARSession() {
-        dismiss(animated: true, completion: nil)
+    private func updateWorldOrigin() {
+        
     }
 
-    deinit {
-        print("deinitialized")
+    @objc private func dismissARSession() {
+        dismiss(animated: true, completion: nil)
     }
 
 }
@@ -233,9 +235,10 @@ final class ARSessionViewController: UIViewController {
 extension ARSessionViewController: LocationUpdateDelegate {
 
     func didReceiveLocationUpdate(to location: CLLocation) {
-        currentLocation = location
         updateNodesAndAnchors()
-
+        currentLocation = location
+        distanceTraveled = startLocation.distance(from: currentLocation)
+        print(currentLocation!.coordinate, distanceTraveled!)
     }
 
     func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D]) {
@@ -272,7 +275,23 @@ extension ARSessionViewController: ARSCNViewDelegate {
 extension ARSessionViewController: ARSessionDelegate {
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
+
+        /// Light estimation
 //        print(frame.lightEstimate?.ambientIntensity)
+
+        /// Tracking state information
+//        switch frame.camera.trackingState {
+//        case .normal:
+//            print("normal tracking state")
+//        case .limited(let reason):
+//            print(reason)
+//        case .notAvailable:
+//            print("tracking state not available")
+//        }
+
+        /// Compare distances
+//        let arDistance = sqrt(pow(frame.camera.transform.columns.3.x, 2) + pow(frame.camera.transform.columns.3.z, 2))
+//        print(arDistance, distanceTraveled)
     }
 
 }

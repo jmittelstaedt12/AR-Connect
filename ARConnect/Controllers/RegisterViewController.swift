@@ -42,14 +42,23 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         return view
     }()
 
-    let nameTextField: JMTextField = {
+    let firstNameTextField: JMTextField = {
         let textField = JMTextField()
-        textField.placeholder = "Username"
+        textField.placeholder = "First name"
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
 
-    var nameSeparatorView: UIView?
+    var firstNameSeparatorView: UIView?
+
+    let lastNameTextField: JMTextField = {
+        let textField = JMTextField()
+        textField.placeholder = "Last name"
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        return textField
+    }()
+
+    var lastNameSeparatorView: UIView?
 
     let emailTextField: JMTextField = {
         let textField = JMTextField()
@@ -79,34 +88,40 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         return btn
     }()
 
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = ColorConstants.primaryColor
 
-        nameSeparatorView = createSeparatorView()
-        emailSeparatorView = createSeparatorView()
-
-        view.addSubview(cancelButton)
-        view.addSubview(profileImageView)
-        view.addSubview(inputsContainerView)
-        view.addSubview(registerButton)
-        inputsContainerView.addSubview(nameTextField)
-        inputsContainerView.addSubview(emailTextField)
-        inputsContainerView.addSubview(passwordTextField)
-
+        addSubviews()
         setSubviewConstraints()
 
         hideKeyboardWhenTappedAround()
 
-        nameTextField.delegate = self
+        firstNameTextField.delegate = self
         emailTextField.delegate = self
         passwordTextField.delegate = self
 
         startObservingKeyboardChanges()
     }
 
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+    private func addSubviews() {
+        firstNameSeparatorView = createSeparatorView()
+        lastNameSeparatorView = createSeparatorView()
+        emailSeparatorView = createSeparatorView()
+
+        view.addSubview(cancelButton)
+        view.addSubview(profileImageView)
+        view.addSubview(inputsContainerView)
+        view.addSubview(registerButton)
+
+        inputsContainerView.addSubview(firstNameTextField)
+        inputsContainerView.addSubview(lastNameTextField)
+        inputsContainerView.addSubview(emailTextField)
+        inputsContainerView.addSubview(passwordTextField)
     }
 
     private func setSubviewConstraints() {
@@ -122,38 +137,43 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
 
         // Set constraints for input container view
         inputsContainerView.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
-        inputsContainerView.dimensionAnchors(height: 150)
+        inputsContainerView.dimensionAnchors(height: 200)
         inputsContainerView.dimensionAnchors(width: view.widthAnchor, widthConstant: -24)
 
-        guard let nameSeparatorView = nameSeparatorView, let emailSeparatorView = emailSeparatorView else {
-            print("Error creating separator views")
-            return
-        }
-        inputsContainerView.addSubview(nameSeparatorView)
-        inputsContainerView.addSubview(emailSeparatorView)
+        inputsContainerView.addSubview(firstNameSeparatorView!)
+        inputsContainerView.addSubview(lastNameSeparatorView!)
+        inputsContainerView.addSubview(emailSeparatorView!)
 
-        // Set constraints for input container view subviews
-        nameTextField.edgeAnchors(top: inputsContainerView.topAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
-        nameTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 3, width: inputsContainerView.widthAnchor, widthConstant: -12)
+        // Set constraints for first name text field
+        firstNameTextField.edgeAnchors(top: inputsContainerView.topAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
+        firstNameTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 4, width: inputsContainerView.widthAnchor, widthConstant: -12)
 
-        // Set constraints for separator view
-        nameSeparatorView.edgeAnchors(top: nameTextField.bottomAnchor, leading: inputsContainerView.leadingAnchor)
-        nameSeparatorView.dimensionAnchors(width: inputsContainerView.widthAnchor)
-        nameSeparatorView.dimensionAnchors(height: 1)
+        // Set edge constraints for first name separator view
+        firstNameSeparatorView!.edgeAnchors(top: firstNameTextField.bottomAnchor, leading: inputsContainerView.leadingAnchor)
+        firstNameSeparatorView!.dimensionAnchors(width: inputsContainerView.widthAnchor)
+        firstNameSeparatorView!.dimensionAnchors(height: 1)
+
+        // Set constraints for last name text field
+        lastNameTextField.edgeAnchors(top: firstNameSeparatorView!.bottomAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
+        lastNameTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 4, width: inputsContainerView.widthAnchor, widthConstant: -12)
+
+        // Set edge constraints for last name separator view
+        lastNameSeparatorView!.edgeAnchors(top: lastNameTextField.bottomAnchor, leading: inputsContainerView.leadingAnchor)
+        lastNameSeparatorView!.dimensionAnchors(width: inputsContainerView.widthAnchor)
+        lastNameSeparatorView!.dimensionAnchors(height: 1)
 
         // Set constraints for email text field
-        emailTextField.edgeAnchors(top: nameSeparatorView.bottomAnchor, leading: inputsContainerView.leadingAnchor)
-        emailTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 3, width: inputsContainerView.widthAnchor, widthConstant: -12)
+        emailTextField.edgeAnchors(top: lastNameSeparatorView!.bottomAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
+        emailTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 4, width: inputsContainerView.widthAnchor, widthConstant: -12)
 
-        // Set constraints for email separator view
-        emailSeparatorView.edgeAnchors(top: emailTextField.bottomAnchor, leading: inputsContainerView.leadingAnchor)
-        emailSeparatorView.dimensionAnchors(width: inputsContainerView.widthAnchor)
-        emailSeparatorView.dimensionAnchors(height: 1)
+        // Set edge constraints for email separator view
+        emailSeparatorView!.edgeAnchors(top: emailTextField.bottomAnchor, leading: inputsContainerView.leadingAnchor)
+        emailSeparatorView!.dimensionAnchors(width: inputsContainerView.widthAnchor)
+        emailSeparatorView!.dimensionAnchors(height: 1)
 
         // Set constraints for password text field
-
-        passwordTextField.edgeAnchors(top: emailSeparatorView.bottomAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
-        passwordTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 3, width: inputsContainerView.widthAnchor, widthConstant: -12)
+        passwordTextField.edgeAnchors(top: emailSeparatorView!.bottomAnchor, leading: inputsContainerView.leadingAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0))
+        passwordTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 4, width: inputsContainerView.widthAnchor, widthConstant: -12)
 
         // Set constraints for register button
         registerButton.centerAnchors(centerX: view.centerXAnchor)
@@ -183,18 +203,23 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
 
     /// Request to register user in database
     @objc private func handleRegister() {
-        guard let name = nameTextField.text, !name.isEmpty, let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text, !password.isEmpty else {
-            createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
-            return
+        guard let firstName = firstNameTextField.text, !firstName.isEmpty, let lastName = lastNameTextField.text,
+            !lastName.isEmpty, let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text,
+            !password.isEmpty else {
+                createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
+                return
         }
-        let image = profileImageView.image?.pngData()
-        do {
-            try FirebaseClient.createNewUser(name: name, email: email, password: password, pngData: image, handler: { [weak self] in
-                self?.dismiss(animated: true, completion: nil)
-                AppDelegate.shared.rootViewController.switchToMainScreen()
-            })
-        } catch let error {
-            createAndDisplayAlert(withTitle: "Error Creating New User", body: error.localizedDescription)
+        let registerUser = RegisterUser(firstName: firstName,
+                                        lastName: lastName,
+                                        email: email, password: password,
+                                        pngData: profileImageView.image?.pngData())
+        FirebaseClient.createNewUser(user: registerUser) { [weak self] error in
+            if let error = error {
+                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+                return
+            }
+            self?.dismiss(animated: true, completion: nil)
+            AppDelegate.shared.rootViewController.switchToMainScreen()
         }
     }
 

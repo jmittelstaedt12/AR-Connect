@@ -63,6 +63,7 @@ final class MainViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        FirebaseClient.createNewUser(user: RegisterUser(firstName: "John", lastName: "Doe", email: "john@email.com", password: "123456", pngData: nil), handler: {_ in })
         if Auth.auth().currentUser == nil {
             AppDelegate.shared.rootViewController.switchToLogout()
         } else {
@@ -194,11 +195,12 @@ final class MainViewController: UIViewController {
 
     /// Segue into AR Connect session
     @objc private func startARSession() {
-        guard let location = mapViewController.locationService.locationManager.location else {
+        guard let location = mapViewController.currentLocation else {
             createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
             return
         }
         let arSessionVC = ARSessionViewController()
+        arSessionVC.startLocation = location
         arSessionVC.currentLocation = location
         arSessionVC.tripCoordinates = mapViewController.tripCoordinates
 

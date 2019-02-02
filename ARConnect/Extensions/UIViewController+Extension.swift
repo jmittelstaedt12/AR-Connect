@@ -17,7 +17,7 @@ extension UIViewController {
         alert.show()
         //        self.present(alert, animated: true, completion: nil)
     }
-    
+
     // Dismiss keyboard when tapping view
     func hideKeyboardWhenTappedAround() {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
@@ -32,8 +32,10 @@ extension UIViewController {
 }
 
 extension UIViewController: UITextFieldDelegate {
+
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         self.view.endEditing(true)
         return true
     }
+
 }

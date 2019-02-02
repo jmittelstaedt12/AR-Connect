@@ -25,11 +25,11 @@ final class SplashViewController: UIViewController {
         activityIndicator.startAnimating()
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()) {
             self.activityIndicator.stopAnimating()
-//            AppDelegate.shared.rootViewController.switchToTesting()
             if Auth.auth().currentUser?.uid == nil {
                 AppDelegate.shared.rootViewController.switchToLogout()
             } else {
-                AppDelegate.shared.rootViewController.switchToMainScreen()
+                AppDelegate.shared.rootViewController.switchToTesting()
+//                AppDelegate.shared.rootViewController.switchToMainScreen()
             }
         }
     }

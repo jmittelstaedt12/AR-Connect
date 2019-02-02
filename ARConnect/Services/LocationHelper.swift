@@ -15,19 +15,20 @@ struct LocationHelper {
 
     static func calculateCoordinates(from start: CLLocationCoordinate2D, withBearing bearing: Double, andDistance distance: Double) -> CLLocationCoordinate2D {
 //      From https://www.movable-type.co.uk/scripts/latlong.html :
-        let angularDistanceLat = distance / LocationConstants.metersPerRadiansLatitude
-        let angularDistanecLon = distance / LocationConstants.metersPerRadiansLongitude
+        let angularDistanceLat = distance / LocationConstants.radius
+        let angularDistanceLon = distance / LocationConstants.radius
         let lat1 = start.latitude.toRadians()
         let lon1 = start.longitude.toRadians()
         let lat2 = asin(sin(lat1) * cos(angularDistanceLat) + cos(lat1) * sin(angularDistanceLat) * cos(bearing))
-        let lon2 = lon1 + atan2(sin(bearing) * sin(angularDistanecLon) * cos(lat1), cos(angularDistanecLon) - sin(lat1) * sin(lat2))
+        let lon2 = lon1 + atan2(sin(bearing) * sin(angularDistanceLon) * cos(lat1), cos(angularDistanceLon) - sin(lat1) * sin(lat2))
         return CLLocationCoordinate2D(latitude: lat2.toDegrees(), longitude: lon2.toDegrees())
     }
 
-    static func createIntermediaryCoordinates(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D, withInterval interval: Double) -> [CLLocationCoordinate2D] {
+    static func createIntermediaryCoordinates(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D, withInterval interval: Int) -> [CLLocationCoordinate2D] {
         let bearing = calculateBearing(from: start, to: end)
-        let totalDistance = Double(CLLocation(coordinate: start).distance(from: CLLocation(coordinate: end)))
-        let points = [start] + Array(stride(from: interval, to: totalDistance - interval, by: interval)).map { calculateCoordinates(from: start, withBearing: bearing, andDistance: $0) }
+        let totalDistance = Int(CLLocation(coordinate: start).distance(from: CLLocation(coordinate: end)))
+        let points = [start] + Array(stride(from: interval, to: totalDistance, by: interval))
+            .map { calculateCoordinates(from: start, withBearing: bearing, andDistance: Double($0)) }
         return points
     }
 
