@@ -34,7 +34,6 @@
 		19997E8921E500560023C3EC /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8821E500560023C3EC /* ConnectViewController.swift */; };
 		19997E8E21E65F4A0023C3EC /* UserTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8C21E65F4A0023C3EC /* UserTableViewCell.swift */; };
 		19997E8F21E65F4A0023C3EC /* UserTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19997E8D21E65F4A0023C3EC /* UserTableViewCell.xib */; };
-		19B1E8A921FFDA8C0087F4EE /* SensitiveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19B1E8A821FFDA8C0087F4EE /* SensitiveData.swift */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
 		19D53CBB21FCC7F1000984FE /* JMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBA21FCC7F1000984FE /* JMTextField.swift */; };
 		19D53CBD21FCC961000984FE /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBC21FCC961000984FE /* UIView+Extension.swift */; };
@@ -50,6 +49,7 @@
 		19DC1D9B21C3436D0079AD25 /* NavigationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9A21C3436D0079AD25 /* NavigationClient.swift */; };
 		19DD8D4B219486E200C01EDC /* CardDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DD8D49219486E200C01EDC /* CardDetailViewController.swift */; };
 		19DD8D4C219486E200C01EDC /* CardDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19DD8D4A219486E200C01EDC /* CardDetailViewController.xib */; };
+		19E5D19D220632A4002EDCD6 /* SensitiveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E5D19C220632A4002EDCD6 /* SensitiveData.swift */; };
 		19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */; };
 		C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */; };
 /* End PBXBuildFile section */
@@ -84,7 +84,6 @@
 		19997E8821E500560023C3EC /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
 		19997E8C21E65F4A0023C3EC /* UserTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableViewCell.swift; sourceTree = "<group>"; };
 		19997E8D21E65F4A0023C3EC /* UserTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UserTableViewCell.xib; sourceTree = "<group>"; };
-		19B1E8A821FFDA8C0087F4EE /* SensitiveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensitiveData.swift; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
 		19D53CBA21FCC7F1000984FE /* JMTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMTextField.swift; sourceTree = "<group>"; };
 		19D53CBC21FCC961000984FE /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
@@ -100,6 +99,7 @@
 		19DC1D9A21C3436D0079AD25 /* NavigationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationClient.swift; sourceTree = "<group>"; };
 		19DD8D49219486E200C01EDC /* CardDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailViewController.swift; sourceTree = "<group>"; };
 		19DD8D4A219486E200C01EDC /* CardDetailViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CardDetailViewController.xib; sourceTree = "<group>"; };
+		19E5D19C220632A4002EDCD6 /* SensitiveData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SensitiveData.swift; sourceTree = "<group>"; };
 		19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectRequestViewController.swift; sourceTree = "<group>"; };
 		20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4BC534F0E30D99C8828C606 /* Pods-ARConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARConnect.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARConnect/Pods-ARConnect.release.xcconfig"; sourceTree = "<group>"; };
@@ -150,7 +150,7 @@
 				19D7E68B21C41E380046D737 /* Storyboards */,
 				19913A1B216CED7800174187 /* Info.plist */,
 				19913A22216CF1F200174187 /* GoogleService-Info.plist */,
-				19B1E8A821FFDA8C0087F4EE /* SensitiveData.swift */,
+				19E5D19C220632A4002EDCD6 /* SensitiveData.swift */,
 			);
 			path = ARConnect;
 			sourceTree = "<group>";
@@ -478,7 +478,7 @@
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
 				19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */,
 				19DD8D4B219486E200C01EDC /* CardDetailViewController.swift in Sources */,
-				19B1E8A921FFDA8C0087F4EE /* SensitiveData.swift in Sources */,
+				19E5D19D220632A4002EDCD6 /* SensitiveData.swift in Sources */,
 				1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */,
 				19DC1D9921C341350079AD25 /* LocationService.swift in Sources */,
 				194CADB821FABA4100204E28 /* JMMKMapView.swift in Sources */,
