@@ -126,7 +126,7 @@ class TestingViewController: UIViewController {
 //            arSessionVC.worldAlignment = .gravityAndHeading
 //        }
         arSessionVC.worldAlignment = .gravity
-        
+
         self.arSessionVC = arSessionVC
         mapViewController.delegate = self.arSessionVC
         mapViewController.locationService.locationManager.stopUpdatingHeading()
@@ -227,7 +227,7 @@ extension TestingViewController: SearchTableViewControllerDelegate {
     }
 
     /// Make card for tapped user visible in view
-    func setChildUserDetailVCVisible(withUser user: LocalUser) {
+    func setUserDetailCardVisible(withUser user: LocalUser) {
         //        let cardDetailVC = CardDetailViewController()
         //        addChild(cardDetailVC)
         //        view.addSubview(cardDetailVC.view)

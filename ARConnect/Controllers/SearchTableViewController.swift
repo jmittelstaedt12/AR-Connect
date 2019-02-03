@@ -14,7 +14,7 @@ protocol SearchTableViewControllerDelegate: class {
     func updateCoordinatesDuringPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
     func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
     func animateToExpanded()
-    func setChildUserDetailVCVisible(withUser user: LocalUser)
+    func setUserDetailCardVisible(withUser user: LocalUser)
 }
 
 final class SearchTableViewController: UIViewController {
@@ -172,7 +172,7 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell, let email = cell.usernameLabel, let user = users?.first(where: { $0.email == email.text }) else { return }
         cell.isSelected = false
-        delegate.setChildUserDetailVCVisible(withUser: user)
+        delegate.setUserDetailCardVisible(withUser: user)
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

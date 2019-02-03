@@ -23,18 +23,21 @@ final class ConnectPendingViewController: ConnectViewController {
 
     override func setViewLayouts() {
         // Set profile image view constraints
-        requestingUserImageView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
-                                            trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 60, left: 32, bottom: 0, right: -32))
-        requestingUserImageView.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
-        requestingUserImageView.dimensionAnchors(height: view.frame.width - 64)
+        requestingUserImageView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, padding: UIEdgeInsets(top: 30, left: 32, bottom: 0, right: 0))
+        requestingUserImageView.dimensionAnchors(height: 80, width: 80)
 
         // Set name label constraints
-        requestingUserNameLabel.edgeAnchors(top: requestingUserImageView.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
-        requestingUserNameLabel.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
+        requestingUserNameLabel.edgeAnchors(leading: requestingUserImageView.trailingAnchor, bottom: requestingUserImageView.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0))
         requestingUserNameLabel.dimensionAnchors(height: 20)
 
+        // Set map view constraints
+        meetupLocationMapView.edgeAnchors(top: requestingUserImageView.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
+        meetupLocationMapView.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
+        meetupLocationMapView.dimensionAnchors(width: view.safeAreaLayoutGuide.widthAnchor, widthConstant: -16)
+        meetupLocationMapView.dimensionAnchors(height: 100)
+
         // set cancel button constriants
-        cancelButton.edgeAnchors(top: requestingUserNameLabel.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
+        cancelButton.edgeAnchors(top: meetupLocationMapView.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
         cancelButton.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
     }
 

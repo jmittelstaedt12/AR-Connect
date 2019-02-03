@@ -9,6 +9,8 @@
 import UIKit
 import MapKit
 import Firebase
+import RxSwift
+import RxCocoa
 
 protocol LocationUpdateDelegate: AnyObject {
     func didReceiveLocationUpdate(to location: CLLocation)
@@ -18,18 +20,20 @@ protocol LocationUpdateDelegate: AnyObject {
 final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
 
     // MARK: Variables
+
     var currentLocation: CLLocation?
     let currentUser = Auth.auth().currentUser
     let locationService = LocationService()
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     weak var delegate: LocationUpdateDelegate?
     var tripCoordinates: [CLLocationCoordinate2D] = []
-    private var pathOverlay: MKOverlay?
+    private var pathOverlay: MKPolyline?
     var headingAccuracy = [Double](repeating: 360.0, count: 4)
     var locationAccuracy = [Double](repeating: 100.0, count: 4)
     var recentLocationIndex = 0
-    var bestReadingAccuracy = 30.1
     var willUpdateCurrentLocation = true
+    private var meetupLocationVariable = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
+    private(set) var meetupLocationObservable: Observable<CLLocationCoordinate2D>?
 
     let map: JMMKMapView = JMMKMapView()
 
@@ -40,6 +44,27 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
 
     var shouldUseAlignment = WorldAlignment.gravity
 
+    var locationSetterIcon: UIImageView? {
+        willSet {
+            guard let view = newValue else { return }
+            view.backgroundColor = .red
+            view.translatesAutoresizingMaskIntoConstraints = false
+        }
+    }
+
+    var setMeetupLocationButton: UIButton? {
+        willSet {
+            guard let btn = newValue else { return }
+            btn.translatesAutoresizingMaskIntoConstraints = false
+            btn.backgroundColor = .white
+            btn.setTitle("Set Meetup Location", for: .normal)
+            btn.layer.cornerRadius = 5
+            btn.addTarget(self, action: #selector(didSetLocation), for: .touchUpInside)
+        }
+    }
+
+    // MARK: Initial Setup
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = map
@@ -48,6 +73,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         map.delegate = self
         setupLocationModel()
         NotificationCenter.default.addObserver(self, selector: #selector(setupMapForConnection(notification:)), name: connectNotificationName, object: nil)
+        meetupLocationObservable = meetupLocationVariable.asObservable().filter { $0 != nil }.map { return $0! }.take(1)
     }
 
     private func setupLocationModel() {
@@ -66,6 +92,8 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         LocationService.setMapProperties(for: map, in: super.view, atCoordinate: coordinate, withCoordinateSpan: 0.01)
     }
 
+    // MARK: Directions Requests
+
     private func setTestingConnection(location: CLLocation) {
         let coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.001,
                                                 longitude: location.coordinate.longitude+0.001)
@@ -78,8 +106,9 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
                 current = step
                 return coordinates
             }
+            self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
             DispatchQueue.main.async {
-                self.draw(polyline: MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count))
+                self.draw(polyline: self.pathOverlay!)
             }
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
         }
@@ -127,46 +156,55 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
             }
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
             print(currentLocation.coordinate, coordinate)
-            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate, handler: { result in
-                if let error = result.error {
-                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-                    return
-                }
-                guard let line = result.line else {
-                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
-                    return
-                }
-                self.pathOverlay = line
-                self.draw(polyline: line)
-                guard line.pointCount > 0 else { return }
-                for index in 0..<line.pointCount {
-                    self.tripCoordinates.append(line.points()[index].coordinate)
-                }
+            NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: coordinate) { [weak self] points in
+                guard let self = self, points != nil else { return }
+                self.tripCoordinates = points!
                 var current = self.tripCoordinates.first!
                 self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
                     let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
                     current = step
                     return coordinates
                 }
+                self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
+                DispatchQueue.main.async {
+                    self.draw(polyline: self.pathOverlay!)
+                }
                 self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+            }
 
-            })
+//            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate) { result in
+//                if let error = result.error {
+//                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+//                    return
+//                }
+//                guard let line = result.line else {
+//                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
+//                    return
+//                }
+//                self.pathOverlay = line
+//                self.draw(polyline: line)
+//                guard line.pointCount > 0 else { return }
+//                for index in 0..<line.pointCount {
+//                    self.tripCoordinates.append(line.points()[index].coordinate)
+//                }
+//                var current = self.tripCoordinates.first!
+//                self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+//                    let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+//                    current = step
+//                    return coordinates
+//                }
+//                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+//
+//            }
         }
-        //        let coordinate = CLLocationCoordinate2D(latitude: 40.68790581546788, longitude: -73.92998578213969)
     }
+
+    // MARK: Updates to Map
 
     func draw(polyline line: MKPolyline) {
         map.addOverlay(line)
         map.setVisibleMapRect(MKMapRect(origin: line.boundingMapRect.origin, size: MKMapSize(width: line.boundingMapRect.size.width,
                 height: line.boundingMapRect.size.height)), edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
-    }
-
-    func resetMap() {
-        if let overlay = pathOverlay { map.removeOverlay(overlay) }
-
-        if let currentCoordinate = currentLocation?.coordinate {
-            LocationService.setMapProperties(for: map, in: super.view, atCoordinate: currentCoordinate, withCoordinateSpan: 0.01)
-        }
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -178,6 +216,43 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         }
         return polylineRenderer
     }
+
+    func resetMap() {
+        if let overlay = pathOverlay { map.removeOverlay(overlay) }
+
+        if let currentCoordinate = currentLocation?.coordinate {
+            LocationService.setMapProperties(for: map, in: super.view, atCoordinate: currentCoordinate, withCoordinateSpan: 0.01)
+        }
+    }
+
+    // MARK: Setting Meetup Location
+
+    func willSetLocationMarker() {
+        locationSetterIcon = UIImageView()
+        setMeetupLocationButton = UIButton()
+
+        view.addSubview(locationSetterIcon!)
+        view.addSubview(setMeetupLocationButton!)
+
+        locationSetterIcon?.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
+        locationSetterIcon?.dimensionAnchors(height: 25, width: 25)
+
+        setMeetupLocationButton?.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: 0))
+        setMeetupLocationButton?.centerAnchors(centerX: view.centerXAnchor)
+        setMeetupLocationButton?.dimensionAnchors(height: 40, width: 100)
+    }
+
+    @objc func didSetLocation() {
+        locationSetterIcon?.removeFromSuperview()
+        setMeetupLocationButton?.removeFromSuperview()
+
+        locationSetterIcon = nil
+        setMeetupLocationButton = nil
+
+        meetupLocationVariable.accept(map.centerCoordinate)
+    }
+
+    // MARK: CLLocationManagerDelegate
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         guard let locValue = manager.location else { return }
@@ -195,10 +270,9 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         guard willUpdateCurrentLocation, let locValue = manager.location, let user = currentUser else { return }
         FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude": locValue.coordinate.latitude, "longitude": locValue.coordinate.longitude])
 
-        if currentLocation == nil { setTestingConnection(location: locValue) }
+//        if currentLocation == nil { setTestingConnection(location: locValue) }
         delegate?.didReceiveLocationUpdate(to: locValue)
         currentLocation = locValue
-//        bestReadingAccuracy = locValue.horizontalAccuracy
     }
 
     deinit {

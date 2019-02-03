@@ -54,5 +54,4 @@ extension UIView {
             widthAnchor.constraint(equalTo: width, multiplier: widthMultiplier, constant: widthConstant).isActive = true
         }
     }
-    
 }

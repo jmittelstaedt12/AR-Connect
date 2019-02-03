@@ -231,7 +231,7 @@ final class ARSessionViewController: UIViewController {
     }
 
     private func updateWorldOrigin() {
-        
+
     }
 
     @objc private func dismissARSession() {

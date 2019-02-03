@@ -71,10 +71,13 @@ struct FirebaseClient {
                 return
             }
             guard let uid = data?.user.uid else { return }
-            let usersReference = FirebaseClient.usersRef.child(uid)
+
+            var postError: Error?
+            let userReference = FirebaseClient.usersRef.child(uid)
+            let requestingUserReference = userReference.child("requestingUser")
+
             let values = ["email": user.email,
                           "name": "\(user.firstName!) \(user.lastName!)",
-                          "requestingUser": "",
                           "connectedTo": "",
                           "pendingRequest": false,
                           "isConnected": false,
@@ -82,13 +85,27 @@ struct FirebaseClient {
                           "longitude": 0,
                           "profileImageUrl": imageUrl ?? "",
                           "isOnline": false] as [String: Any]
-            usersReference.updateChildValues(values, withCompletionBlock: { (error, _) in
-                if let err = error {
-                    handler(err)
-                    return
-                }
-                handler(nil)
+
+            let requestingUserValues = ["uid": "",
+                                        "latitude": 0,
+                                        "longitude": 0] as [String: Any]
+
+            let group = DispatchGroup()
+            group.enter()
+            userReference.setValue(values, withCompletionBlock: { (error, _) in
+                postError = error
+                group.leave()
             })
+
+            group.enter()
+            requestingUserReference.setValue(requestingUserValues, withCompletionBlock: { (error, _) in
+                postError = error
+                group.leave()
+            })
+
+            group.notify(queue: .main) {
+                handler(postError)
+            }
         }
     }
 
@@ -112,14 +129,40 @@ struct FirebaseClient {
         do {
             try Auth.auth().signOut()
             observables = FIRObservables()
-            usersRef.child(uid).updateChildValues(["connectedTo": "",
+            usersRef.child(uid).updateChildValues([
+                "connectedTo": "",
                 "isOnline": false,
                 "pendingRequest": false,
-                "isConnected": false,
-                "requestingUser": ""])
+                "isConnected": false
+                ])
+            usersRef.child(uid).child("requestingUser").updateChildValues([
+                "uid": "",
+                "latitude": 0,
+                "longitude": 0
+                ])
         } catch let logoutError {
             throw logoutError
         }
+    }
+
+    static func sendConnectRequestToUser(withUid uid: String, atCoordinateTuple coordinate: (latitude: Double, longitude: Double)) -> Observable<String> {
+        #warning("combine with createCanCallObservable")
+        return Observable.create({ (observer) -> Disposable in
+            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
+            let requestingUserRef = usersRef.child(uid).child("requestingUser")
+            requestingUserRef.updateChildValues(["uid": uid,
+                                                 "latitude": coordinate.latitude,
+                                                 "longitude": coordinate.longitude
+            ]) { (error, _) in
+                if let error = error {
+                    observer.onError(error)
+                } else {
+                    observer.onNext(uid)
+                }
+                observer.onCompleted()
+            }
+            return Disposables.create()
+        })
     }
 
     static func setOnDisconnectUpdates(forUid uid: String) {
@@ -128,7 +171,9 @@ struct FirebaseClient {
         userRef.child("isOnline").onDisconnectSetValue(false)
         userRef.child("pendingRequest").onDisconnectSetValue(false)
         userRef.child("isConnected").onDisconnectSetValue(false)
-        userRef.child("requestingUser").onDisconnectSetValue("")
+        userRef.child("requestingUser").child("uid").onDisconnectSetValue("")
+        userRef.child("requestingUser").child("latitude").onDisconnectSetValue(0)
+        userRef.child("requestingUser").child("longitude").onDisconnectSetValue(0)
     }
 
     static func rxFirebaseSingleEvent(forRef ref: DatabaseQuery, andEvent event: DataEventType) -> Observable<DataSnapshot> {
@@ -219,7 +264,7 @@ struct FirebaseClient {
     static func createRequestingUserUidObservable() -> Observable<String>? {
         if let observable = observables.requestingUserUidObservable { return observable }
         guard let uid = Auth.auth().currentUser?.uid else { return nil }
-        observables.requestingUserUidObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser"), andEvent: .value)
+        observables.requestingUserUidObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser").child("uid"), andEvent: .value)
             .filter { $0.value is String }
             .map { $0.value as! String }
             .filter { !$0.isEmpty }
@@ -228,7 +273,7 @@ struct FirebaseClient {
     }
 
     static func createNoRequestingUserObservable(forUid uid: String) -> Observable<Bool> {
-        return rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser"), andEvent: .value)
+        return rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser").child("uid"), andEvent: .value)
             .filter { $0.value is String }
             .map { $0.value as! String }
             .map { $0.isEmpty }
@@ -282,7 +327,7 @@ struct FirebaseClient {
         }
     }
 
-    static func createCallUserObservable(forUid uid: String) -> Observable<Bool> {
+    static func createCanCallUserObservable(forUid uid: String) -> Observable<Bool> {
         let isAvailableObservable = createUserAvailableObservable(forUid: uid)
         let amOnlineObservable = createAmOnlineObservable()
         return Observable.combineLatest(isAvailableObservable, amOnlineObservable) {

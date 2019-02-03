@@ -11,7 +11,7 @@ import Firebase
 import RxSwift
 
 protocol CardDetailDelegate: class {
-    func subscribeToCallUserObservable(forUser user: LocalUser)
+    func willSetMeetupLocation(withUser user: LocalUser)
 }
 
 final class CardDetailViewController: UIViewController {
@@ -60,7 +60,7 @@ final class CardDetailViewController: UIViewController {
     }
 
     @IBAction func connectToUser(_ sender: UIButton) {
-        delegate.subscribeToCallUserObservable(forUser: userForCell)
+        delegate.willSetMeetupLocation(withUser: userForCell)
         willMove(toParent: nil)
         view.removeFromSuperview()
         removeFromParent()

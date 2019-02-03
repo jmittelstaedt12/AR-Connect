@@ -49,7 +49,7 @@ final class ConnectRequestViewController: ConnectViewController {
     private func setObservers() {
         FirebaseClient.createCallDroppedObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] _ in
             guard let self = self, let uid = Auth.auth().currentUser?.uid else { return }
-            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser": ""])
+            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
             self.createAndDisplayAlert(withTitle: "Call Dropped", body: "Ending call")
             self.dismiss(animated: true, completion: nil)
         }).disposed(by: bag)
@@ -71,13 +71,13 @@ final class ConnectRequestViewController: ConnectViewController {
                         print(err.localizedDescription)
                         return
                     }
-                    FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser": ""])
+                    FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
                     let name = Notification.Name(rawValue: NotificationConstants.connectionNotificationKey)
                     NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user])
                 }
             }
         } else {
-            FirebaseClient.usersRef.child(uid).updateChildValues(["requestingUser": ""])
+            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
         }
         self.dismiss(animated: true, completion: nil)
     }

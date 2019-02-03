@@ -28,8 +28,8 @@ final class SplashViewController: UIViewController {
             if Auth.auth().currentUser?.uid == nil {
                 AppDelegate.shared.rootViewController.switchToLogout()
             } else {
-                AppDelegate.shared.rootViewController.switchToTesting()
-//                AppDelegate.shared.rootViewController.switchToMainScreen()
+//                AppDelegate.shared.rootViewController.switchToTesting()
+                AppDelegate.shared.rootViewController.switchToMainScreen()
             }
         }
     }

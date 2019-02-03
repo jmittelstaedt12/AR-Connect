@@ -11,6 +11,7 @@ import MapKit
 import Firebase
 import SystemConfiguration
 import RxSwift
+import RxCocoa
 
 final class MainViewController: UIViewController {
 
@@ -23,6 +24,7 @@ final class MainViewController: UIViewController {
     let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
     let mapViewController = MapViewController()
     var searchViewController: SearchTableViewController? = SearchTableViewController()
+    weak var arSessionVC: ARSessionViewController?
 
     var viewARSessionButton: ARSessionButton? {
         willSet {
@@ -63,12 +65,10 @@ final class MainViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        FirebaseClient.createNewUser(user: RegisterUser(firstName: "John", lastName: "Doe", email: "john@email.com", password: "123456", pngData: nil), handler: {_ in })
         if Auth.auth().currentUser == nil {
             AppDelegate.shared.rootViewController.switchToLogout()
-        } else {
-            currentUser = Auth.auth().currentUser!
         }
+        currentUser = Auth.auth().currentUser!
         FirebaseClient.setOnDisconnectUpdates(forUid: currentUser!.uid)
         setObservers()
         //        navigationController?.navigationBar = JMNavigationBar()
@@ -141,6 +141,23 @@ final class MainViewController: UIViewController {
         }
     }
 
+    private func requestToConnectWithUser(_ user: LocalUser, atCoordinate coordinate: CLLocationCoordinate2D) {
+        FirebaseClient.createCanCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
+            if canComplete {
+                FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
+                FirebaseClient.usersRef.child(user.uid!).child("requestingUser").updateChildValues(["uid": Auth.auth().currentUser!.uid])
+                let connectPendingVC = ConnectPendingViewController()
+                connectPendingVC.user = user
+                connectPendingVC.meetupLocation = coordinate
+                self?.present(connectPendingVC, animated: true, completion: nil)
+            } else {
+                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
+            }
+            }, onError: { (error) in
+                self.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
+        }).disposed(by: bag)
+    }
+
     /// When connect to user, transition into AR Session state
     @objc private func handleSessionStart(notification: NSNotification) {
 
@@ -154,8 +171,8 @@ final class MainViewController: UIViewController {
         searchViewController?.willMove(toParent: nil)
         searchViewController?.view.removeFromSuperview()
         searchViewController?.removeFromParent()
-
         searchViewController = nil
+
         viewARSessionButton = ARSessionButton(type: .system)
         endConnectSessionButton = ARSessionButton(type: .system)
 
@@ -212,7 +229,8 @@ final class MainViewController: UIViewController {
             arSessionVC.worldAlignment = .gravityAndHeading
         }
 
-//        mapViewController.delegate = arSessionVC
+        self.arSessionVC = arSessionVC
+        mapViewController.delegate = self.arSessionVC
         mapViewController.locationService.locationManager.stopUpdatingHeading()
         present(arSessionVC, animated: true, completion: nil)
     }
@@ -304,14 +322,18 @@ extension MainViewController: SearchTableViewControllerDelegate {
     }
 
     /// Make card for tapped user visible in view
-    func setChildUserDetailVCVisible(withUser user: LocalUser) {
+    func setUserDetailCardVisible(withUser user: LocalUser) {
         let cardDetailVC = CardDetailViewController()
         addChild(cardDetailVC)
         view.addSubview(cardDetailVC.view)
         cardDetailVC.didMove(toParent: self)
         cardDetailVC.userForCell = user
         cardDetailVC.delegate = self
-        cardDetailVC.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
+        cardDetailVC.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,
+                                      leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                      bottom: view.safeAreaLayoutGuide.bottomAnchor,
+                                      trailing: view.safeAreaLayoutGuide.trailingAnchor,
+                                      padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
         view.updateConstraintsIfNeeded()
     }
 
@@ -319,20 +341,42 @@ extension MainViewController: SearchTableViewControllerDelegate {
 
 extension MainViewController: CardDetailDelegate {
 
-    func subscribeToCallUserObservable(forUser user: LocalUser) {
-        FirebaseClient.createCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
-            if canComplete {
-                FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
-                FirebaseClient.usersRef.child(user.uid!).updateChildValues(["requestingUser": Auth.auth().currentUser!.uid])
-                let connectPendingVC = ConnectPendingViewController()
-                connectPendingVC.user = user
-                self?.present(connectPendingVC, animated: true, completion: nil)
-            } else {
-                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
-            }
-        }, onError: { (error) in
-                self.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
-            }).disposed(by: bag)
+    func willSetMeetupLocation(withUser user: LocalUser) {
+        searchViewController?.willMove(toParent: nil)
+        searchViewController?.view.removeFromSuperview()
+        searchViewController?.removeFromParent()
+        searchViewController = nil
+
+        navigationController?.navigationBar.isHidden = true
+
+        mapViewController.meetupLocationObservable?.subscribe(onNext: { [weak self] coordinate in
+            self?.requestToConnectWithUser(user, atCoordinate: coordinate)
+        }).disposed(by: bag)
+
+        mapViewController.willSetLocationMarker()
+//        FirebaseClient.createCanCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
+//            if canComplete {
+//                self?.willSetMeetupLocation()
+//            } else {
+//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
+//            }
+//            }, onError: { [weak self] error in
+//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
+//        }).disposed(by: bag)
+//
+//        FirebaseClient.createCanCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
+//            if canComplete {
+//                FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
+//                FirebaseClient.usersRef.child(user.uid!).child("requestingUser").updateChildValues(["uid": Auth.auth().currentUser!.uid])
+//                let connectPendingVC = ConnectPendingViewController()
+//                connectPendingVC.user = user
+//                self?.present(connectPendingVC, animated: true, completion: nil)
+//            } else {
+//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
+//            }
+//            }, onError: { (error) in
+//                self.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
+//        }).disposed(by: bag)
     }
 
 }
