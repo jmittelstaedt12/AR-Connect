@@ -24,7 +24,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     var currentLocation: CLLocation?
     let currentUser = Auth.auth().currentUser
     let locationService = LocationService()
-    let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
+    let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
     weak var delegate: LocationUpdateDelegate?
     var tripCoordinates: [CLLocationCoordinate2D] = []
     private var pathOverlay: MKPolyline?
@@ -57,6 +57,8 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
             guard let btn = newValue else { return }
             btn.translatesAutoresizingMaskIntoConstraints = false
             btn.backgroundColor = .white
+            btn.setTitleColor(.black, for: .normal)
+            btn.titleLabel?.lineBreakMode = .byWordWrapping
             btn.setTitle("Set Meetup Location", for: .normal)
             btn.layer.cornerRadius = 5
             btn.addTarget(self, action: #selector(didSetLocation), for: .touchUpInside)
@@ -112,43 +114,11 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
             }
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
         }
-
-//        NavigationClient.requestLineAndSteps(from: location.coordinate, to: coordinate, handler: { result in
-//            if let error = result.error {
-//                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-//                return
-//            }
-//
-//            guard let line = result.line else {
-//                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
-//                return
-//            }
-//
-////            self.pathOverlay = line
-////            self.draw(polyline: line)
-//
-//            guard line.pointCount > 0 else { return }
-//            for index in 0..<line.pointCount {
-//                self.tripCoordinates.append(line.points()[index].coordinate)
-//            }
-//            var current = self.tripCoordinates.first!
-//            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
-//                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-//                current = step
-//                return coordinates
-//            }
-//            self.draw(polyline: MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count))
-//            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-//        })
     }
 
     @objc private func setupMapForConnection(notification: NSNotification) {
-        guard let currentLocation = currentLocation else { return }
-        guard let userInfo = notification.userInfo else {
-            print("No user attached")
-            return
-        }
-        let user = userInfo["user"] as! LocalUser
+        guard let didConnect = notification.userInfo?["didConnect"] as? Bool, didConnect, let currentLocation = currentLocation else { return }
+        let user = notification.userInfo?["user"] as! LocalUser
         FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
             guard let lat = latitude, let lon = longitude else {
                 print("coordinates not available")
@@ -239,7 +209,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
 
         setMeetupLocationButton?.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: 0))
         setMeetupLocationButton?.centerAnchors(centerX: view.centerXAnchor)
-        setMeetupLocationButton?.dimensionAnchors(height: 40, width: 100)
+        setMeetupLocationButton?.dimensionAnchors(height: 100, width: 100)
     }
 
     @objc func didSetLocation() {

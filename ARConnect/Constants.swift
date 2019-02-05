@@ -17,5 +17,5 @@ struct LocationConstants {
 }
 
 struct NotificationConstants {
-    static let connectionNotificationKey = "jacobm.ARConnect.connectKey"
+    static let requestResponseNotificationKey = "jacobm.ARConnect.didConnectKey"
 }

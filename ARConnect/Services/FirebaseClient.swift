@@ -145,25 +145,25 @@ struct FirebaseClient {
         }
     }
 
-    static func sendConnectRequestToUser(withUid uid: String, atCoordinateTuple coordinate: (latitude: Double, longitude: Double)) -> Observable<String> {
-        #warning("combine with createCanCallObservable")
-        return Observable.create({ (observer) -> Disposable in
-            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
-            let requestingUserRef = usersRef.child(uid).child("requestingUser")
-            requestingUserRef.updateChildValues(["uid": uid,
-                                                 "latitude": coordinate.latitude,
-                                                 "longitude": coordinate.longitude
-            ]) { (error, _) in
-                if let error = error {
-                    observer.onError(error)
-                } else {
-                    observer.onNext(uid)
-                }
-                observer.onCompleted()
-            }
-            return Disposables.create()
-        })
-    }
+//    static func sendConnectRequestToUser(withUid uid: String, atCoordinateTuple coordinate: (latitude: Double, longitude: Double)) -> Observable<String> {
+//        #warning("combine with createCanCallObservable")
+//        return Observable.create({ (observer) -> Disposable in
+//            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
+//            let requestingUserRef = usersRef.child(uid).child("requestingUser")
+//            requestingUserRef.updateChildValues(["uid": uid,
+//                                                 "latitude": coordinate.latitude,
+//                                                 "longitude": coordinate.longitude
+//            ]) { (error, _) in
+//                if let error = error {
+//                    observer.onError(error)
+//                } else {
+//                    observer.onNext(uid)
+//                }
+//                observer.onCompleted()
+//            }
+//            return Disposables.create()
+//        })
+//    }
 
     static func setOnDisconnectUpdates(forUid uid: String) {
         let userRef = usersRef.child(uid)
@@ -252,13 +252,53 @@ struct FirebaseClient {
         }
     }
 
-    /// Create observable that fetches requesting user
-    static func createRequestingUserObservable() -> Observable<LocalUser>? {
-        let requestingUserObservable = createRequestingUserUidObservable()
-        return requestingUserObservable?
-            .flatMapLatest { fetchObservableUser(forUid: $0) }
-            .share(replay: 1)
+    static func fetchRequestingUser(uid: String) -> Observable<(LocalUser, [String: AnyObject])> {
+        return Observable.create { (observer) -> Disposable in
+            let currentUserRef = usersRef.child(Auth.auth().currentUser!.uid)
+            let requestingUserRef = usersRef.child(uid)
+
+            let group = DispatchGroup()
+            group.enter()
+            var requestingUserDictionary: [String: AnyObject] = [:]
+            currentUserRef.child("requestingUser").observeSingleEvent(of: .value, with: { snapshot in
+                if let dictionary = snapshot.value as? [String: AnyObject] {
+                    requestingUserDictionary = dictionary
+                }
+                group.leave()
+            }, withCancel: { error in
+                observer.onError(error)
+                group.leave()
+            })
+
+            group.enter()
+            var requestingUser = LocalUser()
+            requestingUserRef.observeSingleEvent(of: .value, with: { snapshot in
+                if let dictionary = snapshot.value as? [String: AnyObject]  {
+                    requestingUser.name = dictionary["name"] as? String
+                    requestingUser.email = dictionary["email"] as? String
+                    requestingUser.uid = uid
+                }
+                group.leave()
+            }, withCancel: { error in
+                observer.onError(error)
+                group.leave()
+            })
+
+            group.notify(queue: .main) {
+                observer.onNext((requestingUser, requestingUserDictionary))
+                observer.onCompleted()
+            }
+            return Disposables.create()
+        }
     }
+
+//    /// Create observable that fetches requesting user
+//    static func createRequestingUserObservable() -> Observable<LocalUser>? {
+//        let requestingUserObservable = createRequestingUserUidObservable()
+//        return requestingUserObservable?
+//            .flatMapLatest { fetchObservableUser(forUid: $0) }
+//            .share(replay: 1)
+//    }
 
     /// Create observable to monitor incoming request user uid's
     static func createRequestingUserUidObservable() -> Observable<String>? {
@@ -327,16 +367,32 @@ struct FirebaseClient {
         }
     }
 
-    static func createCanCallUserObservable(forUid uid: String) -> Observable<Bool> {
+    static func createCallUserObservable(forUid uid: String, atCoordinateTuple coordinate: (latitude: Double, longitude: Double)) -> Observable<Bool> {
         let isAvailableObservable = createUserAvailableObservable(forUid: uid)
         let amOnlineObservable = createAmOnlineObservable()
         return Observable.combineLatest(isAvailableObservable, amOnlineObservable) {
             if !$1 { throw UserUnavailableError.amOffline }
-            return $0 && $1
-        }.take(1)
+            if !$0 { throw UserUnavailableError.unavailable }
+            }.take(1)
+            .flatMap { return Observable.create({ (observer) -> Disposable in
+                    let requestingUserRef = usersRef.child(uid).child("requestingUser")
+                    requestingUserRef.updateChildValues(["uid": uid,
+                                                         "latitude": coordinate.latitude,
+                                                         "longitude": coordinate.longitude]
+                    ) { (error, _) in
+                        if let error = error {
+                            observer.onError(error)
+                        } else {
+                            observer.onNext(true)
+                        }
+                        observer.onCompleted()
+                    }
+                    return Disposables.create()
+                })
+            }
     }
 
-    static func willDisplayRequestingUserObservable() -> Observable<LocalUser>? {
+    static func willDisplayRequestingUserObservable() -> Observable<(LocalUser, [String: AnyObject])>? {
         guard let currentUid = Auth.auth().currentUser?.uid else { return nil }
         let requestingUidObservable = createRequestingUserUidObservable() // get requesting uid
         let isOnlineObservable = requestingUidObservable?.flatMap { createUserOnlineObservable(forUid: $0) } // requesting user is available
@@ -345,9 +401,13 @@ struct FirebaseClient {
 
         return Observable.combineLatest(isOnlineObservable!, pendingObservable, amOnlineObservable) { isOnline, amPending, amOnline -> Bool in
             return isOnline && !amPending && amOnline && Auth.auth().currentUser != nil
-        }.filter { $0 }
-            .flatMapLatest { _ -> Observable<LocalUser> in
-                return createRequestingUserObservable()!
+        }
+            .filter { $0 }
+            .flatMapLatest { _ -> Observable<String> in
+                return createRequestingUserUidObservable()!
+            }
+            .flatMapLatest { uid -> Observable<(LocalUser, [String: AnyObject])> in
+                return fetchRequestingUser(uid: uid)
             }
             .share(replay: 1)
     }
@@ -356,7 +416,7 @@ struct FirebaseClient {
         let requestIsPendingObservable = createRequestIsPendingObservable(forUid: uid)
         let isInSessionObservable = createIsInSessionObservable(forUid: uid)
         return requestIsPendingObservable
-            .filter { !$0 }
+            .filter { $0 }
             .flatMapLatest { _ in return isInSessionObservable }
             .filter { !$0 }
     }

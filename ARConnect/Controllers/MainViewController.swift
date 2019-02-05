@@ -21,7 +21,7 @@ final class MainViewController: UIViewController {
     var searchViewControllerPreviousYCoordinate: CGFloat?
     let bag = DisposeBag()
 
-    let connectNotificationName = Notification.Name(NotificationConstants.connectionNotificationKey)
+    let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
     let mapViewController = MapViewController()
     var searchViewController: SearchTableViewController? = SearchTableViewController()
     weak var arSessionVC: ARSessionViewController?
@@ -124,9 +124,10 @@ final class MainViewController: UIViewController {
         }).disposed(by: self.bag)
 
         // Setting connection request observer
-        FirebaseClient.willDisplayRequestingUserObservable()?.subscribe(onNext: { [weak self] requestingUser in
+        FirebaseClient.willDisplayRequestingUserObservable()?.subscribe(onNext: { [weak self] (requestingUser, requestDictionary) in
             let connectRequestVC = ConnectRequestViewController()
             connectRequestVC.user = requestingUser
+            connectRequestVC.meetupLocation = CLLocationCoordinate2D(latitude: requestDictionary["latitude"] as! Double, longitude: requestDictionary["longitude"] as! Double)
             self?.present(connectRequestVC, animated: true, completion: nil)
         }).disposed(by: self.bag)
     }
@@ -142,32 +143,44 @@ final class MainViewController: UIViewController {
     }
 
     private func requestToConnectWithUser(_ user: LocalUser, atCoordinate coordinate: CLLocationCoordinate2D) {
-        FirebaseClient.createCanCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
-            if canComplete {
-                FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
-                FirebaseClient.usersRef.child(user.uid!).child("requestingUser").updateChildValues(["uid": Auth.auth().currentUser!.uid])
+        FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
+            guard let self = self else { return }
+            if let err = error {
+                self.createAndDisplayAlert(withTitle: "Error", body: err.localizedDescription)
+                return
+            }
+            FirebaseClient.createCallUserObservable(forUid: user.uid!, atCoordinateTuple: (latitude: coordinate.latitude, longitude: coordinate.longitude)).subscribe(onNext: { [weak self] completed in
+                guard completed else { return }
                 let connectPendingVC = ConnectPendingViewController()
                 connectPendingVC.user = user
                 connectPendingVC.meetupLocation = coordinate
                 self?.present(connectPendingVC, animated: true, completion: nil)
-            } else {
-                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
-            }
-            }, onError: { (error) in
-                self.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
-        }).disposed(by: bag)
+            }, onError: { [weak self] error in
+                self?.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
+            }).disposed(by: self.bag)
+        }
     }
 
     /// When connect to user, transition into AR Session state
     @objc private func handleSessionStart(notification: NSNotification) {
 
-        guard let currentUid = Auth.auth().currentUser?.uid, let user = notification.userInfo?["user"] as? LocalUser else { return }
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+
+        let user = notification.userInfo?["user"] as! LocalUser
+        let didConnect = notification.userInfo?["didConnect"] as! Bool
+
+        if !didConnect {
+            createAndDisplayAlert(withTitle: "Call Ending", body: "\(user.name ?? "User") is unavailable")
+            if let searchVC = searchViewController {
+                searchVC.expansionState = .compressed
+                setChildSearchVCState(toState: searchVC.expansionState)
+                animateTopConstraint()
+            }
+            return
+        }
 
         FirebaseClient.usersRef.child(currentUid).updateChildValues(["isPending": false, "isConnected": true, "connectedTo": user.uid])
 
-        if searchViewController == nil {
-            print("no search vc")
-        }
         searchViewController?.willMove(toParent: nil)
         searchViewController?.view.removeFromSuperview()
         searchViewController?.removeFromParent()
@@ -190,6 +203,8 @@ final class MainViewController: UIViewController {
 
         FirebaseClient.createEndSessionObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] _ in
             self?.handleSessionEnd()
+            guard let currentUid = Auth.auth().currentUser?.uid else { return }
+            FirebaseClient.usersRef.child(currentUid).updateChildValues(["connectedTo": "", "isConnected": false])
         }).disposed(by: bag)
     }
 
@@ -206,8 +221,6 @@ final class MainViewController: UIViewController {
         searchViewController!.didMove(toParent: self)
         setupSubviewsAndChildVCs()
         mapViewController.resetMap()
-        guard let currentUid = Auth.auth().currentUser?.uid else { return }
-        FirebaseClient.usersRef.child(currentUid).updateChildValues(["connectedTo": "", "isConnected": false])
     }
 
     /// Segue into AR Connect session
@@ -349,11 +362,15 @@ extension MainViewController: CardDetailDelegate {
 
         navigationController?.navigationBar.isHidden = true
 
+        mapViewController.willSetLocationMarker()
+
         mapViewController.meetupLocationObservable?.subscribe(onNext: { [weak self] coordinate in
-            self?.requestToConnectWithUser(user, atCoordinate: coordinate)
+            guard let self = self else { return }
+            self.navigationController?.navigationBar.isHidden = false
+            self.handleSessionEnd()
+            self.requestToConnectWithUser(user, atCoordinate: coordinate)
         }).disposed(by: bag)
 
-        mapViewController.willSetLocationMarker()
 //        FirebaseClient.createCanCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
 //            if canComplete {
 //                self?.willSetMeetupLocation()
