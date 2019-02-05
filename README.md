@@ -6,9 +6,9 @@ AR-Connect is an iOS application for helping users find each other using augment
 Motivation
 ======
 
-In a crowded city, everyone knows the frustration of coming out of the subway and not knowing which way is North or which street they need to walk down. Often we'll choose our best guess, watch our location indicator move down the wrong street, then turn around and figure it out.
+In a crowded city, everyone knows the frustration of coming out of the subway and not knowing which way is North or which street they need to walk down. Often we'll choose our best guess, watch our location indicator move down the wrong street, then turn around and figure it out from there.
 
-After, once you get to where you need to go, you and whoever you're meeting up with are struggling to figure out the details regarding meeting up.
+Then after that, once you get to where you need to go, you and your friend struggle to figure out the details regarding the exact location of the meet up spot.
 
 *What side of the street are we meeting on?*
 *How close are they?*
@@ -16,12 +16,14 @@ After, once you get to where you need to go, you and whoever you're meeting up w
 
 **This is the problem I am addressing with AR Connect**
 
-By allowing users to agree and confirm a meetup location, receive their own walking directions and visual path to their meetup spot, and see their path in augmented reality using ARKit, AR Connect provides a simple and intuitive tool for making connecting with friends that much easier.
+By allowing users to agree on a meetup location, receive their own walking directions and visual path to their meetup spot, and see their path in augmented reality using ARKit, AR Connect provides a simple and intuitive tool for making connecting with friends that much easier.
 
 Users can:
 * Request to connect with a user at a chosen meetup location
-* Use their camera and AR to see a graphical representation of the shortest path to their meetup spot
+* Use their camera in AR to see a graphical representation of the shortest path to their meetup spot
 * See a visual indicator of their friend's location
+
+*NOTE: User locations are not disclosed until both users agree to connect.*
 
 Features
 ======
