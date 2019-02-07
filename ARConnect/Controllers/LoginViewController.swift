@@ -16,6 +16,13 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     var keyboardWillShowObserver: NSObjectProtocol?
     var keyboardWillHideObserver: NSObjectProtocol?
 
+    let logoImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: "ar_connect_logo")
+        view.contentMode = .scaleAspectFit
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     let arConnectLabel: UILabel = {
         let lbl = UILabel()
         lbl.text = "AR Connect"
@@ -32,6 +39,7 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         textField.textColor = .black
         textField.backgroundColor = .white
         textField.textAlignment = NSTextAlignment.center
+        textField.layer.cornerRadius = 5
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
@@ -43,6 +51,7 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         textField.backgroundColor = .white
         textField.isSecureTextEntry = true
         textField.textAlignment = NSTextAlignment.center
+        textField.layer.cornerRadius = 5
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
@@ -52,31 +61,48 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         btn.setTitle("Log in", for: .normal)
         btn.setTitleColor(UIColor.black, for: .normal)
         btn.backgroundColor = .white
-        btn.layer.cornerRadius = 5
+        btn.layer.cornerRadius = 20
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.addTarget(self, action: #selector(logIn), for: .touchUpInside)
         return btn
+    }()
+    let signUpLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Don't have an account?"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .lightGray
+        return label
     }()
 
     let signUpButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.setTitle("Sign up", for: .normal)
-        btn.setTitleColor(UIColor.black, for: .normal)
-        btn.backgroundColor = .white
-        btn.layer.cornerRadius = 5
+        btn.setTitleColor(ColorConstants.secondaryColor, for: .normal)
+        btn.backgroundColor = .clear
+//        btn.layer.cornerRadius = 20
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.addTarget(self, action: #selector(signUp), for: .touchUpInside)
         return btn
     }()
 
+    lazy var signUpStackView: UIStackView = {
+        let view = UIStackView(arrangedSubviews: [signUpLabel, signUpButton])
+        view.axis = .horizontal
+        view.distribution = .fill
+        view.alignment = .fill
+        view.spacing = 5
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = ColorConstants.primaryColor
+        view.addSubview(logoImageView)
         view.addSubview(arConnectLabel)
         view.addSubview(emailTextField)
         view.addSubview(passwordTextField)
         view.addSubview(logInButton)
-        view.addSubview(signUpButton)
+        view.addSubview(signUpStackView)
         setSubviewConstraints()
 
         title = "AR Connect"
@@ -96,16 +122,20 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     /// Set auto layout anchors for all subviews
     private func setSubviewConstraints() {
         // set x, y, width, and height constraints for arConnectLabel
-        arConnectLabel.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,
+        logoImageView.dimensionAnchors(height: 150, width: 150)
+        logoImageView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,padding: UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0))
+        logoImageView.centerAnchors(centerX: view.centerXAnchor)
+
+        arConnectLabel.edgeAnchors(top: logoImageView.bottomAnchor,
                                    leading: view.safeAreaLayoutGuide.leadingAnchor,
                                    trailing: view.safeAreaLayoutGuide.trailingAnchor,
-                                   padding: UIEdgeInsets(top: 100, left: 32, bottom: 0, right: -32))
+                                   padding: UIEdgeInsets(top: 0, left: 32, bottom: 0, right: -32))
         arConnectLabel.dimensionAnchors(height: 40)
 
         emailTextField.edgeAnchors(top: arConnectLabel.bottomAnchor,
                                    leading: view.safeAreaLayoutGuide.leadingAnchor,
                                    trailing: view.safeAreaLayoutGuide.trailingAnchor,
-                                   padding: UIEdgeInsets(top: 60, left: 16, bottom: 0, right: -16))
+                                   padding: UIEdgeInsets(top: 30, left: 16, bottom: 0, right: -16))
         emailTextField.dimensionAnchors(height: 40)
 
         passwordTextField.edgeAnchors(top: emailTextField.bottomAnchor,
@@ -115,14 +145,18 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         passwordTextField.dimensionAnchors(height: 40)
 
         logInButton.edgeAnchors(top: passwordTextField.bottomAnchor,
-                                padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
-        logInButton.dimensionAnchors(height: 40, width: view.frame.width, widthMultiplier: 1 / 3)
+                                padding: UIEdgeInsets(top: 32, left: 0, bottom: 0, right: 0))
+        logInButton.dimensionAnchors(width: passwordTextField.widthAnchor, widthMultiplier: 2/5)
+        logInButton.dimensionAnchors(height: 50)
         logInButton.centerAnchors(centerX: view.centerXAnchor)
 
-        signUpButton.edgeAnchors(top: logInButton.bottomAnchor,
-                                 padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
-        signUpButton.dimensionAnchors(height: 40, width: view.frame.width, widthMultiplier: 1 / 3)
-        signUpButton.centerAnchors(centerX: view.centerXAnchor)
+        signUpStackView.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -20, right: 0))
+        signUpStackView.centerAnchors(centerX: view.centerXAnchor)
+//        signUpButton.edgeAnchors(leading: signUpLabel.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor,
+//                                 padding: UIEdgeInsets(top: 0, left: 0, bottom: -16, right: 0))
+//        signUpButton.dimensionAnchors(width: passwordTextField.widthAnchor, widthMultiplier: 3/5)
+//        signUpButton.dimensionAnchors(height: 40)
+//        signUpButton.centerAnchors(centerX: view.centerXAnchor)
     }
 
     /// Request to login to database and segue into MainVC
