@@ -28,7 +28,6 @@ class UserTableViewCell: UITableViewCell {
     private func setupUI() {
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.clipsToBounds = true
-
         isOnlineImageView.backgroundColor = .lightGray
         isOnlineImageView.layer.cornerRadius = isOnlineImageView.frame.width / 2
     }

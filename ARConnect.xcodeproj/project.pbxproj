@@ -140,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				19913A21216CEE6300174187 /* Controllers */,
+				1958B81121F12CD800B1840F /* TestingViewController.swift */,
 				19D7E68821C41DF60046D737 /* Services */,
 				19913A2D216D39C400174187 /* Models */,
 				19D7E68E21C426920046D737 /* Extensions */,
@@ -171,7 +172,6 @@
 				19997E8621E4F6970023C3EC /* ConnectPendingViewController.swift */,
 				199383C62195EE99001BE7FD /* CardDetailViewController */,
 				199383C72195EEAA001BE7FD /* MessageViewController */,
-				1958B81121F12CD800B1840F /* TestingViewController.swift */,
 				19997E7E21E404FD0023C3EC /* Inherited Controllers */,
 			);
 			path = Controllers;

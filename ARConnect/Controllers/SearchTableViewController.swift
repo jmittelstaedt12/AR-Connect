@@ -175,7 +175,7 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "userCell", for: indexPath) as! UserTableViewCell
-        guard var user = users?[indexPath.row] else {
+        guard let user = users?[indexPath.row] else {
             return cell
         }
         cell.selectionStyle = .none
@@ -190,10 +190,10 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
             cell.profileImageView.image = image
             return cell
         }
-        NetworkRequests.profilePictureNetworkRequest(withUrl: url) { (data) in
+        NetworkRequests.profilePictureNetworkRequest(withUrl: url) { [unowned self] (data) in
             DispatchQueue.main.async {
-                user.profileImage = UIImage(data: data)
-                cell.profileImageView.image = user.profileImage
+                cell.profileImageView.image = UIImage(data: data)
+                self.users![indexPath.row].profileImage = cell.profileImageView.image
             }
         }
         return cell

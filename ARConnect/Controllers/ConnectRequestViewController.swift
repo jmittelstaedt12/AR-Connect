@@ -53,7 +53,7 @@ final class ConnectRequestViewController: ConnectViewController {
     private func setObservers() {
         FirebaseClient.createCallDroppedObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] _ in
             guard let self = self, let uid = Auth.auth().currentUser?.uid else { return }
-            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
+            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": "", "latitude": 0, "longitude": 0])
             self.createAndDisplayAlert(withTitle: "Call Dropped", body: "Ending call")
             self.dismiss(animated: true, completion: nil)
         }).disposed(by: bag)

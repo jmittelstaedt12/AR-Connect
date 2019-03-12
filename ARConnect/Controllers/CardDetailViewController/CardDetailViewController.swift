@@ -29,6 +29,9 @@ final class CardDetailViewController: UIViewController {
 
     var userForCell: LocalUser! {
         didSet {
+            userImageView.image = userForCell?.profileImage ?? UIImage(named: "person-placeholder")
+            userImageView.contentMode = .scaleAspectFill
+            userImageView.clipsToBounds = true
             nameLabel.text = userForCell?.name
         }
     }

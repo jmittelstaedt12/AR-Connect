@@ -34,6 +34,7 @@ final class ConnectPendingViewController: ConnectViewController {
             FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": false])
             guard let self = self else { return }
             let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
+            print(didConnect)
             NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user as Any,
                                                                                     "didConnect": didConnect])
             self.dismiss(animated: true, completion: nil)

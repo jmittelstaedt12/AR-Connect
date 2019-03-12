@@ -374,8 +374,10 @@ struct FirebaseClient {
         return Observable.combineLatest(isAvailableObservable, amOnlineObservable) {
             if !$0 { throw UserUnavailableError.unavailable }
             if !$1 { throw UserUnavailableError.amOffline }
+            return $0 && $1
             }
-            .flatMap { return Observable.create({ (observer) -> Disposable in
+            .filter { $0 }
+            .flatMap { _ in return Observable.create({ (observer) -> Disposable in
                     let requestingUserRef = usersRef.child(uid).child("requestingUser")
                     requestingUserRef.updateChildValues(["uid": currentUid,
                                                          "latitude": coordinate.latitude,
