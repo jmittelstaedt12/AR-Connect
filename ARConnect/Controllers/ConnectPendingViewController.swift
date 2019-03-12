@@ -35,7 +35,8 @@ final class ConnectPendingViewController: ConnectViewController {
             guard let self = self else { return }
             let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
             print(didConnect)
-            NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user as Any,
+            NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user,
+                                                                                "meetupLocation": self.meetupLocation,
                                                                                     "didConnect": didConnect])
             self.dismiss(animated: true, completion: nil)
         }).disposed(by: bag)

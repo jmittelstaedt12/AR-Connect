@@ -34,7 +34,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     var willUpdateCurrentLocation = true
     private var meetupLocationVariable = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
     private(set) var meetupLocationObservable: Observable<CLLocationCoordinate2D>?
-
+    private var tempPolylineColor: UIColor?
     let map: JMMKMapView = JMMKMapView()
 
     enum WorldAlignment {
@@ -110,7 +110,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
             }
             self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
             DispatchQueue.main.async {
-                self.draw(polyline: self.pathOverlay!)
+                self.draw(polyline: self.pathOverlay!, color: ColorConstants.primaryColor)
             }
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
         }
@@ -119,60 +119,76 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     @objc private func setupMapForConnection(notification: NSNotification) {
         guard let didConnect = notification.userInfo?["didConnect"] as? Bool, didConnect, let currentLocation = currentLocation else { return }
         let user = notification.userInfo?["user"] as! LocalUser
+        let meetupLocation = notification.userInfo?["meetupLocation"] as! CLLocationCoordinate2D
+        NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: meetupLocation) { [weak self] points in
+            guard let self = self, points != nil else { return }
+            self.tripCoordinates = points!
+            var current = self.tripCoordinates.first!
+            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+                current = step
+                return coordinates
+            }
+            self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
+            DispatchQueue.main.async {
+                self.draw(polyline: self.pathOverlay!, color: ColorConstants.primaryColor)
+            }
+            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+        }
+
         FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
             guard let lat = latitude, let lon = longitude else {
                 print("coordinates not available")
                 return
             }
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            print(currentLocation.coordinate, coordinate)
-//            #error("need to debug this algorithm for generating directions requests. Currently does not recognize changing to different steps")
-            NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: coordinate) { [weak self] points in
-                guard let self = self, points != nil else { return }
-                self.tripCoordinates = points!
-                var current = self.tripCoordinates.first!
-                self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+            NetworkRequests.directionsRequest(from: coordinate, to: meetupLocation) { [weak self] points in
+                guard let self = self, let points = points, !points.isEmpty else { return }
+                self.tripCoordinates = points
+                var current = points.first!
+                let friendCoordinates = points.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
                     let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
                     current = step
                     return coordinates
                 }
-                self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
+                let friendPath = MKPolyline(coordinates: friendCoordinates, count: friendCoordinates.count)
                 DispatchQueue.main.async {
-                    self.draw(polyline: self.pathOverlay!)
+                    self.draw(polyline: friendPath, color: ColorConstants.secondaryColor)
                 }
-                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
             }
-
-//            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate) { result in
-//                if let error = result.error {
-//                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-//                    return
-//                }
-//                guard let line = result.line else {
-//                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
-//                    return
-//                }
-//                self.pathOverlay = line
-//                self.draw(polyline: line)
-//                guard line.pointCount > 0 else { return }
-//                for index in 0..<line.pointCount {
-//                    self.tripCoordinates.append(line.points()[index].coordinate)
-//                }
-//                var current = self.tripCoordinates.first!
-//                self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
-//                    let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-//                    current = step
-//                    return coordinates
-//                }
-//                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-//
-//            }
         }
+        //            #error("need to debug this algorithm for generating directions requests. Currently does not recognize changing to different steps")
+
+        //            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate) { result in
+        //                if let error = result.error {
+        //                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+        //                    return
+        //                }
+        //                guard let line = result.line else {
+        //                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
+        //                    return
+        //                }
+        //                self.pathOverlay = line
+        //                self.draw(polyline: line)
+        //                guard line.pointCount > 0 else { return }
+        //                for index in 0..<line.pointCount {
+        //                    self.tripCoordinates.append(line.points()[index].coordinate)
+        //                }
+        //                var current = self.tripCoordinates.first!
+        //                self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+        //                    let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+        //                    current = step
+        //                    return coordinates
+        //                }
+        //                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+        //
+        //            }
     }
 
     // MARK: Updates to Map
 
-    func draw(polyline line: MKPolyline) {
+    func draw(polyline line: MKPolyline, color: UIColor) {
+        tempPolylineColor = color
         map.addOverlay(line)
         map.setVisibleMapRect(MKMapRect(origin: line.boundingMapRect.origin, size: MKMapSize(width: line.boundingMapRect.size.width,
                 height: line.boundingMapRect.size.height)), edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
@@ -182,7 +198,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         let polylineRenderer = MKPolylineRenderer(overlay: overlay)
         if overlay is MKPolyline {
             polylineRenderer.strokeColor =
-                UIColor.blue.withAlphaComponent(0.75)
+                tempPolylineColor
             polylineRenderer.lineWidth = 5
         }
         return polylineRenderer

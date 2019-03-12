@@ -92,6 +92,7 @@ final class ConnectRequestViewController: ConnectViewController {
             let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
             let didConnect = (sender.title(for: .normal) == "Confirm") ? true : false
             NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user,
+                                                                                "meetupLocation": self.meetupLocation,
                                                                                 "didConnect": didConnect])
             self.dismiss(animated: true, completion: nil)
         }
