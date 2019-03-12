@@ -64,26 +64,36 @@ final class ConnectRequestViewController: ConnectViewController {
             self.dismiss(animated: true, completion: nil)
             return
         }
+
+        let group = DispatchGroup()
+        group.enter()
         if sender.title(for: .normal) == "Confirm" {
+            group.enter()
             FirebaseClient.usersRef.child(uid).updateChildValues(["isConnected": true, "connectedTo": requestUid]) { (error, _) in
                 if let err = error {
                     print(err.localizedDescription)
                     return
                 }
-                FirebaseClient.usersRef.child(requestUid).updateChildValues(["isConnected": true]) { (error, _) in
-                    if let err = error {
-                        print(err.localizedDescription)
-                        return
-                    }
-                    FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
-                    let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
-                    NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user,
-                                                                                        "didConnect": true])
-                }
+                group.leave()
             }
-        } else {
-            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
+
+            group.enter()
+            FirebaseClient.usersRef.child(requestUid).updateChildValues(["isConnected": true]) { (error, _) in
+                if let err = error {
+                    print(err.localizedDescription)
+                    return
+                }
+                group.leave()
+            }
         }
-        self.dismiss(animated: true, completion: nil)
+        group.leave()
+        group.notify(queue: .main) {
+            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
+            let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
+            let didConnect = (sender.title(for: .normal) == "Confirm") ? true : false
+            NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user,
+                                                                                "didConnect": didConnect])
+            self.dismiss(animated: true, completion: nil)
+        }
     }
 }

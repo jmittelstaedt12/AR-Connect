@@ -123,7 +123,8 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     private func setSubviewConstraints() {
         // set x, y, width, and height constraints for arConnectLabel
         logoImageView.dimensionAnchors(height: 150, width: 150)
-        logoImageView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,padding: UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0))
+        logoImageView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,
+                                  padding: UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0))
         logoImageView.centerAnchors(centerX: view.centerXAnchor)
 
         arConnectLabel.edgeAnchors(top: logoImageView.bottomAnchor,

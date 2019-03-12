@@ -273,10 +273,11 @@ struct FirebaseClient {
             group.enter()
             var requestingUser = LocalUser()
             requestingUserRef.observeSingleEvent(of: .value, with: { snapshot in
-                if let dictionary = snapshot.value as? [String: AnyObject]  {
+                if let dictionary = snapshot.value as? [String: AnyObject] {
+                    requestingUser.uid = uid
                     requestingUser.name = dictionary["name"] as? String
                     requestingUser.email = dictionary["email"] as? String
-                    requestingUser.uid = uid
+                    requestingUser.profileUrl = (dictionary["email"] is String) ? URL(fileURLWithPath: dictionary["email"] as! String) : nil
                 }
                 group.leave()
             }, withCancel: { error in
@@ -318,7 +319,6 @@ struct FirebaseClient {
             .map { $0.value as! String }
             .map { $0.isEmpty }
             .filter { $0 }
-            .share(replay: 1)
     }
 
     /// Create requesting user for uid observable
@@ -368,15 +368,16 @@ struct FirebaseClient {
     }
 
     static func createCallUserObservable(forUid uid: String, atCoordinateTuple coordinate: (latitude: Double, longitude: Double)) -> Observable<Bool> {
+        let currentUid = Auth.auth().currentUser!.uid
         let isAvailableObservable = createUserAvailableObservable(forUid: uid)
         let amOnlineObservable = createAmOnlineObservable()
         return Observable.combineLatest(isAvailableObservable, amOnlineObservable) {
-            if !$1 { throw UserUnavailableError.amOffline }
             if !$0 { throw UserUnavailableError.unavailable }
-            }.take(1)
+            if !$1 { throw UserUnavailableError.amOffline }
+            }
             .flatMap { return Observable.create({ (observer) -> Disposable in
                     let requestingUserRef = usersRef.child(uid).child("requestingUser")
-                    requestingUserRef.updateChildValues(["uid": uid,
+                    requestingUserRef.updateChildValues(["uid": currentUid,
                                                          "latitude": coordinate.latitude,
                                                          "longitude": coordinate.longitude]
                     ) { (error, _) in
@@ -389,7 +390,7 @@ struct FirebaseClient {
                     }
                     return Disposables.create()
                 })
-            }
+            }.take(1)
     }
 
     static func willDisplayRequestingUserObservable() -> Observable<(LocalUser, [String: AnyObject])>? {
@@ -426,7 +427,6 @@ struct FirebaseClient {
         return createNoRequestingUserObservable(forUid: uid)
             .flatMapLatest { _ in return createIsInSessionObservable(forUid: currentUid) }
             .take(1)
-            .share(replay: 1)
     }
 
     static func createIsInSessionObservable(forUid uid: String) -> Observable<Bool> {

@@ -35,6 +35,7 @@ final class RootViewController: UIViewController {
     // If there was no user signed in on last app close, this will display the login screen
     func showLoginScreen() {
         let new = UINavigationController(rootViewController: LoginViewController())
+        customizeNavigationBar(new.navigationBar)
         addChild(new)
         new.view.frame = view.bounds
         view.addSubview(new.view)
@@ -45,9 +46,17 @@ final class RootViewController: UIViewController {
         current = new
     }
 
+    private func customizeNavigationBar(_ bar: UINavigationBar) {
+        bar.barTintColor = ColorConstants.primaryColor
+        bar.alpha = 0.9
+        bar.tintColor = UIColor.white
+        bar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+    }
+
     // Display the testing view controlelr
     func switchToTesting() {
         let testingScreen = UINavigationController(rootViewController: TestingViewController())
+        customizeNavigationBar(testingScreen.navigationBar)
         animateFadeTransition(to: testingScreen)
     }
 
@@ -55,12 +64,14 @@ final class RootViewController: UIViewController {
     func switchToMainScreen() {
         //        let mainScreen = UINavigationController(rootViewController: TestingViewController())
         let mainScreen = UINavigationController(rootViewController: MainViewController())
+        customizeNavigationBar(mainScreen.navigationBar)
         animateFadeTransition(to: mainScreen)
     }
 
     // If the user signs out, switch to the login screen
     func switchToLogout() {
         let logoutScreen = UINavigationController(rootViewController: LoginViewController())
+        customizeNavigationBar(logoutScreen.navigationBar)
         animateDismissTransition(to: logoutScreen)
     }
 

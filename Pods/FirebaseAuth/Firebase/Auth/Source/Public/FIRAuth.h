@@ -31,6 +31,8 @@
 @class FIRAuthSettings;
 @class FIRUser;
 @protocol FIRAuthStateListener;
+@protocol FIRAuthUIDelegate;
+@protocol FIRFederatedAuthProvider;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -410,20 +412,6 @@ NS_SWIFT_NAME(Auth)
     @param password The user's password.
     @param completion Optionally; a block which is invoked when the sign in flow finishes, or is
         canceled. Invoked asynchronously on the main thread in the future.
-
-    @remarks Possible error codes:
-
-        + `FIRAuthErrorCodeOperationNotAllowed` - Indicates that email and password
-            accounts are not enabled. Enable them in the Auth section of the
-            Firebase console.
-        + `FIRAuthErrorCodeUserDisabled` - Indicates the user's account is disabled.
-        + `FIRAuthErrorCodeWrongPassword` - Indicates the user attempted
-            sign in with an incorrect password.
-        + `FIRAuthErrorCodeInvalidEmail` - Indicates the email address is malformed.
-
-
-
-    @remarks See `FIRAuthErrors` for a list of error codes that are common to all API methods.
  */
 - (void)signInAndRetrieveDataWithEmail:(NSString *)email
                               password:(NSString *)password
@@ -477,6 +465,54 @@ NS_SWIFT_NAME(Auth)
                                       "Please use signInAndRetrieveDataWithCredential:completion:"
                                       " for Objective-C or signInAndRetrieveData(with:completion:)"
                                       " for Swift instead.");
+
+/** @fn signInWithProvider:UIDelegate:completion:
+    @brief Signs in using the provided auth provider instance.
+
+    @param provider An isntance of an auth provider used to initiate the sign-in flow.
+    @param UIDelegate Optionally an instance of a class conforming to the FIRAuthUIDelegate
+        protocol, this is used for presenting the web context. If nil, a default FIRAuthUIDelegate
+        will be used.
+    @param completion Optionally; a block which is invoked when the sign in flow finishes, or is
+        canceled. Invoked asynchronously on the main thread in the future.
+
+    @remarks Possible error codes:
+    <ul>
+        <li>@c FIRAuthErrorCodeOperationNotAllowed - Indicates that email and password
+            accounts are not enabled. Enable them in the Auth section of the
+            Firebase console.
+        </li>
+        <li>@c FIRAuthErrorCodeUserDisabled - Indicates the user's account is disabled.
+        </li>
+        <li>@c FIRAuthErrorCodeWebNetworkRequestFailed - Indicates that a network request within a
+            SFSafariViewController or UIWebview failed.
+        </li>
+        <li>@c FIRAuthErrorCodeWebInternalError - Indicates that an internal error occured within a
+            SFSafariViewController or UIWebview.
+        </li>
+        <li>@c FIRAuthErrorCodeWebSignInUserInteractionFailure - Indicates a general failure during
+            a web sign-in flow.
+        </li>
+        <li>@c FIRAuthErrorCodeWebContextAlreadyPresented - Indicates that an attempt was made to
+            present a new web context while one was already being presented.
+        </li>
+        <li>@c FIRAuthErrorCodeWebContextCancelled - Indicates that the URL presentation was cancelled prematurely
+            by the user.
+        </li>
+        <li>@c FIRAuthErrorCodeAccountExistsWithDifferentCredential - Indicates the email asserted
+            by the credential (e.g. the email in a Facebook access token) is already in use by an
+            existing account, that cannot be authenticated with this sign-in method. Call
+            fetchProvidersForEmail for this user’s email and then prompt them to sign in with any of
+            the sign-in providers returned. This error will only be thrown if the "One account per
+            email address" setting is enabled in the Firebase console, under Auth settings.
+        </li>
+    </ul>
+
+    @remarks See @c FIRAuthErrors for a list of error codes that are common to all API methods.
+ */
+- (void)signInWithProvider:(id<FIRFederatedAuthProvider>)provider
+                UIDelegate:(nullable id<FIRAuthUIDelegate>)UIDelegate
+                completion:(nullable FIRAuthDataResultCallback)completion;
 
 /** @fn signInAndRetrieveDataWithCredential:completion:
     @brief Asynchronously signs in to Firebase with the given 3rd-party credentials (e.g. a Facebook
@@ -543,21 +579,6 @@ NS_SWIFT_NAME(Auth)
         `signInAnonymously(Completion:)` for Swift instead.
     @param completion Optionally; a block which is invoked when the sign in finishes, or is
         canceled. Invoked asynchronously on the main thread in the future.
-
-    @remarks If there is already an anonymous user signed in, that user will be returned instead.
-        If there is any other existing user signed in, that user will be signed out.
-
-    @remarks Possible error codes:
-
-        + `FIRAuthErrorCodeOperationNotAllowed` - Indicates that anonymous accounts are
-            not enabled. Enable them in the Auth section of the Firebase console.
-
-
-    @remarks See `FIRAuthErrors` for a list of error codes that are common to all API methods.
-
-    @remarks This method will only exist until the next major Firebase release following 4.x.x.
-        After the next major release the method `signInAnonymouslyWithCompletion` will support the
-        `FIRAuthDataResultCallback`.
  */
 - (void)signInAnonymouslyAndRetrieveDataWithCompletion:
     (nullable FIRAuthDataResultCallback)completion
@@ -592,22 +613,6 @@ NS_SWIFT_NAME(Auth)
     @param token A self-signed custom auth token.
     @param completion Optionally; a block which is invoked when the sign in finishes, or is
         canceled. Invoked asynchronously on the main thread in the future.
-
-    @remarks Possible error codes:
-
-        + `FIRAuthErrorCodeInvalidCustomToken` - Indicates a validation error with
-            the custom token.
-
-        + `FIRAuthErrorCodeCustomTokenMismatch` - Indicates the service account and the API key
-            belong to different projects.
-
-
-
-    @remarks See `FIRAuthErrors` for a list of error codes that are common to all API methods.
-
-    @remarks This method will only exist until the next major Firebase release following 4.x.x.
-        After the next major release the method `createUserWithEmail:password:completion:` will
-        support the `FIRAuthDataResultCallback`.
  */
 - (void)signInAndRetrieveDataWithCustomToken:(NSString *)token
                                   completion:(nullable FIRAuthDataResultCallback)completion
@@ -650,24 +655,6 @@ NS_SWIFT_NAME(Auth)
     @param password The user's desired password.
     @param completion Optionally; a block which is invoked when the sign up flow finishes, or is
         canceled. Invoked asynchronously on the main thread in the future.
-
-    @remarks Possible error codes:
-
-        + `FIRAuthErrorCodeInvalidEmail` - Indicates the email address is malformed.
-        + `FIRAuthErrorCodeEmailAlreadyInUse` - Indicates the email used to attempt sign up
-            already exists. Call fetchProvidersForEmail to check which sign-in mechanisms the user
-            used, and prompt the user to sign in with one of those.
-        + `FIRAuthErrorCodeOperationNotAllowed` - Indicates that email and password accounts
-            are not enabled. Enable them in the Auth section of the Firebase console.
-        + `FIRAuthErrorCodeWeakPassword` - Indicates an attempt to set a password that is
-            considered too weak. The NSLocalizedFailureReasonErrorKey field in the NSError.userInfo
-            dictionary object will contain more detailed explanation that can be shown to the user.
-
-    @remarks See `FIRAuthErrors` for a list of error codes that are common to all API methods.
-
-    @remarks This method will only exist until the next major Firebase release following 4.x.x.
-        After the next major release the method `createUserWithEmail:password:completion:` will
-        support the `FIRAuthDataResultCallback`.
  */
 - (void)createUserAndRetrieveDataWithEmail:(NSString *)email
                                   password:(NSString *)password

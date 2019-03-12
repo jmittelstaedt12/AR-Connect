@@ -21,6 +21,25 @@ final class ConnectPendingViewController: ConnectViewController {
         setTimer()
     }
 
+    private func setObservers() {
+        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] amOnline in
+            if !amOnline {
+                self?.dismiss(animated: true) {
+                    self?.createAndDisplayAlert(withTitle: "Network Error", body: "You are offline")
+                }
+            }
+        }).disposed(by: bag)
+
+        FirebaseClient.createCalledUserResponseObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] didConnect in
+            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": false])
+            guard let self = self else { return }
+            let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
+            NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user as Any,
+                                                                                    "didConnect": didConnect])
+            self.dismiss(animated: true, completion: nil)
+        }).disposed(by: bag)
+    }
+
     override func setViewLayouts() {
         // Set profile image view constraints
         requestingUserImageView.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, padding: UIEdgeInsets(top: 30, left: 32, bottom: 0, right: 0))
@@ -39,25 +58,6 @@ final class ConnectPendingViewController: ConnectViewController {
         // set cancel button constriants
         cancelButton.edgeAnchors(top: meetupLocationMapView.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
         cancelButton.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
-    }
-
-    private func setObservers() {
-        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] amOnline in
-            if !amOnline {
-                self?.dismiss(animated: true) {
-                    self?.createAndDisplayAlert(withTitle: "Network Error", body: "You are offline")
-                }
-            }
-        }).disposed(by: bag)
-
-        FirebaseClient.createCalledUserResponseObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] didConnect in
-            FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": false])
-            guard let self = self else { return }
-            let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
-            NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user as Any,
-                                                                                    "didConnect": didConnect])
-            self.dismiss(animated: true, completion: nil)
-        }).disposed(by: bag)
     }
 
     private func setTimer() {

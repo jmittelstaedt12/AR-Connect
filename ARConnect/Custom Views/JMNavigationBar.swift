@@ -21,7 +21,7 @@ class JMNavigationBar: UINavigationBar {
 
     private func setupNavigationBar() {
         isTranslucent = true
-        barTintColor = UIColor.gray
+        barTintColor = ColorConstants.primaryColor
         alpha = 0.9
         tintColor = UIColor.white
         titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]

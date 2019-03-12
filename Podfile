@@ -12,6 +12,6 @@ target 'ARConnect' do
   pod 'Firebase/Core'
   pod 'RxSwift',                '~> 4.4', inhibit_warnings: true
   pod 'RxCocoa',                '~> 4.4'
-  pod 'SwiftLint'  
+  pod 'SwiftLint'
 # pod 'RxAtomic',               '~> 4.0', :modular_headers => true
 end

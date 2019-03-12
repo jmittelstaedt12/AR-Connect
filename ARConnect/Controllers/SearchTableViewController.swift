@@ -27,7 +27,7 @@ final class SearchTableViewController: UIViewController {
 
     let drawerIconView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.gray
+        view.backgroundColor = .white
         view.layer.cornerRadius = 1.5
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -35,10 +35,10 @@ final class SearchTableViewController: UIViewController {
 
     let userSearchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.backgroundColor = .white
+        let textField = searchBar.value(forKey: "searchField") as! UITextField
         searchBar.placeholder = "Find a friend"
+        searchBar.setBackgroundImage(UIImage(), for: .any, barMetrics: .default)
         searchBar.translatesAutoresizingMaskIntoConstraints = false
-        searchBar.layer.borderColor = UIColor.black.cgColor
         searchBar.layer.cornerRadius = 5
         return searchBar
     }()
@@ -77,7 +77,7 @@ final class SearchTableViewController: UIViewController {
 
     private func setupView() {
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = UIColor(white: 5 / 6, alpha: 1.0)
+        view.backgroundColor = ColorConstants.primaryColor
         view.layer.cornerRadius = 5
     }
 
@@ -139,7 +139,37 @@ final class SearchTableViewController: UIViewController {
 // MARK: UITableViewDelegate Methods
 extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource {
 
+    private func emptyTableViewMessage() {
+        let viewRect = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: self.view.bounds.size.width, height: self.view.bounds.size.height))
+        let backgroundView = UIView(frame: viewRect)
+        let emptyMessageLabel = UILabel()
+        backgroundView.addSubview(emptyMessageLabel)
+        emptyMessageLabel.translatesAutoresizingMaskIntoConstraints = false
+        emptyMessageLabel.edgeAnchors(top: backgroundView.topAnchor, padding: UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
+        emptyMessageLabel.centerAnchors(centerX: backgroundView.centerXAnchor)
+        emptyMessageLabel.dimensionAnchors(width: 260)
+        emptyMessageLabel.text = "Try searching for a friend by first name"
+        emptyMessageLabel.textAlignment = .center
+        emptyMessageLabel.textColor = .darkGray
+        emptyMessageLabel.font = emptyMessageLabel.font.withSize(16)
+        emptyMessageLabel.numberOfLines = 0
+        emptyMessageLabel.sizeToFit()
+        backgroundView.backgroundColor = UIColor(red: 234, green: 234, blue: 234)
+        tableView.backgroundView = backgroundView
+        tableView.separatorStyle = .none
+    }
+
+    private func restoreTableView() {
+        tableView.backgroundView = nil
+        tableView.separatorStyle = .singleLine
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if let count = self.users?.count, count > 0 {
+            restoreTableView()
+        } else {
+            emptyTableViewMessage()
+        }
         return users?.count ?? 0
     }
 

@@ -126,6 +126,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
             }
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
             print(currentLocation.coordinate, coordinate)
+//            #error("need to debug this algorithm for generating directions requests. Currently does not recognize changing to different steps")
             NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: coordinate) { [weak self] points in
                 guard let self = self, points != nil else { return }
                 self.tripCoordinates = points!
@@ -220,6 +221,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         setMeetupLocationButton = nil
 
         meetupLocationVariable.accept(map.centerCoordinate)
+        meetupLocationVariable.accept(nil)
     }
 
     // MARK: CLLocationManagerDelegate

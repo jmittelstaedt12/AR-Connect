@@ -15,13 +15,14 @@ import RxCocoa
 
 final class MainViewController: UIViewController {
 
+    // MARK: Properties
     var currentUser: User?
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var childSearchVCHeightConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
     let bag = DisposeBag()
 
-    let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
+    private let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
     let mapViewController = MapViewController()
     var searchViewController: SearchTableViewController? = SearchTableViewController()
     weak var arSessionVC: ARSessionViewController?
@@ -71,7 +72,6 @@ final class MainViewController: UIViewController {
         currentUser = Auth.auth().currentUser!
         FirebaseClient.setOnDisconnectUpdates(forUid: currentUser!.uid)
         setObservers()
-        //        navigationController?.navigationBar = JMNavigationBar()
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
 
@@ -126,6 +126,7 @@ final class MainViewController: UIViewController {
         // Setting connection request observer
         FirebaseClient.willDisplayRequestingUserObservable()?.subscribe(onNext: { [weak self] (requestingUser, requestDictionary) in
             let connectRequestVC = ConnectRequestViewController()
+//            #error("This is the issue with your connect request code. This is sending the wrong user")
             connectRequestVC.user = requestingUser
             connectRequestVC.meetupLocation = CLLocationCoordinate2D(latitude: requestDictionary["latitude"] as! Double, longitude: requestDictionary["longitude"] as! Double)
             self?.present(connectRequestVC, animated: true, completion: nil)
