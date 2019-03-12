@@ -419,7 +419,7 @@ struct FirebaseClient {
         let requestIsPendingObservable = createRequestIsPendingObservable(forUid: uid)
         let isInSessionObservable = createIsInSessionObservable(forUid: uid)
         return requestIsPendingObservable
-            .filter { $0 }
+            .filter { !$0 }
             .flatMapLatest { _ in return isInSessionObservable }
             .filter { !$0 }
     }
