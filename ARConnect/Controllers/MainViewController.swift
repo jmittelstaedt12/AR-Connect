@@ -204,13 +204,13 @@ final class MainViewController: UIViewController {
 
         FirebaseClient.createEndSessionObservable(forUid: user.uid)?.subscribe(onNext: { [weak self] _ in
             self?.handleSessionEnd()
-            guard let currentUid = Auth.auth().currentUser?.uid else { return }
-            FirebaseClient.usersRef.child(currentUid).updateChildValues(["connectedTo": "", "isConnected": false])
         }).disposed(by: bag)
     }
 
     @objc private func handleSessionEnd() {
-        guard searchViewController == nil else { return }
+        guard let user = currentUser else { return }
+        FirebaseClient.usersRef.child(user.uid).updateChildValues(["connectedTo": "",
+                                                                   "isConnected": false])
         viewARSessionButton?.removeFromSuperview()
         endConnectSessionButton?.removeFromSuperview()
         viewARSessionButton = nil

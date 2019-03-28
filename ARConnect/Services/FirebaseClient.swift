@@ -167,13 +167,13 @@ struct FirebaseClient {
 
     static func setOnDisconnectUpdates(forUid uid: String) {
         let userRef = usersRef.child(uid)
-        userRef.child("connectedTo").onDisconnectSetValue("")
-        userRef.child("isOnline").onDisconnectSetValue(false)
-        userRef.child("pendingRequest").onDisconnectSetValue(false)
-        userRef.child("isConnected").onDisconnectSetValue(false)
-        userRef.child("requestingUser").child("uid").onDisconnectSetValue("")
-        userRef.child("requestingUser").child("latitude").onDisconnectSetValue(0)
-        userRef.child("requestingUser").child("longitude").onDisconnectSetValue(0)
+        userRef.onDisconnectUpdateChildValues(["connectedTo": "",
+                                               "isOnline": false,
+                                               "pendingRequest": false,
+                                               "isConnected": false])
+        userRef.child("requestingUser").onDisconnectUpdateChildValues(["uid": "",
+                                                                       "latitude": 0,
+                                                                       "longitude": 0])
     }
 
     static func rxFirebaseSingleEvent(forRef ref: DatabaseQuery, andEvent event: DataEventType) -> Observable<DataSnapshot> {
@@ -446,8 +446,14 @@ struct FirebaseClient {
         let isInSessionObservable = createIsInSessionObservable(forUid: uid)
         return Observable.combineLatest(amInSessionObservable, isInSessionObservable) { return !$0 || !$1 }
             .filter { $0 }
-        .take(1)
+            .take(1)
     }
+
+//    static func createConnectedUserCoordinatesObservable(userUid uid: String) -> Observable<(Double?, Double?)> {
+//        let latitudeObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("latitude"), andEvent: .value)
+//        let longitudeObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("latitude"), andEvent: .value)
+////        return latitudeObservable.concat(longitudeObservable)
+//    }
 
     static func fetchCoordinates(uid: String, handler: @escaping((Double?, Double?) -> Void)) {
         let userRef = usersRef.child(uid)

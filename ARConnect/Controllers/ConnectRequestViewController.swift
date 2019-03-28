@@ -58,7 +58,7 @@ final class ConnectRequestViewController: ConnectViewController {
             self.dismiss(animated: true, completion: nil)
         }).disposed(by: bag)
     }
-
+    
     override func handleResponse(sender: UIButton) {
         guard let requestUid = user.uid, let uid = Auth.auth().currentUser?.uid else {
             self.dismiss(animated: true, completion: nil)
@@ -66,29 +66,12 @@ final class ConnectRequestViewController: ConnectViewController {
         }
 
         let group = DispatchGroup()
-        group.enter()
-        if sender.title(for: .normal) == "Confirm" {
-            group.enter()
-            FirebaseClient.usersRef.child(uid).updateChildValues(["isConnected": true, "connectedTo": requestUid]) { (error, _) in
-                if let err = error {
-                    print(err.localizedDescription)
-                    return
-                }
-                group.leave()
-            }
 
-            group.enter()
-            FirebaseClient.usersRef.child(requestUid).updateChildValues(["isConnected": true]) { (error, _) in
-                if let err = error {
-                    print(err.localizedDescription)
-                    return
-                }
-                group.leave()
-            }
-        }
-        group.leave()
-        group.notify(queue: .main) {
-            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": ""])
+        // Work item if firebase updates succeed
+        let workItem = DispatchWorkItem {
+            FirebaseClient.usersRef.child(uid).child("requestingUser").updateChildValues(["uid": "",
+                                                                                          "latitude": 0,
+                                                                                          "longitude": 0])
             let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
             let didConnect = (sender.title(for: .normal) == "Confirm") ? true : false
             NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": self.user,
@@ -96,5 +79,25 @@ final class ConnectRequestViewController: ConnectViewController {
                                                                                 "didConnect": didConnect])
             self.dismiss(animated: true, completion: nil)
         }
+
+        // Completion handler for firebase requests
+        let updateCompletionHandler: (Error?, DatabaseReference) -> Void = {(error, _) in
+            defer {
+                group.leave()
+            }
+            if let err = error {
+                workItem.cancel()
+                print(err.localizedDescription)
+                return
+            }
+        }
+        if sender.title(for: .normal) == "Confirm" {
+            group.enter()
+            FirebaseClient.usersRef.child(uid).updateChildValues(["isConnected": true, "connectedTo": requestUid], withCompletionBlock: updateCompletionHandler)
+            group.enter()
+            FirebaseClient.usersRef.child(requestUid).updateChildValues(["isConnected": true], withCompletionBlock: updateCompletionHandler)
+        }
+
+        group.notify(queue: .main, work: workItem)
     }
 }

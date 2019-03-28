@@ -96,93 +96,120 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
 
     // MARK: Directions Requests
 
-    private func setTestingConnection(location: CLLocation) {
-        let coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.001,
-                                                longitude: location.coordinate.longitude+0.001)
-        NetworkRequests.directionsRequest(from: location.coordinate, to: coordinate) { [weak self] points in
-            guard let self = self, points != nil else { return }
-            self.tripCoordinates = points!
-            var current = self.tripCoordinates.first!
-            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
-                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-                current = step
-                return coordinates
-            }
-            self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
-            DispatchQueue.main.async {
-                self.draw(polyline: self.pathOverlay!, color: ColorConstants.primaryColor)
-            }
-            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-        }
-    }
+//    private func setTestingConnection(location: CLLocation) {
+//        let coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude+0.001,
+//                                                longitude: location.coordinate.longitude+0.001)
+//        NetworkRequests.directionsRequest(from: location.coordinate, to: coordinate) { [weak self] points in
+//            guard let self = self, points != nil else { return }
+//            self.tripCoordinates = points!
+//            var current = self.tripCoordinates.first!
+//            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+//                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+//                current = step
+//                return coordinates
+//            }
+//            self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
+//            DispatchQueue.main.async {
+//                self.draw(polyline: self.pathOverlay!, color: ColorConstants.primaryColor)
+//            }
+//            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+//        }
+//    }
 
     @objc private func setupMapForConnection(notification: NSNotification) {
-        guard let didConnect = notification.userInfo?["didConnect"] as? Bool, didConnect, let currentLocation = currentLocation else { return }
+        guard let didConnect = notification.userInfo?["didConnect"] as? Bool,
+            didConnect, let currentLocation = currentLocation else { return }
         let user = notification.userInfo?["user"] as! LocalUser
         let meetupLocation = notification.userInfo?["meetupLocation"] as! CLLocationCoordinate2D
-        NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: meetupLocation) { [weak self] points in
-            guard let self = self, points != nil else { return }
-            self.tripCoordinates = points!
-            var current = self.tripCoordinates.first!
-            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
-                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-                current = step
-                return coordinates
+
+        let group = DispatchGroup()
+        var userLine: MKPolyline?
+        var connectedUserLine: MKPolyline?
+        group.enter()
+        NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: meetupLocation) { result in
+            defer {
+                group.leave()
             }
-            self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
-            DispatchQueue.main.async {
-                self.draw(polyline: self.pathOverlay!, color: ColorConstants.primaryColor)
+            if let error = result.error {
+                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+                return
             }
-            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+            userLine = result.line
         }
 
+        group.enter()
         FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
             guard let lat = latitude, let lon = longitude else {
                 print("coordinates not available")
+                group.leave()
                 return
             }
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            NetworkRequests.directionsRequest(from: coordinate, to: meetupLocation) { [weak self] points in
-                guard let self = self, let points = points, !points.isEmpty else { return }
-                self.tripCoordinates = points
-                var current = points.first!
-                let friendCoordinates = points.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
-                    let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-                    current = step
-                    return coordinates
+            NavigationClient.requestLineAndSteps(from: coordinate, to: meetupLocation) { result in
+                defer {
+                    group.leave()
                 }
-                let friendPath = MKPolyline(coordinates: friendCoordinates, count: friendCoordinates.count)
-                DispatchQueue.main.async {
-                    self.draw(polyline: friendPath, color: ColorConstants.secondaryColor)
+                if let error = result.error {
+                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+                    return
                 }
+                connectedUserLine = result.line
             }
         }
-        //            #error("need to debug this algorithm for generating directions requests. Currently does not recognize changing to different steps")
+        group.notify(queue: .main) {
+            guard let userPath = userLine else { return }
+            self.pathOverlay = userPath
+            self.draw(polyline: userPath, color: ColorConstants.primaryColor)
+            for index in 0..<userPath.pointCount {
+                self.tripCoordinates.append(userPath.points()[index].coordinate)
+            }
+            var current = self.tripCoordinates.first!
+            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+                current = step
+                return coordinates
+            }
+            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+            guard let connectedUserPath = connectedUserLine else { return }
+            self.draw(polyline: connectedUserPath, color: ColorConstants.secondaryColor)
+        }
+//        NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: meetupLocation) { [weak self] points in
+//            guard let self = self, points != nil else { return }
+//            self.tripCoordinates = points!
+//            var current = self.tripCoordinates.first!
+//            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+//                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+//                current = step
+//                return coordinates
+//            }
+//            self.pathOverlay = MKPolyline(coordinates: self.tripCoordinates, count: self.tripCoordinates.count)
+//            DispatchQueue.main.async {
+//                self.draw(polyline: self.pathOverlay!, color: ColorConstants.primaryColor)
+//            }
+//            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+//        }
 
-        //            NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: coordinate) { result in
-        //                if let error = result.error {
-        //                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-        //                    return
-        //                }
-        //                guard let line = result.line else {
-        //                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: "No routes found.")
-        //                    return
-        //                }
-        //                self.pathOverlay = line
-        //                self.draw(polyline: line)
-        //                guard line.pointCount > 0 else { return }
-        //                for index in 0..<line.pointCount {
-        //                    self.tripCoordinates.append(line.points()[index].coordinate)
-        //                }
-        //                var current = self.tripCoordinates.first!
-        //                self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
-        //                    let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-        //                    current = step
-        //                    return coordinates
-        //                }
-        //                self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-        //
-        //            }
+//        FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
+//            guard let lat = latitude, let lon = longitude else {
+//                print("coordinates not available")
+//                return
+//            }
+//            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+//            NetworkRequests.directionsRequest(from: coordinate, to: meetupLocation) { [weak self] points in
+//                guard let self = self, let points = points, !points.isEmpty else { return }
+//                self.tripCoordinates = points
+//                var current = points.first!
+//                let friendCoordinates = points.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+//                    let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+//                    current = step
+//                    return coordinates
+//                }
+//                let friendPath = MKPolyline(coordinates: friendCoordinates, count: friendCoordinates.count)
+//                DispatchQueue.main.async {
+//                    self.draw(polyline: friendPath, color: ColorConstants.secondaryColor)
+//                }
+//            }
+//        }
     }
 
     // MARK: Updates to Map
@@ -205,7 +232,9 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     }
 
     func resetMap() {
-        if let overlay = pathOverlay { map.removeOverlay(overlay) }
+        for overlay in map.overlays {
+            map.removeOverlay(overlay)
+        }
 
         if let currentCoordinate = currentLocation?.coordinate {
             LocationService.setMapProperties(for: map, in: super.view, atCoordinate: currentCoordinate, withCoordinateSpan: 0.01)
