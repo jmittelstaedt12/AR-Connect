@@ -12,6 +12,7 @@ import RxSwift
 
 protocol CardDetailDelegate: class {
     func willSetMeetupLocation(withUser user: LocalUser)
+    func removeFromHierarchy()
 }
 
 final class CardDetailViewController: UIViewController {
@@ -22,7 +23,7 @@ final class CardDetailViewController: UIViewController {
     @IBOutlet weak var messageButton: UIButton!
     @IBOutlet weak var connectButton: UIButton!
 
-    weak var delegate: CardDetailDelegate!
+    weak var delegate: CardDetailDelegate?
 
     let currentUser = Auth.auth().currentUser
     let bag = DisposeBag()
@@ -57,13 +58,15 @@ final class CardDetailViewController: UIViewController {
     }
 
     @IBAction func onCancel(_ sender: UIButton) {
+        delegate?.removeFromHierarchy()
         willMove(toParent: nil)
         view.removeFromSuperview()
         removeFromParent()
     }
 
     @IBAction func connectToUser(_ sender: UIButton) {
-        delegate.willSetMeetupLocation(withUser: userForCell)
+        delegate?.willSetMeetupLocation(withUser: userForCell)
+        delegate?.removeFromHierarchy()
         willMove(toParent: nil)
         view.removeFromSuperview()
         removeFromParent()
@@ -72,5 +75,9 @@ final class CardDetailViewController: UIViewController {
     @IBAction func messageUser(_ sender: UIButton) {
         let messageVC = MessageViewController()
         self.navigationController?.pushViewController(messageVC, animated: true)
+    }
+
+    deinit {
+        print("deinit card detail")
     }
 }

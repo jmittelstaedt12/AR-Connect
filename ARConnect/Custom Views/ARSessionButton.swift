@@ -10,11 +10,26 @@ import UIKit
 
 class ARSessionButton: UIButton {
 
+//
+//    required init?(coder aDecoder: NSCoder) {
+//        super.init(coder: aDecoder)
+//        setupButton()
+//    }
+//
+//    private func setupButton() {
+//        setTitleColor(UIColor.black, for: .normal)
+//        backgroundColor = .white
+//        layer.cornerRadius = 5
+//        translatesAutoresizingMaskIntoConstraints = false
+//    }
+//    override init(frame: CGRect) {
+//        super.init(frame: frame)
+//    }
+//
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupButton()
     }
-
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupButton()
@@ -23,7 +38,6 @@ class ARSessionButton: UIButton {
     private func setupButton() {
         setTitleColor(UIColor.black, for: .normal)
         backgroundColor = .white
-        layer.cornerRadius = 5
         translatesAutoresizingMaskIntoConstraints = false
     }
 

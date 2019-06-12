@@ -54,4 +54,10 @@ extension UIView {
             widthAnchor.constraint(equalTo: width, multiplier: widthMultiplier, constant: widthConstant).isActive = true
         }
     }
+
+    func rotate(_ degrees: CGFloat, duration: Double = 0.1, _ completion: (() -> Void)? = nil) {
+        UIView.animate(withDuration: duration, animations: {
+            self.transform = CGAffineTransform(rotationAngle: degrees)
+        }, completion: { _ in completion?() })
+    }
 }

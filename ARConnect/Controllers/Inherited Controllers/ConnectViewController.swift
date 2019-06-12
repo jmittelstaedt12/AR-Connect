@@ -21,7 +21,19 @@ class ConnectViewController: UIViewController {
         }
     }
 
-    var meetupLocation: CLLocationCoordinate2D!
+    var meetupLocation: CLLocation!
+    var currentLocation: CLLocation?
+
+    init(requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation? = nil) {
+        super.init(nibName: nil, bundle: nil)
+        self.user = requestingUser
+        self.meetupLocation = meetupLocation
+        self.currentLocation = currentLocation
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     let requestingUserImageView: UIImageView = {
         let view = UIImageView()
@@ -50,9 +62,9 @@ class ConnectViewController: UIViewController {
         map.translatesAutoresizingMaskIntoConstraints = false
         map.isUserInteractionEnabled = false
         let annotation = MKPointAnnotation()
-        annotation.coordinate = meetupLocation
+        annotation.coordinate = meetupLocation.coordinate
         map.addAnnotation(annotation)
-        LocationService.setMapProperties(for: map, in: self.view, atCoordinate: meetupLocation, withCoordinateSpan: 0.01)
+        LocationService.setMapProperties(for: map, in: self.view, atCoordinate: meetupLocation.coordinate, withCoordinateSpan: 0.01)
         return map
     }()
 

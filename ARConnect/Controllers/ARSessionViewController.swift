@@ -44,6 +44,8 @@ final class ARSessionViewController: UIViewController {
         let btn = ARSessionButton(type: .system)
         btn.setTitle("Dismiss", for: .normal)
         btn.addTarget(self, action: #selector(dismissARSession), for: .touchUpInside)
+        btn.layer.cornerRadius = 30
+        btn.dimensionAnchors(height: 60, width: 60)
         return btn
     }()
 
@@ -263,6 +265,10 @@ extension ARSessionViewController: LocationUpdateDelegate {
         createNodesAndAnchors()
     }
 
+    func failedToUpdateLocation() {
+        #warning("display some message")
+    }
+
 }
 
 extension ARSessionViewController: ARSCNViewDelegate {
@@ -286,7 +292,7 @@ extension ARSessionViewController: ARSCNViewDelegate {
 extension ARSessionViewController: ARSessionDelegate {
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
-
+//        print(sceneView.pointOfView?.simdWorldPosition.y)
         /// Light estimation
 //        print(frame.lightEstimate?.ambientIntensity)
 

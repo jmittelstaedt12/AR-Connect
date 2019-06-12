@@ -462,6 +462,8 @@ struct FirebaseClient {
                 let latitude = userDictionary["latitude"] as? Double
                 let longitude = userDictionary["longitude"] as? Double
                 handler(latitude, longitude)
+            } else {
+                handler(nil, nil)
             }
         }
     }

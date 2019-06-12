@@ -15,6 +15,7 @@ protocol SearchTableViewControllerDelegate: class {
     func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
     func animateToExpanded()
     func setUserDetailCardVisible(withUser user: LocalUser)
+    func updateDetailCard(withUser user: LocalUser)
 }
 
 final class SearchTableViewController: UIViewController {
@@ -48,6 +49,7 @@ final class SearchTableViewController: UIViewController {
         tableView.rowHeight = 63.5
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.bounces = false
+        tableView.alpha = 0.0
         return tableView
     }()
 
@@ -56,7 +58,7 @@ final class SearchTableViewController: UIViewController {
         case compressed
     }
     private var shouldHandleGesture: Bool = true
-    var expansionState = ExpansionState.compressed
+    var expansionState: ExpansionState = .compressed
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -194,13 +196,15 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
             DispatchQueue.main.async {
                 cell.profileImageView.image = UIImage(data: data)
                 self.users![indexPath.row].profileImage = cell.profileImageView.image
+                self.delegate.updateDetailCard(withUser: self.users![indexPath.row])
             }
         }
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell, let email = cell.usernameLabel, let user = users?.first(where: { $0.email == email.text }) else { return }
+        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserTableViewCell,
+            let email = cell.usernameLabel, let user = users?.first(where: { $0.email == email.text }) else { return }
         cell.isSelected = false
         delegate.setUserDetailCardVisible(withUser: user)
     }

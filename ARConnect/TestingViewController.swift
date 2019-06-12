@@ -237,4 +237,8 @@ extension TestingViewController: SearchTableViewControllerDelegate {
         //        cardDetailVC.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
         //        view.updateConstraintsIfNeeded()
     }
+
+    func updateDetailCard(withUser user: LocalUser) {
+        
+    }
 }

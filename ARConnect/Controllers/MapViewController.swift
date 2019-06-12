@@ -15,9 +15,10 @@ import RxCocoa
 protocol LocationUpdateDelegate: AnyObject {
     func didReceiveLocationUpdate(to location: CLLocation)
     func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D])
+    func failedToUpdateLocation()
 }
 
-final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
+final class MapViewController: UIViewController, MKMapViewDelegate {
 
     // MARK: Variables
 
@@ -56,11 +57,12 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         willSet {
             guard let btn = newValue else { return }
             btn.translatesAutoresizingMaskIntoConstraints = false
-            btn.backgroundColor = .white
-            btn.setTitleColor(.black, for: .normal)
+            btn.backgroundColor = ColorConstants.primaryColor
+            btn.setTitleColor(.white, for: .normal)
             btn.titleLabel?.lineBreakMode = .byWordWrapping
+            btn.titleLabel?.textAlignment = .center
             btn.setTitle("Set Meetup Location", for: .normal)
-            btn.layer.cornerRadius = 5
+            btn.layer.cornerRadius = 25
             btn.addTarget(self, action: #selector(didSetLocation), for: .touchUpInside)
         }
     }
@@ -116,17 +118,32 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
 //        }
 //    }
 
+    @objc func centerAtLocation() {
+        if let coordinate = currentLocation?.coordinate {
+            LocationService.setMapProperties(for: map, in: super.view, atCoordinate: coordinate, withCoordinateSpan: 0.003)
+        }
+    }
+
+    @objc func centerAtPath() {
+        if let path = pathOverlay {
+            map.setVisibleMapRect(MKMapRect(origin: path.boundingMapRect.origin,
+                                            size: MKMapSize(width: path.boundingMapRect.size.width,
+                                                            height: path.boundingMapRect.size.height)),
+                                            edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
+        }
+    }
+
     @objc private func setupMapForConnection(notification: NSNotification) {
         guard let didConnect = notification.userInfo?["didConnect"] as? Bool,
             didConnect, let currentLocation = currentLocation else { return }
         let user = notification.userInfo?["user"] as! LocalUser
-        let meetupLocation = notification.userInfo?["meetupLocation"] as! CLLocationCoordinate2D
+        let meetupLocation = notification.userInfo?["meetupLocation"] as! CLLocation
 
         let group = DispatchGroup()
         var userLine: MKPolyline?
         var connectedUserLine: MKPolyline?
         group.enter()
-        NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: meetupLocation) { result in
+        NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: meetupLocation.coordinate) { result in
             defer {
                 group.leave()
             }
@@ -140,12 +157,11 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         group.enter()
         FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
             guard let lat = latitude, let lon = longitude else {
-                print("coordinates not available")
                 group.leave()
                 return
             }
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            NavigationClient.requestLineAndSteps(from: coordinate, to: meetupLocation) { result in
+            NavigationClient.requestLineAndSteps(from: coordinate, to: meetupLocation.coordinate) { result in
                 defer {
                     group.leave()
                 }
@@ -156,7 +172,8 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
                 connectedUserLine = result.line
             }
         }
-        group.notify(queue: .main) {
+
+        group.notify(queue: .main) { [unowned self] in
             guard let userPath = userLine else { return }
             self.pathOverlay = userPath
             self.draw(polyline: userPath, color: ColorConstants.primaryColor)
@@ -170,8 +187,16 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
                 return coordinates
             }
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-            guard let connectedUserPath = connectedUserLine else { return }
-            self.draw(polyline: connectedUserPath, color: ColorConstants.secondaryColor)
+            if let connectedUserPath = connectedUserLine {
+                self.draw(polyline: connectedUserPath, color: ColorConstants.secondaryColor)
+                self.map.setVisibleMapRect(connectedUserPath.boundingMapRect.union(self.pathOverlay!.boundingMapRect), animated: true)
+            } else {
+                self.map.setVisibleMapRect(self.pathOverlay!.boundingMapRect, animated: true)
+            }
+//            connectedUserLine = MKPolyline(coordinates:
+//                                            UnsafeMutablePointer(mutating: self.tripCoordinates.map { CLLocationCoordinate2D(latitude: $0.latitude + 0.01,
+//                                                                                                                             longitude: $0.longitude + 0.01) }),
+//                                                                 count: self.tripCoordinates.count)
         }
 //        NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: meetupLocation) { [weak self] points in
 //            guard let self = self, points != nil else { return }
@@ -217,8 +242,6 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     func draw(polyline line: MKPolyline, color: UIColor) {
         tempPolylineColor = color
         map.addOverlay(line)
-        map.setVisibleMapRect(MKMapRect(origin: line.boundingMapRect.origin, size: MKMapSize(width: line.boundingMapRect.size.width,
-                height: line.boundingMapRect.size.height)), edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -253,9 +276,9 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         locationSetterIcon?.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
         locationSetterIcon?.dimensionAnchors(height: 25, width: 25)
 
-        setMeetupLocationButton?.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: 0))
-        setMeetupLocationButton?.centerAnchors(centerX: view.centerXAnchor)
-        setMeetupLocationButton?.dimensionAnchors(height: 100, width: 100)
+        setMeetupLocationButton?.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor,
+                                             trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 32, bottom: -12, right: -32))
+        setMeetupLocationButton?.dimensionAnchors(height: 50)
     }
 
     @objc func didSetLocation() {
@@ -269,7 +292,13 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         meetupLocationVariable.accept(nil)
     }
 
-    // MARK: CLLocationManagerDelegate
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+}
+
+// MARK: CLLocationManagerDelegate
+extension MapViewController: CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         guard let locValue = manager.location else { return }
@@ -292,7 +321,13 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate, MKMa
         currentLocation = locValue
     }
 
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedAlways || status == .authorizedWhenInUse {
+            setupLocationModel()
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        delegate?.failedToUpdateLocation()
     }
 }

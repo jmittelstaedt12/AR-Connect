@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import MapKit
 
 final class ConnectRequestViewController: ConnectViewController {
 
@@ -58,7 +59,7 @@ final class ConnectRequestViewController: ConnectViewController {
             self.dismiss(animated: true, completion: nil)
         }).disposed(by: bag)
     }
-    
+
     override func handleResponse(sender: UIButton) {
         guard let requestUid = user.uid, let uid = Auth.auth().currentUser?.uid else {
             self.dismiss(animated: true, completion: nil)
@@ -92,6 +93,10 @@ final class ConnectRequestViewController: ConnectViewController {
             }
         }
         if sender.title(for: .normal) == "Confirm" {
+            if let distance = currentLocation?.distance(from: meetupLocation), distance > 5000.0 {
+                createAndDisplayAlert(withTitle: "Too Far From Meetup Point", body: "Your distance of \(distance) is too far for accurate walking directions")
+                return
+            }
             group.enter()
             FirebaseClient.usersRef.child(uid).updateChildValues(["isConnected": true, "connectedTo": requestUid], withCompletionBlock: updateCompletionHandler)
             group.enter()

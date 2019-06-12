@@ -49,6 +49,9 @@
 		19DC1D9B21C3436D0079AD25 /* NavigationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC1D9A21C3436D0079AD25 /* NavigationClient.swift */; };
 		19DD8D4B219486E200C01EDC /* CardDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DD8D49219486E200C01EDC /* CardDetailViewController.swift */; };
 		19DD8D4C219486E200C01EDC /* CardDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19DD8D4A219486E200C01EDC /* CardDetailViewController.xib */; };
+		19E30D9A22A5EB3000A1F981 /* MainViewController+UICollectionViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E30D9922A5EB3000A1F981 /* MainViewController+UICollectionViewDataSource.swift */; };
+		19E30DA222A5FA1800A1F981 /* CollapsibleCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E30DA122A5FA1800A1F981 /* CollapsibleCollectionView.swift */; };
+		19E30DA422A814B300A1F981 /* ButtonCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E30DA322A814B300A1F981 /* ButtonCollectionViewCell.swift */; };
 		19E5D19D220632A4002EDCD6 /* SensitiveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E5D19C220632A4002EDCD6 /* SensitiveData.swift */; };
 		19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */; };
 		C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */; };
@@ -99,6 +102,9 @@
 		19DC1D9A21C3436D0079AD25 /* NavigationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationClient.swift; sourceTree = "<group>"; };
 		19DD8D49219486E200C01EDC /* CardDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailViewController.swift; sourceTree = "<group>"; };
 		19DD8D4A219486E200C01EDC /* CardDetailViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CardDetailViewController.xib; sourceTree = "<group>"; };
+		19E30D9922A5EB3000A1F981 /* MainViewController+UICollectionViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MainViewController+UICollectionViewDataSource.swift"; sourceTree = "<group>"; };
+		19E30DA122A5FA1800A1F981 /* CollapsibleCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapsibleCollectionView.swift; sourceTree = "<group>"; };
+		19E30DA322A814B300A1F981 /* ButtonCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonCollectionViewCell.swift; sourceTree = "<group>"; };
 		19E5D19C220632A4002EDCD6 /* SensitiveData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SensitiveData.swift; sourceTree = "<group>"; };
 		19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectRequestViewController.swift; sourceTree = "<group>"; };
 		20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -258,6 +264,7 @@
 				19D53CBC21FCC961000984FE /* UIView+Extension.swift */,
 				19D53CBE21FCC99E000984FE /* UIViewController+Extension.swift */,
 				19D53CC021FCC9ED000984FE /* UIAlertController+Extension.swift */,
+				19E30D9922A5EB3000A1F981 /* MainViewController+UICollectionViewDataSource.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -271,6 +278,8 @@
 				19D736AD21CA9DF300D6D92A /* JMNavigationBar.swift */,
 				194CADB721FABA4100204E28 /* JMMKMapView.swift */,
 				192C58AA21F9089600162543 /* JMNode.swift */,
+				19E30DA122A5FA1800A1F981 /* CollapsibleCollectionView.swift */,
+				19E30DA322A814B300A1F981 /* ButtonCollectionViewCell.swift */,
 				19A5C09C21EB86E700C2FD74 /* UserTableViewCell */,
 			);
 			path = "Custom Views";
@@ -451,6 +460,7 @@
 				19D53CBD21FCC961000984FE /* UIView+Extension.swift in Sources */,
 				192C58AB21F9089600162543 /* JMNode.swift in Sources */,
 				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
+				19E30D9A22A5EB3000A1F981 /* MainViewController+UICollectionViewDataSource.swift in Sources */,
 				19997E8E21E65F4A0023C3EC /* UserTableViewCell.swift in Sources */,
 				19D53CBF21FCC99E000984FE /* UIViewController+Extension.swift in Sources */,
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
@@ -472,6 +482,7 @@
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
 				19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */,
+				19E30DA422A814B300A1F981 /* ButtonCollectionViewCell.swift in Sources */,
 				19D53CC121FCC9ED000984FE /* UIAlertController+Extension.swift in Sources */,
 				198DA98A218A5C230054E1BD /* User.swift in Sources */,
 				19997E8721E4F6970023C3EC /* ConnectPendingViewController.swift in Sources */,
@@ -484,6 +495,7 @@
 				194CADB821FABA4100204E28 /* JMMKMapView.swift in Sources */,
 				19D7E69421C445550046D737 /* MatrixOperations.swift in Sources */,
 				19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */,
+				19E30DA222A5FA1800A1F981 /* CollapsibleCollectionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
