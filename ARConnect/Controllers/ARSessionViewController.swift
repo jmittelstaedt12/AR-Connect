@@ -13,16 +13,40 @@ import MapKit
 final class ARSessionViewController: UIViewController {
 
     var startLocation: CLLocation!
-    var currentLocation: CLLocation!
+    var tripCoordinates: [CLLocationCoordinate2D]!
+    var tripLocations: [CLLocation]!
+    var localCoordinates: [CLLocationCoordinate2D]?
+    var currentLocation: CLLocation! {
+        didSet {
+            localCoordinates = Array((tripLocations
+                .sorted { $0.distance(from: currentLocation) < $1.distance(from: currentLocation) }[0...9])
+                .map { $0.coordinate })
+        }
+    }
+
+//    var updatedLocations: [CLLocation] = [] {
+//        didSet {
+//            var locations = updatedLocations.sorted(by: { (first, second) -> Bool in
+//                if first.horizontalAccuracy == second.horizontalAccuracy {
+//                    return first.timestamp > second.timestamp
+//                }
+//                return first.horizontalAccuracy < second.horizontalAccuracy
+//            })
+//            print(locations.map{ $0.horizontalAccuracy })
+//            currentLocation = locations.first
+//        }
+//    }
+
     var distanceTraveled: CLLocationDistance?
-    var tripCoordinates: [CLLocationCoordinate2D] = []
+
     var worldAlignment: ARWorldTrackingConfiguration.WorldAlignment!
 //    var delegate: ARSessionViewControllerDelegate?
 
     private var nodes: [JMNode] = []
     private var settingNorth = false
+    private var scheduledTimer: Timer?
 
-    var sceneView: ARSCNView! {
+    private var sceneView: ARSCNView! {
         didSet {
             sceneView.translatesAutoresizingMaskIntoConstraints = false
             sceneView.delegate = self
@@ -32,7 +56,7 @@ final class ARSessionViewController: UIViewController {
         }
     }
 
-    var configuration: ARWorldTrackingConfiguration! {
+    private var configuration: ARWorldTrackingConfiguration! {
         didSet {
             configuration.worldAlignment = worldAlignment
             configuration.planeDetection = .horizontal
@@ -40,7 +64,7 @@ final class ARSessionViewController: UIViewController {
         }
     }
 
-    let dismissButton: ARSessionButton = {
+    private let dismissButton: ARSessionButton = {
         let btn = ARSessionButton(type: .system)
         btn.setTitle("Dismiss", for: .normal)
         btn.addTarget(self, action: #selector(dismissARSession), for: .touchUpInside)
@@ -49,7 +73,7 @@ final class ARSessionViewController: UIViewController {
         return btn
     }()
 
-    var tapGestureRecognizer: UITapGestureRecognizer? {
+    private var tapGestureRecognizer: UITapGestureRecognizer? {
         willSet {
             guard let gesture = newValue else { return }
             gesture.addTarget(self, action: #selector(didTap(sender:)))
@@ -76,6 +100,22 @@ final class ARSessionViewController: UIViewController {
         }
     }
 
+    init(startLocation: CLLocation, tripLocations: [CLLocation], worldAlignment: ARWorldTrackingConfiguration.WorldAlignment) {
+        super.init(nibName: nil, bundle: nil)
+        self.tripLocations = tripLocations
+        self.worldAlignment = worldAlignment
+        self.startLocation = startLocation
+        currentLocation = startLocation
+        tripCoordinates = tripLocations.map { $0.coordinate }
+        localCoordinates = Array((tripLocations
+            .sorted { $0.distance(from: currentLocation!) < $1.distance(from: currentLocation!) }[0...9])
+            .map { $0.coordinate })
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         sceneView = ARSCNView()
@@ -83,6 +123,7 @@ final class ARSessionViewController: UIViewController {
         sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
         addSubviews()
         setupSubviews()
+        setTimerForReconfigure()
 //        didReceiveTripSteps(tripCoordinates)
     }
 
@@ -106,7 +147,6 @@ final class ARSessionViewController: UIViewController {
 
         dismissButton.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
                                   padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
-        dismissButton.dimensionAnchors(height: 30, width: 60)
 
         if worldAlignment == .gravity {
             settingNorth = true
@@ -129,7 +169,8 @@ final class ARSessionViewController: UIViewController {
         mapView = JMMKMapView()
         view.addSubview(mapView!)
         mapView?.isUserInteractionEnabled = false
-        let coordinateForMap = CLLocationCoordinate2D(latitude: currentLocation.coordinate.latitude+0.001, longitude: currentLocation.coordinate.longitude)
+        let locationCoordinate = (currentLocation ?? startLocation)!
+        let coordinateForMap = CLLocationCoordinate2D(latitude: locationCoordinate.coordinate.latitude+0.001, longitude: locationCoordinate.coordinate.longitude)
         LocationService.setMapProperties(for: mapView!, in: view, atCoordinate: coordinateForMap, withCoordinateSpan: 0.01)
     }
 
@@ -193,8 +234,13 @@ final class ARSessionViewController: UIViewController {
     }
 
     private func createNodesAndAnchors() {
-        guard !tripCoordinates.isEmpty, nodes.isEmpty, !settingNorth else { return }
-        for coordinate in tripCoordinates {
+        guard let coordinates = localCoordinates, !coordinates.isEmpty, !settingNorth else { return }
+        nodes = []
+        let childNodes = sceneView.scene.rootNode.childNodes
+        for node in childNodes {
+            node.removeFromParentNode()
+        }
+        for coordinate in coordinates {
             let transform = MatrixOperations.transformMatrix(for: matrix_identity_float4x4, originLocation: startLocation, location: CLLocation(coordinate: coordinate))
             let node = JMNode(geometry: SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0), location: coordinate)
             node.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
@@ -221,37 +267,33 @@ final class ARSessionViewController: UIViewController {
         }
     }
 
-//    private func setTimerForReconfigure() {
-//        Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
-//
-//        }
-//    }
+    private func setTimerForReconfigure() {
+        scheduledTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [unowned self] _ in
+            self.sceneView.session.run(self.configuration, options: [.resetTracking, .removeExistingAnchors])
+            self.createNodesAndAnchors()
+        }
+    }
 
     private func rotateWorldOrigin(withAngle angle: Double) {
         let rotation = MatrixOperations.rotateAroundY(with: matrix_identity_float4x4, for: Float(angle))
         sceneView?.session.setWorldOrigin(relativeTransform: simd_mul(rotation, matrix_identity_float4x4))
     }
 
-    private func updateWorldOrigin() {
-
-    }
-
     @objc private func dismissARSession() {
+        scheduledTimer?.invalidate()
+        scheduledTimer = nil
         dismiss(animated: true, completion: nil)
-    }
-
-    deinit {
-        print("deinitialized")
     }
 }
 
 extension ARSessionViewController: LocationUpdateDelegate {
 
     func didReceiveLocationUpdate(to location: CLLocation) {
-        updateNodesAndAnchors()
-        currentLocation = location
-        distanceTraveled = startLocation.distance(from: currentLocation)
-        print(currentLocation!.coordinate, distanceTraveled!)
+        if location.horizontalAccuracy <= 30.0 {
+            currentLocation = location
+            updateNodesAndAnchors()
+            distanceTraveled = startLocation.distance(from: currentLocation!)
+        }
     }
 
     func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D]) {
@@ -284,7 +326,9 @@ extension ARSessionViewController: ARSCNViewDelegate {
 
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
-
+        self.sceneView.session.run(self.configuration, options: [.resetTracking, .removeExistingAnchors])
+        self.createNodesAndAnchors()
+        setTimerForReconfigure()
     }
 
 }

@@ -13,7 +13,7 @@ class TestingViewController: UIViewController {
 
     let mapViewController = MapViewController()
     var searchVC: SearchTableViewController? = SearchTableViewController()
-    weak var arSessionVC: ARSessionViewController?
+    var arSessionVC: ARSessionViewController?
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var childSearchVCHeightConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
@@ -113,24 +113,17 @@ class TestingViewController: UIViewController {
             createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
             return
         }
-        let arSessionVC = ARSessionViewController()
-        arSessionVC.startLocation = location
-        arSessionVC.currentLocation = location
-        arSessionVC.tripCoordinates = mapViewController.tripCoordinates
+        switch mapViewController.shouldUseAlignment {
+        case .gravity:
+            createAndDisplayAlert(withTitle: "Poor Heading Accuracy", body: "Tap left and right side of the screen to adjust direction of True North")
+            arSessionVC = ARSessionViewController(startLocation: location, tripLocations: mapViewController.tripCoordinates.map { CLLocation(coordinate: $0) }, worldAlignment: .gravity)
+        case .gravityAndHeading:
+            arSessionVC = ARSessionViewController(startLocation: location, tripLocations: mapViewController.tripCoordinates.map { CLLocation(coordinate: $0) }, worldAlignment: .gravityAndHeading)
+        }
 
-//        switch mapViewController.shouldUseAlignment {
-//        case .gravity:
-//            createAndDisplayAlert(withTitle: "Poor Heading Accuracy", body: "Tap left and right side of the screen to adjust direction of True North")
-//            arSessionVC.worldAlignment = .gravity
-//        case .gravityAndHeading:
-//            arSessionVC.worldAlignment = .gravityAndHeading
-//        }
-        arSessionVC.worldAlignment = .gravity
-
-        self.arSessionVC = arSessionVC
-        mapViewController.delegate = self.arSessionVC
+        mapViewController.delegate = arSessionVC
         mapViewController.locationService.locationManager.stopUpdatingHeading()
-        present(arSessionVC, animated: true, completion: nil)
+        present(arSessionVC!, animated: true, completion: nil)
     }
 
     @objc private func handleSessionEnd() {

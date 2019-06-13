@@ -305,7 +305,7 @@ extension MapViewController: CLLocationManagerDelegate {
         headingAccuracy[recentLocationIndex] = newHeading.headingAccuracy
         locationAccuracy[recentLocationIndex] = locValue.horizontalAccuracy
         recentLocationIndex = (recentLocationIndex + 1) % 4
-        if headingAccuracy.contains(where: { $0 >= 0 && $0 <= 30 }) && locationAccuracy.contains(where: { $0 <= 30 }) {
+        if headingAccuracy.contains(where: { $0 >= 0 && $0 <= 30 }) {
             shouldUseAlignment = .gravityAndHeading
         } else {
             shouldUseAlignment = .gravity
