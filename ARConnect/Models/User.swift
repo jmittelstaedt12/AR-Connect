@@ -16,13 +16,13 @@ struct RegisterUser {
     var pngData: Data?
 }
 
-struct LocalUser: Equatable {
+struct LocalUser {
     var name: String!
     var email: String!
     var uid: String!
     var isOnline: Bool!
     var profileUrl: URL?
-    var profileImage: UIImage?
+    var profileImageData: Data?
     var connectedUid: String?
 
     init(name: String = "", email: String = "", uid: String = "", isOnline: Bool = false) {
@@ -31,13 +31,11 @@ struct LocalUser: Equatable {
         self.uid = uid
         self.isOnline = isOnline
     }
+}
 
+extension LocalUser: Equatable {
     static func ==(lhs: LocalUser, rhs: LocalUser) -> Bool {
         return lhs.name == rhs.name && lhs.email == rhs.email && lhs.uid == rhs.uid && lhs.connectedUid == rhs.connectedUid &&
-            lhs.profileUrl == rhs.profileUrl && lhs.profileImage == rhs.profileImage
-    }
-
-    static func !=(lhs: LocalUser, rhs: LocalUser) -> Bool {
-        return !(lhs == rhs)
+            lhs.profileUrl == rhs.profileUrl && lhs.profileImageData == rhs.profileImageData
     }
 }

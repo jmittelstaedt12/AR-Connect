@@ -17,7 +17,7 @@ class ConnectViewController: UIViewController {
         willSet {
             guard let user = newValue else { return }
             requestingUserNameLabel.text = user.name
-            requestingUserImageView.image = user.profileImage ?? UIImage(named: "person-placeholder")
+            requestingUserImageView.image = (user.profileImageData != nil) ? UIImage(data: user.profileImageData!) : UIImage(named: "person-placeholder")
         }
     }
 

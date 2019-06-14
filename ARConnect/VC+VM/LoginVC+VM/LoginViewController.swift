@@ -8,8 +8,13 @@
 
 import UIKit
 import Firebase
+import RxSwift
 
-final class LoginViewController: UIViewController, KeyboardHandler {
+final class LoginViewController: UIViewController, KeyboardHandler, ControllerProtocol {
+
+    typealias ViewModelType = LoginViewModel
+
+    var viewModel: ViewModelType!
 
     var keyboardWillShow = true
     var keyboardWillHide = false
@@ -63,7 +68,7 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         btn.backgroundColor = .white
         btn.layer.cornerRadius = 20
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.addTarget(self, action: #selector(logIn), for: .touchUpInside)
+//        btn.addTarget(self, action: #selector(logIn), for: .touchUpInside)
         return btn
     }()
     let signUpLabel: UILabel = {
@@ -94,6 +99,45 @@ final class LoginViewController: UIViewController, KeyboardHandler {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+
+    let disposeBag = DisposeBag()
+
+    func configure(with viewModel: ViewModelType) {
+        emailTextField.rx.text.asObservable()
+            .ignoreNil()
+            .subscribe(viewModel.input.email)
+            .disposed(by: disposeBag)
+
+        passwordTextField.rx.text.asObservable()
+            .ignoreNil()
+            .subscribe(viewModel.input.password)
+            .disposed(by: disposeBag)
+
+        logInButton.rx.tap.asObservable()
+            .subscribe(viewModel.input.signInDidTap)
+            .disposed(by: disposeBag)
+
+        viewModel.output.errorsObservable
+            .subscribe(onNext: { error in
+                self.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.output.loginResultObservable
+            .subscribe(onNext: { _ in
+                AppDelegate.shared.rootViewController.switchToMainScreen()
+            })
+            .disposed(by: disposeBag)
+
+    }
+
+    static func create(with viewModel: ViewModelType) -> UIViewController {
+        let controller = LoginViewController()
+        controller.viewModel = viewModel
+        controller.configure(with: controller.viewModel)
+        return controller
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = ColorConstants.primaryColor
@@ -161,14 +205,14 @@ final class LoginViewController: UIViewController, KeyboardHandler {
     }
 
     /// Request to login to database and segue into MainVC
-    @objc private func logIn() {
-        guard let email = emailTextField.text, !email.isEmpty,
-            let password = passwordTextField.text, !password.isEmpty else {
-            createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
-            return
-        }
-        FirebaseClient.logInToDB(email: email, password: password, controller: self)
-    }
+//    @objc private func logIn() {
+//        guard let email = emailTextField.text, !email.isEmpty,
+//            let password = passwordTextField.text, !password.isEmpty else {
+//            createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
+//            return
+//        }
+//        FirebaseClient.logInToDB(email: email, password: password)
+//    }
 
     @objc private func signUp() {
         self.present(RegisterViewController(), animated: true, completion: nil)
@@ -225,7 +269,9 @@ extension KeyboardHandler where Self: UIViewController {
 
     /// When keyboard hides, animate view downwards
     func keyboardWillHide(notification: Notification) {
-        guard keyboardWillHide, let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double, let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
+        guard keyboardWillHide,
+            let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
+            let curve = notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else { return }
         UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve), animations: {
             self.view.frame = CGRect(x: self.view.frame.origin.x, y: self.view.frame.origin.y + 100,
                                      width: self.view.bounds.width, height: self.view.bounds.height)

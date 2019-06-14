@@ -13,10 +13,14 @@ import SystemConfiguration
 import RxSwift
 import RxCocoa
 
-final class MainViewController: UIViewController {
+final class MainViewController: UIViewController, ControllerProtocol {
 
     // MARK: Properties
-    var currentUser: User?
+
+    typealias ViewModelType = MainViewModel
+
+    var viewModel: ViewModelType!
+
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var childSearchVCHeightConstraint: NSLayoutConstraint?
     var searchViewControllerPreviousYCoordinate: CGFloat?
@@ -24,7 +28,7 @@ final class MainViewController: UIViewController {
 
     private let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
     let mapViewController = MapViewController()
-    var searchViewController: SearchTableViewController? = SearchTableViewController()
+    var searchViewController: SearchTableViewController? = SearchTableViewController.create(with: SearchTableViewModel()) as? SearchTableViewController
     var arSessionVC: ARSessionViewController?
 
     var buttonCollection: CollapsibleCollectionView?
@@ -41,9 +45,12 @@ final class MainViewController: UIViewController {
     var endConnectSessionButton: ARSessionButton? {
         willSet {
             newValue?.setTitle("End", for: .normal)
-            newValue?.addTarget(self, action: #selector(didDisconnect), for: .touchUpInside)
+//            newValue?.addTarget(self, action: #selector(didDisconnect), for: .touchUpInside)
             newValue?.layer.cornerRadius = 30
             newValue?.dimensionAnchors(height: 60, width: 60)
+            newValue?.rx.tap.asObservable()
+                .subscribe(viewModel.input.disconnectDidTap)
+                .disposed(by: disposeBag)
         }
     }
 
@@ -72,15 +79,66 @@ final class MainViewController: UIViewController {
     }
 
     var cardDetailViewController: CardDetailViewController?
+    let disposeBag = DisposeBag()
+
+    func configure(with viewModel: ViewModelType) {
+
+        viewModel.output.authenticatedUserObservable
+            .subscribe(onNext: { isAuthenticated in
+                if !isAuthenticated {
+                    AppDelegate.shared.rootViewController.switchToLogout()
+                }
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.output.userImageDataObservable
+            .subscribe(onNext: { data in
+                #warning("display image")
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.output.connectRequestObservable
+            .subscribe(onNext: { [weak self] connectRequest in
+                guard let self = self else { return }
+                let connectRequestVC = ConnectRequestViewController(requestingUser: connectRequest.requestingUser,
+                                                                    meetupLocation: connectRequest.meetupLocation,
+                                                                    currentLocation: self.mapViewController.currentLocation)
+                self.present(connectRequestVC, animated: true, completion: nil)
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.output.endSessionObservable
+            .subscribe(onNext: { [weak self] in
+                self?.handleSessionEnd()
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.output.sessionStartObservable
+            .subscribe(onNext: { [weak self] errorMessage in
+                guard let message = errorMessage else {
+                    self?.handleSessionStart()
+                    return
+                }
+                self?.createAndDisplayAlert(withTitle: "Call Ending", body: message)
+                if let searchVC = self?.searchViewController {
+                    searchVC.expansionState = .compressed
+                    self?.setChildSearchVCState(toState: searchVC.expansionState)
+                    self?.animateTopConstraint()
+                }
+            })
+            .disposed(by: disposeBag)
+
+    }
+
+    static func create(with viewModel: ViewModelType) -> UIViewController {
+        let controller = MainViewController()
+        controller.viewModel = viewModel
+        controller.configure(with: controller.viewModel)
+        return controller
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if Auth.auth().currentUser == nil {
-            AppDelegate.shared.rootViewController.switchToLogout()
-        }
-        currentUser = Auth.auth().currentUser!
-        FirebaseClient.setOnDisconnectUpdates(forUid: currentUser!.uid)
-        setObservers()
         let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
         navigationItem.setLeftBarButton(logoutButton, animated: true)
 
@@ -88,8 +146,6 @@ final class MainViewController: UIViewController {
         setupSubviewsAndChildVCs()
         searchViewController?.delegate = self
         hideKeyboardWhenTappedAround()
-
-        NotificationCenter.default.addObserver(self, selector: #selector(handleSessionStart(notification:)), name: connectNotificationName, object: nil)
     }
 
     /// Add all subviews and child view controllers to main view controller
@@ -106,39 +162,22 @@ final class MainViewController: UIViewController {
     /// Setup auto layout anchors, dimensions, and other position properties for subviews
     private func setupSubviewsAndChildVCs() {
         // Setup auto layout anchors for map view
-        mapViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+        mapViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,
+                                           leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                           bottom: view.bottomAnchor,
+                                           trailing: view.safeAreaLayoutGuide.trailingAnchor)
 
         // Setup auto layout anchors for searchViewController
         guard let searchVC = searchViewController else { return }
-        searchVC.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
+        searchVC.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                  trailing: view.safeAreaLayoutGuide.trailingAnchor,
+                                  padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
         childSearchVCTopConstraint = searchVC.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
         childSearchVCHeightConstraint = searchVC.view.heightAnchor.constraint(equalToConstant: expandedHeight)
         childSearchVCTopConstraint?.isActive = true
         childSearchVCHeightConstraint?.isActive = true
         searchVC.expansionState = .compressed
         setChildSearchVCState(toState: searchVC.expansionState)
-    }
-
-    private func setObservers() {
-
-        // Set one time connection for nav bar title
-        FirebaseClient.fetchObservableUser(forUid: currentUser!.uid).subscribe(onNext: { [weak self] user in
-            self?.title = user.name
-        }).disposed(by: self.bag)
-
-        // Setting online status observer
-        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] connected in
-            guard let uid = self?.currentUser?.uid else { return }
-            FirebaseClient.usersRef.child(uid).updateChildValues(["isOnline": connected])
-        }).disposed(by: self.bag)
-
-        // Setting connection request observer
-        FirebaseClient.willDisplayRequestingUserObservable()?.subscribe(onNext: { [weak self] (requestingUser, requestDictionary) in
-            let connectRequestVC = ConnectRequestViewController(requestingUser: requestingUser,
-                                                                meetupLocation: CLLocation(latitude: requestDictionary["latitude"] as! Double, longitude: requestDictionary["longitude"] as! Double),
-                                                                currentLocation: self?.mapViewController.currentLocation)
-            self?.present(connectRequestVC, animated: true, completion: nil)
-        }).disposed(by: self.bag)
     }
 
     /// Log out current user and return to login screen
@@ -169,22 +208,7 @@ final class MainViewController: UIViewController {
     }
 
     /// When connect to user, transition into AR Session state
-    @objc private func handleSessionStart(notification: NSNotification) {
-        guard let currentUid = Auth.auth().currentUser?.uid else { return }
-        let user = notification.userInfo?["user"] as! LocalUser
-        let didConnect = notification.userInfo?["didConnect"] as! Bool
-
-        if !didConnect {
-            createAndDisplayAlert(withTitle: "Call Ending", body: "\(user.name ?? "User") is unavailable")
-            if let searchVC = searchViewController {
-                searchVC.expansionState = .compressed
-                setChildSearchVCState(toState: searchVC.expansionState)
-                animateTopConstraint()
-            }
-            return
-        }
-
-        FirebaseClient.usersRef.child(currentUid).updateChildValues(["isPending": false, "isConnected": true, "connectedTo": user.uid])
+    private func handleSessionStart() {
 
         searchViewController?.willMove(toParent: nil)
         searchViewController?.view.removeFromSuperview()
@@ -198,56 +222,21 @@ final class MainViewController: UIViewController {
         view.addSubview(endConnectSessionButton!)
 
         // Setup auto layout anchors for endConnectSession button
-        viewARSessionButton!.edgeAnchors(bottom: mapViewController.view.bottomAnchor, trailing: mapViewController.view.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
+        viewARSessionButton!.edgeAnchors(bottom: mapViewController.view.bottomAnchor,
+                                         trailing: mapViewController.view.trailingAnchor,
+                                         padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
 
         // Setup auto layout anchors for endConnectSession button
-        endConnectSessionButton!.edgeAnchors(bottom: viewARSessionButton?.topAnchor, trailing: mapViewController.view.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
+        endConnectSessionButton!.edgeAnchors(bottom: viewARSessionButton?.topAnchor,
+                                             trailing: mapViewController.view.trailingAnchor,
+                                             padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
 
         initializeButtonCollection()
-        buttonCollection!.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
+        buttonCollection!.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                      bottom: view.safeAreaLayoutGuide.bottomAnchor,
+                                      padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
         buttonCollection!.dimensionAnchors(height: 500, width: 50)
         view.layoutIfNeeded()
-
-//        guard let currentUid = Auth.auth().currentUser?.uid else { return }
-//
-//        let user = notification.userInfo?["user"] as! LocalUser
-//        let didConnect = notification.userInfo?["didConnect"] as! Bool
-//
-//        if !didConnect {
-//            createAndDisplayAlert(withTitle: "Call Ending", body: "\(user.name ?? "User") is unavailable")
-//            if let searchVC = searchViewController {
-//                searchVC.expansionState = .compressed
-//                setChildSearchVCState(toState: searchVC.expansionState)
-//                animateTopConstraint()
-//            }
-//            return
-//        }
-//
-//        FirebaseClient.usersRef.child(currentUid).updateChildValues(["isPending": false, "isConnected": true, "connectedTo": user.uid])
-//
-//        searchViewController?.willMove(toParent: nil)
-//        searchViewController?.view.removeFromSuperview()
-//        searchViewController?.removeFromParent()
-//        searchViewController = nil
-//
-//        viewARSessionButton = ARSessionButton(type: .system)
-//        endConnectSessionButton = ARSessionButton(type: .system)
-//
-//        view.addSubview(viewARSessionButton!)
-//        view.addSubview(endConnectSessionButton!)
-//
-//        // Setup auto layout anchors for viewARSession button
-//        viewARSessionButton!.edgeAnchors(leading: mapViewController.view.leadingAnchor, bottom: mapViewController.view.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 12, bottom: -12, right: 0))
-//        viewARSessionButton!.dimensionAnchors(height: 40, width: 100)
-//
-//        // Setup auto layout anchors for endConnectSession button
-//        endConnectSessionButton!.edgeAnchors(bottom: mapViewController.view.bottomAnchor, trailing: mapViewController.view.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -12, right: -12))
-//
-//        view.layoutIfNeeded()
-//
-        FirebaseClient.createEndSessionObservable(forUid: user.uid)?.subscribe(onNext: { [unowned self] _ in
-            self.handleSessionEnd()
-        }).disposed(by: bag)
     }
 
     private func initializeButtonCollection() {
@@ -265,16 +254,13 @@ final class MainViewController: UIViewController {
     }
 
     @objc private func handleSessionEnd() {
-        guard let user = currentUser else { return }
-        FirebaseClient.usersRef.child(user.uid).updateChildValues(["connectedTo": "",
-                                                                   "isConnected": false])
         viewARSessionButton?.removeFromSuperview()
         endConnectSessionButton?.removeFromSuperview()
         buttonCollection?.removeFromSuperview()
         viewARSessionButton = nil
         endConnectSessionButton = nil
         buttonCollection = nil
-        searchViewController = SearchTableViewController()
+        searchViewController = SearchTableViewController.create(with: SearchTableViewModel()) as? SearchTableViewController
         searchViewController!.delegate = self
         addChild(searchViewController!)
         view.addSubview(searchViewController!.view)
@@ -301,9 +287,13 @@ final class MainViewController: UIViewController {
         switch mapViewController.shouldUseAlignment {
         case .gravity:
             createAndDisplayAlert(withTitle: "Poor Heading Accuracy", body: "Tap left and right side of the screen to adjust direction of True North")
-            arSessionVC = ARSessionViewController(startLocation: location, tripLocations: mapViewController.tripCoordinates.map { CLLocation(coordinate: $0) }, worldAlignment: .gravity)
+            arSessionVC = ARSessionViewController(startLocation: location,
+                                                  tripLocations: mapViewController.tripCoordinates.map { CLLocation(coordinate: $0) },
+                                                  worldAlignment: .gravity)
         case .gravityAndHeading:
-            arSessionVC = ARSessionViewController(startLocation: location, tripLocations: mapViewController.tripCoordinates.map { CLLocation(coordinate: $0) }, worldAlignment: .gravityAndHeading)
+            arSessionVC = ARSessionViewController(startLocation: location,
+                                                  tripLocations: mapViewController.tripCoordinates.map { CLLocation(coordinate: $0) },
+                                                  worldAlignment: .gravityAndHeading)
         }
 
         mapViewController.delegate = arSessionVC
@@ -311,14 +301,7 @@ final class MainViewController: UIViewController {
         present(arSessionVC!, animated: true, completion: nil)
     }
 
-    @objc private func didDisconnect() {
-        guard let user = currentUser else { return }
-        FirebaseClient.usersRef.child(user.uid).updateChildValues(["connectedTo": "",
-                                                                   "isConnected": false])
-    }
-
     deinit {
-        NotificationCenter.default.removeObserver(self)
         mapViewController.locationService.locationManager.stopUpdatingLocation()
     }
 

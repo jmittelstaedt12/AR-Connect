@@ -12,7 +12,7 @@ import MapKit
 class TestingViewController: UIViewController {
 
     let mapViewController = MapViewController()
-    var searchVC: SearchTableViewController? = SearchTableViewController()
+    var searchVC: SearchTableViewController? = SearchTableViewController.create(with: SearchTableViewModel()) as? SearchTableViewController
     var arSessionVC: ARSessionViewController?
     var childSearchVCTopConstraint: NSLayoutConstraint?
     var childSearchVCHeightConstraint: NSLayoutConstraint?
@@ -55,31 +55,31 @@ class TestingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        searchVC!.delegate = self
-
-        let dummyUser = LocalUser(name: "TempName", email: "email@email.com", uid: "123", isOnline: true)
-        searchVC!.users = [dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser]
-
-        addChild(mapViewController)
-        view.addSubview(mapViewController.view)
-        mapViewController.didMove(toParent: self)
-        addChild(searchVC!)
-        view.addSubview(searchVC!.view)
-        searchVC!.didMove(toParent: self)
-
-        mapViewController.view.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
-                                           bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
-        searchVC!.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor,
-                                   padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
-        childSearchVCTopConstraint = searchVC!.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
-        childSearchVCHeightConstraint = searchVC!.view.heightAnchor.constraint(equalToConstant: expandedHeight)
-        childSearchVCTopConstraint?.isActive = true
-        childSearchVCHeightConstraint?.isActive = true
-
-        searchVC!.expansionState = .compressed
-        setChildSearchVCState(toState: searchVC!.expansionState)
-
-        handleSessionStart()
+//        searchVC!.delegate = self
+//
+//        let dummyUser = LocalUser(name: "TempName", email: "email@email.com", uid: "123", isOnline: true)
+//        searchVC!.users = [dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser, dummyUser]
+//
+//        addChild(mapViewController)
+//        view.addSubview(mapViewController.view)
+//        mapViewController.didMove(toParent: self)
+//        addChild(searchVC!)
+//        view.addSubview(searchVC!.view)
+//        searchVC!.didMove(toParent: self)
+//
+//        mapViewController.view.edgeAnchors(top: view.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
+//                                           bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor)
+//        searchVC!.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, trailing: view.safeAreaLayoutGuide.trailingAnchor,
+//                                   padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
+//        childSearchVCTopConstraint = searchVC!.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
+//        childSearchVCHeightConstraint = searchVC!.view.heightAnchor.constraint(equalToConstant: expandedHeight)
+//        childSearchVCTopConstraint?.isActive = true
+//        childSearchVCHeightConstraint?.isActive = true
+//
+//        searchVC!.expansionState = .compressed
+//        setChildSearchVCState(toState: searchVC!.expansionState)
+//
+//        handleSessionStart()
     }
 
     /// When connect to user, transition into AR Session state

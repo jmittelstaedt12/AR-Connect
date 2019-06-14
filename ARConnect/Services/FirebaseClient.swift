@@ -7,7 +7,7 @@
 //
 
 import Firebase
-import UIKit
+import Foundation
 import RxSwift
 
 fileprivate struct FIRObservables {
@@ -110,14 +110,18 @@ struct FirebaseClient {
     }
 
     /// Request from view controller to log in to the database
-    static func logInToDB(email: String, password: String, controller: UIViewController) {
-        Auth.auth().signIn(withEmail: email, password: password) { (_, error) in
-            if let err = error {
-                controller.createAndDisplayAlert(withTitle: "Authorization error", body: err.localizedDescription)
-                return
+    static func logInToDB(email: String, password: String) -> Observable<Result<AuthDataResult, Error>> {
+        return Observable.create({ observer -> Disposable in
+            Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
+                if let err = error {
+//                controller.createAndDisplayAlert(withTitle: "Authorization error", body: err.localizedDescription)
+                    observer.onNext(.failure(err))
+                } else {
+                    observer.onNext(.success(result!))
+                }
             }
-            AppDelegate.shared.rootViewController.switchToMainScreen()
-        }
+            return Disposables.create()
+        })
     }
 
     /// Log out current user and return to login screen
