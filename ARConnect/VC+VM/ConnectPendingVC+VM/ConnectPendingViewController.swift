@@ -90,7 +90,7 @@ final class ConnectPendingViewController: ConnectViewController, ControllerProto
         meetupLocationMapView.edgeAnchors(top: requestingUserImageView.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))
         meetupLocationMapView.centerAnchors(centerX: view.safeAreaLayoutGuide.centerXAnchor)
         meetupLocationMapView.dimensionAnchors(width: view.safeAreaLayoutGuide.widthAnchor, widthConstant: -16)
-        meetupLocationMapView.dimensionAnchors(height: 100)
+        meetupLocationMapView.dimensionAnchors(height: 400)
 
         // set cancel button constriants
         cancelButton.edgeAnchors(top: meetupLocationMapView.bottomAnchor, padding: UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0))

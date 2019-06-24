@@ -266,7 +266,7 @@ struct FirebaseClient {
                     requestingUser.uid = uid
                     requestingUser.name = dictionary["name"] as? String
                     requestingUser.email = dictionary["email"] as? String
-                    requestingUser.profileUrl = (dictionary["email"] is String) ? URL(fileURLWithPath: dictionary["email"] as! String) : nil
+                    if let urlString = dictionary["profileImageUrl"] as? String, !urlString.isEmpty, let url = URL(string: urlString) { requestingUser.profileUrl = url }
                 }
                 group.leave()
             }, withCancel: { error in

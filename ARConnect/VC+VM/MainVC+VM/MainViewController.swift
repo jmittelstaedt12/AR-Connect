@@ -37,12 +37,13 @@ final class MainViewController: UIViewController, ControllerProtocol {
         let rightButton = UIButton(type: .system)
         rightButton.backgroundColor = .lightGray
         rightButton.setBackgroundImage(UIImage(named: "person-placeholder"), for: .normal)
+        rightButton.layoutIfNeeded()
+        rightButton.subviews.first?.contentMode = .scaleAspectFill
         rightButton.addTarget(self, action: #selector(didTapProfileImage), for: .touchUpInside)
         rightButton.translatesAutoresizingMaskIntoConstraints = false
         rightButton.dimensionAnchors(height: 34, width: 34)
         rightButton.layer.cornerRadius = 17
         rightButton.layer.masksToBounds = true
-        rightButton.subviews.first?.contentMode = .scaleAspectFill
         return rightButton
     }()
 
@@ -74,7 +75,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         }
     }
 
-    let compressedHeight: CGFloat = 50
+    let compressedHeight: CGFloat = 100
 
     // MARK: Methods
     private func setChildSearchVCState(toState state: SearchTableViewController.ExpansionState) {
@@ -83,7 +84,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         }
         switch state {
         case .compressed:
-            topConstraint.constant = -50
+            topConstraint.constant = -100
             searchViewControllerPreviousYCoordinate = view.bounds.height - compressedHeight
         case .expanded:
             topConstraint.constant = -400
@@ -233,7 +234,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         searchVC.view.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor,
                                   trailing: view.safeAreaLayoutGuide.trailingAnchor,
                                   padding: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4))
-        childSearchVCTopConstraint = searchVC.view.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
+        childSearchVCTopConstraint = searchVC.view.topAnchor.constraint(equalTo: view.bottomAnchor, constant: 0)
         childSearchVCHeightConstraint = searchVC.view.heightAnchor.constraint(equalToConstant: expandedHeight)
         childSearchVCTopConstraint?.isActive = true
         childSearchVCHeightConstraint?.isActive = true
@@ -361,7 +362,7 @@ extension MainViewController: SearchTableViewControllerDelegate {
         }
         let constraintOffset = previousYCoordinate - view.bounds.height
         let newTopConstraint = previousYCoordinate + translationPoint.y
-        let compressedYCoordinate = view.bounds.height - 50
+        let compressedYCoordinate = view.bounds.height - 100
         let expandedYCoordinate = view.bounds.height - 400
         if newTopConstraint >= expandedYCoordinate && newTopConstraint <= compressedYCoordinate + 40 {
             topConstraint.constant = constraintOffset + translationPoint.y
@@ -377,7 +378,7 @@ extension MainViewController: SearchTableViewControllerDelegate {
         guard let searchVC = searchViewController, let previousYCoordinate = searchViewControllerPreviousYCoordinate else { return }
         expandedHeight = 400
         let newTopConstraint = previousYCoordinate + translationPoint.y
-        let compressedYCoordinate = view.frame.height - 50
+        let compressedYCoordinate = view.frame.height - 100
         let expandedYCoordinate = view.frame.height - 400
         let velocityThreshold: CGFloat = 100
         if abs(velocity.y) < velocityThreshold {

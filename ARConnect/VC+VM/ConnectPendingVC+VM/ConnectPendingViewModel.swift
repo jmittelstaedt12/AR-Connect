@@ -80,7 +80,7 @@ final class ConnectPendingViewModel: ViewModelProtocol {
     }
 
     private func setTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 20, repeats: false) { [weak self] _ in
             guard let self = self else { return }
             FirebaseClient.usersRef.child(self.currentUser.uid).updateChildValues(["pendingRequest": false])
             self.callDroppedSubject.onNext(.noResponse(userName: self.requestingUser.name))

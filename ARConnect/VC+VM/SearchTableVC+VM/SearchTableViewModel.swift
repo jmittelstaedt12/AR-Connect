@@ -63,9 +63,6 @@ class SearchTableViewModel: ViewModelProtocol {
                 }
                 self.searchItem = newWorkItem
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(250), execute: newWorkItem)
-            }, onDisposed: {
-                print("disposed")
-
             })
             .disposed(by: disposeBag)
     }

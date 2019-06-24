@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 
 class UserCellModel {
-    let user: LocalUser
+    var user: LocalUser
     let uid: String
     let name: String
     let username: String
@@ -41,6 +41,7 @@ class UserCellModel {
         NetworkRequests.profilePictureNetworkRequest(withUrl: url) { result in
             switch result {
             case .success(let data):
+                self.user.profileImageData = data
                 self.profileImageData.onNext(data)
                 self.profileImageData.onCompleted()
             case .failure(let error):
