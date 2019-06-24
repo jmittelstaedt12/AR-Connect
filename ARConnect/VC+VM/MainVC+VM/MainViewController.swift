@@ -107,7 +107,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         viewModel.output.authenticatedUserObservable
             .subscribe(onNext: { [weak self] result in
                 switch result {
-                case .success(_):
+                case .success:
                     return
                 case .failure(let error):
                     self?.createAndDisplayAlert(withTitle: error.title, body: error.errorDescription)
@@ -133,7 +133,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         viewModel.output.sessionStartObservable
             .subscribe(onNext: { [weak self] result in
                 switch result {
-                case .success(_):
+                case .success:
                     self?.handleSessionStart()
                 case .failure(let error):
                     self?.createAndDisplayAlert(withTitle: error.title, body: error.errorDescription)
@@ -223,10 +223,10 @@ final class MainViewController: UIViewController, ControllerProtocol {
     /// Setup auto layout anchors, dimensions, and other position properties for subviews
     private func setupSubviewsAndChildVCs() {
         // Setup auto layout anchors for map view
-        mapViewController.view.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,
-                                           leading: view.safeAreaLayoutGuide.leadingAnchor,
+        mapViewController.view.edgeAnchors(top: view.topAnchor,
+                                           leading: view.leadingAnchor,
                                            bottom: view.bottomAnchor,
-                                           trailing: view.safeAreaLayoutGuide.trailingAnchor)
+                                           trailing: view.trailingAnchor)
 
         // Setup auto layout anchors for searchViewController
         guard let searchVC = searchViewController else { return }
@@ -250,23 +250,6 @@ final class MainViewController: UIViewController, ControllerProtocol {
             createAndDisplayAlert(withTitle: "Log out Error", body: logoutError.localizedDescription)
         }
     }
-
-//    private func requestToConnectWithUser(_ user: LocalUser, atCoordinate coordinate: CLLocationCoordinate2D) {
-//        FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
-//            guard let self = self else { return }
-//            if let err = error {
-//                self.createAndDisplayAlert(withTitle: "Error", body: err.localizedDescription)
-//                return
-//            }
-//            FirebaseClient.createCallUserObservable(forUid: user.uid!, atCoordinateTuple: (latitude: coordinate.latitude, longitude: coordinate.longitude)).subscribe(onNext: { [weak self] completed in
-//                guard completed else { return }
-//                let connectPendingVC = ConnectPendingViewController(requestingUser: user, meetupLocation: CLLocation(coordinate: coordinate))
-//                self?.present(connectPendingVC, animated: true, completion: nil)
-//            }, onError: { [weak self] error in
-//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
-//            }).disposed(by: self.bag)
-//        }
-//    }
 
     @objc private func didTapProfileImage() {
 
@@ -465,10 +448,6 @@ extension MainViewController: SearchTableViewControllerDelegate {
 
         view.updateConstraintsIfNeeded()
     }
-//    func updateDetailCard(withUser user: LocalUser) {
-//        guard let cardDetailVC = cardDetailViewController, let cellUser = cardDetailVC.userForCell, cellUser != user else { return }
-//        cardDetailVC.userForCell = user
-//    }
 }
 
 extension MainViewController: CardDetailDelegate {
@@ -495,46 +474,7 @@ extension MainViewController: CardDetailDelegate {
                 self.navigationController?.navigationBar.isHidden = false
                 self.handleSessionEnd()
                 self.viewModel.requestToConnect(cellModel: cellModel, location: location)
-//                self.requestToConnectWithUser(user, atCoordinate: coordinate)
             })
             .disposed(by: bag)
-
-//
-//        mapViewController.meetupLocationObservable?.subscribe(onNext: { [unowned self] coordinate in
-//            self.navigationController?.navigationBar.isHidden = false
-//            self.handleSessionEnd()
-//            FirebaseClient.usersRef.child(self.currentUser!.uid).updateChildValues(["connectedTo": "afasf",
-//                                                                       "isConnected": true])
-//            let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
-//            NotificationCenter.default.post(name: name, object: nil, userInfo: ["user": user,
-//                                                                                "meetupLocation": coordinate,
-//                                                                                "didConnect": true])
-//        }).disposed(by: bag)
     }
-
 }
-
-
-//        FirebaseClient.createCanCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
-//            if canComplete {
-//                self?.willSetMeetupLocation()
-//            } else {
-//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
-//            }
-//            }, onError: { [weak self] error in
-//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
-//        }).disposed(by: bag)
-//
-//        FirebaseClient.createCanCallUserObservable(forUid: user.uid!).subscribe(onNext: { [weak self] canComplete in
-//            if canComplete {
-//                FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true])
-//                FirebaseClient.usersRef.child(user.uid!).child("requestingUser").updateChildValues(["uid": Auth.auth().currentUser!.uid])
-//                let connectPendingVC = ConnectPendingViewController()
-//                connectPendingVC.user = user
-//                self?.present(connectPendingVC, animated: true, completion: nil)
-//            } else {
-//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: "User\(user.name != nil ? (" " + user.name!) : "") is unavailable")
-//            }
-//            }, onError: { (error) in
-//                self.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
-//        }).disposed(by: bag)

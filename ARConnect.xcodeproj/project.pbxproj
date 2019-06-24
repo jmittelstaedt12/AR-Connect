@@ -235,7 +235,6 @@
 				1944C38A22B2875B00753E49 /* VC+VM */,
 				1944C38322B1FE7200753E49 /* Protocols */,
 				19913A21216CEE6300174187 /* Controllers */,
-				1958B81121F12CD800B1840F /* TestingViewController.swift */,
 				19D7E68821C41DF60046D737 /* Services */,
 				19913A2D216D39C400174187 /* Models */,
 				19D7E68E21C426920046D737 /* Extensions */,
@@ -254,6 +253,7 @@
 		19913A21216CEE6300174187 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				1958B81121F12CD800B1840F /* TestingViewController.swift */,
 				19948E0F216FB7E8008C39DA /* RootViewController.swift */,
 				19948E11216FB7FB008C39DA /* SplashViewController.swift */,
 				19D736B121CAE15D00D6D92A /* InitialViewController.swift */,

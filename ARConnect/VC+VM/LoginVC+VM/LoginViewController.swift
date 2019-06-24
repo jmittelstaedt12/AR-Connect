@@ -131,16 +131,6 @@ final class LoginViewController: UIViewController, KeyboardHandler, ControllerPr
 
     }
 
-    init(viewModel: ViewModelType) {
-        super.init(nibName: nil, bundle: nil)
-        self.viewModel = viewModel
-        configure(with: viewModel)
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = ColorConstants.primaryColor

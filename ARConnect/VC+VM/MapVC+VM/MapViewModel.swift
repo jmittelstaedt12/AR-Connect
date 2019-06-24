@@ -116,15 +116,18 @@ class MapViewModel: NSObject, ViewModelProtocol {
         let group = DispatchGroup()
         var userLine: MKPolyline?
         var connectedUserLine: MKPolyline?
+
         group.enter()
         NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: meetupLocation.coordinate) { result in
             defer {
                 group.leave()
             }
-            if let error = result.error {
-                return
+            switch result {
+            case .success(let line):
+                userLine = line
+            case .failure(let error):
+                print(error.localizedDescription)
             }
-            userLine = result.line
         }
 
         group.enter()
@@ -138,10 +141,12 @@ class MapViewModel: NSObject, ViewModelProtocol {
                 defer {
                     group.leave()
                 }
-                if let error = result.error {
-                    return
+                switch result {
+                case .success(let line):
+                    connectedUserLine = line
+                case .failure(let error):
+                    print(error.localizedDescription)
                 }
-                connectedUserLine = result.line
             }
         }
 
@@ -161,6 +166,7 @@ class MapViewModel: NSObject, ViewModelProtocol {
                 return coordinates
             }
             self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+
             if let connectedUserPath = connectedUserLine {
                 let visibleRegion = connectedUserPath.boundingMapRect.union(self.pathOverlay!.boundingMapRect)
                 self.setMapForConnectionSubject.onNext((userLine: userPath, connectedUserLine: connectedUserPath, visibleMapRect: visibleRegion))

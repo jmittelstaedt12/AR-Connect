@@ -148,22 +148,15 @@ class MainViewModel: ViewModelProtocol {
     private func setUIEventObservers() {
         disconnectDidTapSubject
             .subscribe(onNext: { [weak self] in
-                if let self = self {
-                    FirebaseClient.usersRef
-                        .child(self.uid)
-                        .updateChildValues(["connectedTo": "",
-                                            "isConnected": false])
-                }
-//                self?.endSessionSubject.onNext(())
+                guard let self = self else { return }
+                FirebaseClient.usersRef
+                    .child(self.uid)
+                    .updateChildValues(["connectedTo": "",
+                                        "isConnected": false])
+                self.endSessionSubject.onNext(())
             })
             .disposed(by: disposeBag)
     }
-
-//    private func fetchUserImage(url: URL) {
-//        NetworkRequests.profilePictureNetworkRequest(withUrl: url) { [weak self] data in
-//            self?.userImageDataSubject.onNext(data)
-//        }
-//    }
 
     @objc func handleSessionStart(notification: NSNotification) {
         let connectedUid = notification.userInfo?["uid"] as! String

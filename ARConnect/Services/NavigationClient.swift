@@ -11,7 +11,7 @@ import MapKit
 struct NavigationClient {
 
     /// Calls directions request for two locations and returns their polyline and the steps between them
-    static func requestLineAndSteps(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D, handler: @escaping ((line: MKPolyline?, error: Error?)) -> Void) {
+    static func requestLineAndSteps(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D, handler: @escaping (Result<MKPolyline, Error>) -> Void) {
         var result: (line: MKPolyline?, error: Error?)
         let directionsRequest = MKDirections.Request()
         directionsRequest.source = MKMapItem(placemark: MKPlacemark(coordinate: start))
@@ -19,11 +19,12 @@ struct NavigationClient {
         directionsRequest.transportType = .walking
         let directions = MKDirections(request: directionsRequest)
         directions.calculate { (response, error) in
-            result.error = error
-            if let route = response?.routes[0], route.polyline.pointCount > 0 {
-                result.line = route.polyline
+            if let error = error {
+                handler(.failure(error))
             }
-            return handler(result)
+            else if let route = response?.routes[0], route.polyline.pointCount > 0 {
+                handler(.success(route.polyline))
+            }
         }
     }
 }

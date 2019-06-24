@@ -56,8 +56,6 @@ final class ConnectRequestViewModel: ViewModelProtocol {
             FirebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser")
                 .updateChildValues(["uid": "", "latitude": 0, "longitude": 0])
             self.callDroppedSubject.onNext(())
-//            self.createAndDisplayAlert(withTitle: "Call Dropped", body: "Ending call")
-//            self.dismiss(animated: true, completion: nil)
         }).disposed(by: disposeBag)
     }
 
@@ -71,11 +69,10 @@ final class ConnectRequestViewModel: ViewModelProtocol {
                                                                                           "longitude": 0])
             let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
             let didConnect = (senderTitle == "Confirm") ? true : false
-            NotificationCenter.default.post(name: name, object: nil, userInfo: ["uid": self.currentUser.uid,
+            NotificationCenter.default.post(name: name, object: nil, userInfo: ["uid": self.requestingUser.uid,
                                                                                 "meetupLocation": self.meetupLocation,
                                                                                 "didConnect": didConnect])
             self.processedResponseSubject.onNext(.success(()))
-//            self.dismiss(animated: true, completion: nil)
         }
 
         // Completion handler for firebase requests
@@ -92,7 +89,8 @@ final class ConnectRequestViewModel: ViewModelProtocol {
         if senderTitle == "Confirm" {
             let distance = currentLocation.distance(from: meetupLocation)
             if distance > 5000.0 {
-//                createAndDisplayAlert(withTitle: "Too Far From Meetup Point", body: "Your distance of \(distance) is too far for accurate walking directions")
+                processedResponseSubject.onNext(.failure(.custom(title: "Too Far From Meetup Point",
+                                                                 errorDescription: "Your distance of \(distance) is too far for accurate walking directions")))
                 return
             }
             group.enter()
