@@ -19,6 +19,7 @@
 		1944C39022B2C35C00753E49 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1944C38F22B2C35C00753E49 /* MainViewModel.swift */; };
 		194CADB821FABA4100204E28 /* JMMKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194CADB721FABA4100204E28 /* JMMKMapView.swift */; };
 		1958B81221F12CD800B1840F /* TestingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1958B81121F12CD800B1840F /* TestingViewController.swift */; };
+		1974B80322BEC03A00D665D9 /* ConnectRequestViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1974B80222BEC03900D665D9 /* ConnectRequestViewModel.swift */; };
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
 		1981CB6921A604C600B69138 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* Constants.swift */; };
 		1986BBC621F2506900DA9611 /* NetworkRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1986BBC521F2506900DA9611 /* NetworkRequests.swift */; };
@@ -43,6 +44,7 @@
 		19997E8E21E65F4A0023C3EC /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8C21E65F4A0023C3EC /* UserCell.swift */; };
 		19997E8F21E65F4A0023C3EC /* UserCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19997E8D21E65F4A0023C3EC /* UserCell.xib */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
+		19C43F0022C00DE100279D7E /* ConnectPendingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C43EFF22C00DE100279D7E /* ConnectPendingViewModel.swift */; };
 		19D53CBB21FCC7F1000984FE /* JMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBA21FCC7F1000984FE /* JMTextField.swift */; };
 		19D53CBD21FCC961000984FE /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBC21FCC961000984FE /* UIView+Extension.swift */; };
 		19D53CBF21FCC99E000984FE /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53CBE21FCC99E000984FE /* UIViewController+Extension.swift */; };
@@ -78,6 +80,7 @@
 		1944C38F22B2C35C00753E49 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		194CADB721FABA4100204E28 /* JMMKMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMMKMapView.swift; sourceTree = "<group>"; };
 		1958B81121F12CD800B1840F /* TestingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingViewController.swift; sourceTree = "<group>"; };
+		1974B80222BEC03900D665D9 /* ConnectRequestViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectRequestViewModel.swift; sourceTree = "<group>"; };
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		1981CB6821A604C600B69138 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		1986BBC521F2506900DA9611 /* NetworkRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequests.swift; sourceTree = "<group>"; };
@@ -104,6 +107,7 @@
 		19997E8C21E65F4A0023C3EC /* UserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
 		19997E8D21E65F4A0023C3EC /* UserCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UserCell.xib; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
+		19C43EFF22C00DE100279D7E /* ConnectPendingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectPendingViewModel.swift; sourceTree = "<group>"; };
 		19D53CBA21FCC7F1000984FE /* JMTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMTextField.swift; sourceTree = "<group>"; };
 		19D53CBC21FCC961000984FE /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 		19D53CBE21FCC99E000984FE /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
@@ -188,12 +192,23 @@
 		1944C38A22B2875B00753E49 /* VC+VM */ = {
 			isa = PBXGroup;
 			children = (
+				19C43EFE22BFF94400279D7E /* ConnectPendingVC+VM */,
+				1974B80122BEC01100D665D9 /* ConnectRequestVC+VM */,
 				1912576D22B3470F00200DA5 /* MapVC+VM */,
 				1912576A22B3467C00200DA5 /* SearchTableVC+VM */,
 				1912576922B3393300200DA5 /* LoginVC+VM */,
 				1912576822B3390F00200DA5 /* MainVC+VM */,
 			);
 			path = "VC+VM";
+			sourceTree = "<group>";
+		};
+		1974B80122BEC01100D665D9 /* ConnectRequestVC+VM */ = {
+			isa = PBXGroup;
+			children = (
+				19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */,
+				1974B80222BEC03900D665D9 /* ConnectRequestViewModel.swift */,
+			);
+			path = "ConnectRequestVC+VM";
 			sourceTree = "<group>";
 		};
 		19913A01216CED7500174187 = {
@@ -244,8 +259,6 @@
 				19D736B121CAE15D00D6D92A /* InitialViewController.swift */,
 				19913A11216CED7600174187 /* RegisterViewController.swift */,
 				19913A24216CF46100174187 /* ARSessionViewController.swift */,
-				19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */,
-				19997E8621E4F6970023C3EC /* ConnectPendingViewController.swift */,
 				199383C62195EE99001BE7FD /* CardDetailViewController */,
 				199383C72195EEAA001BE7FD /* MessageViewController */,
 				19997E7E21E404FD0023C3EC /* Inherited Controllers */,
@@ -295,6 +308,15 @@
 				1912576E22B3D94B00200DA5 /* UserCellModel.swift */,
 			);
 			path = UserTableViewCell;
+			sourceTree = "<group>";
+		};
+		19C43EFE22BFF94400279D7E /* ConnectPendingVC+VM */ = {
+			isa = PBXGroup;
+			children = (
+				19997E8621E4F6970023C3EC /* ConnectPendingViewController.swift */,
+				19C43EFF22C00DE100279D7E /* ConnectPendingViewModel.swift */,
+			);
+			path = "ConnectPendingVC+VM";
 			sourceTree = "<group>";
 		};
 		19D7E68821C41DF60046D737 /* Services */ = {
@@ -537,6 +559,7 @@
 				19997E8E21E65F4A0023C3EC /* UserCell.swift in Sources */,
 				19D53CBF21FCC99E000984FE /* UIViewController+Extension.swift in Sources */,
 				1944C38E22B2AD1500753E49 /* Observable+Extension.swift in Sources */,
+				1974B80322BEC03A00D665D9 /* ConnectRequestViewModel.swift in Sources */,
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
 				19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */,
 				19D53CBB21FCC7F1000984FE /* JMTextField.swift in Sources */,
@@ -577,6 +600,7 @@
 				19D7E69421C445550046D737 /* MatrixOperations.swift in Sources */,
 				19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */,
 				19E30DA222A5FA1800A1F981 /* CollapsibleCollectionView.swift in Sources */,
+				19C43F0022C00DE100279D7E /* ConnectPendingViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

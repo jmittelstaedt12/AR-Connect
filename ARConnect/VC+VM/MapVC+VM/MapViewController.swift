@@ -12,30 +12,27 @@ import Firebase
 import RxSwift
 import RxCocoa
 
-protocol LocationUpdateDelegate: AnyObject {
-    func didReceiveLocationUpdate(to location: CLLocation)
-    func didReceiveTripSteps(_ steps: [CLLocationCoordinate2D])
-    func failedToUpdateLocation()
-}
+final class MapViewController: UIViewController, MKMapViewDelegate, ControllerProtocol {
 
-final class MapViewController: UIViewController, MKMapViewDelegate {
+    // MARK: Properties
 
-    // MARK: Variables
+    typealias ViewModelType = MapViewModel
+
+    var viewModel: ViewModelType!
 
     var currentLocation: CLLocation?
-    let currentUser = Auth.auth().currentUser
-    let locationService = LocationService()
     let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
-    weak var delegate: LocationUpdateDelegate?
+//    weak var delegate: LocationUpdateDelegate?
     var tripCoordinates: [CLLocationCoordinate2D] = []
     private var pathOverlay: MKPolyline?
     var headingAccuracy = [Double](repeating: 360.0, count: 4)
     var locationAccuracy = [Double](repeating: 100.0, count: 4)
     var recentLocationIndex = 0
     var willUpdateCurrentLocation = true
-    private var meetupLocationVariable = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
-    private(set) var meetupLocationObservable: Observable<CLLocationCoordinate2D>?
+    private var meetupLocationVariable = BehaviorRelay<CLLocation?>(value: nil)
+    private(set) var meetupLocationObservable: Observable<CLLocation>?
     private var tempPolylineColor: UIColor?
+
     let map: JMMKMapView = JMMKMapView()
 
     enum WorldAlignment {
@@ -69,32 +66,64 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
 
     // MARK: Initial Setup
 
+    let disposeBag = DisposeBag()
+    func configure(with viewModel: ViewModelType) {
+
+        viewModel.output.setCurrentLocationObservable
+            .subscribe(onNext: { [weak self] coordinate in
+                guard let self = self else { return }
+                self.centerMap(atCoordinate: coordinate, withCoordinateSpan: 0.01)
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.output.setMapForConnectionObservable
+            .subscribe(onNext: { [weak self] data in
+                guard let self = self, data != nil else { return }
+                self.draw(polyline: data!.userLine, color: ColorConstants.primaryColor)
+                if let line = data!.connectedUserLine {
+                    self.draw(polyline: line, color: ColorConstants.secondaryColor)
+                }
+                self.map.setVisibleMapRect(data!.visibleMapRect, animated: true)
+            })
+            .disposed(by: disposeBag)
+    }
+
+    init(viewModel: ViewModelType) {
+        super.init(nibName: nil, bundle: nil)
+        self.viewModel = viewModel
+        configure(with: viewModel)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = map
         map.compassButton.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
                                       padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
         map.delegate = self
-        setupLocationModel()
-        NotificationCenter.default.addObserver(self, selector: #selector(setupMapForConnection(notification:)), name: connectNotificationName, object: nil)
-        meetupLocationObservable = meetupLocationVariable.asObservable().filter { $0 != nil }.map { return $0! }.take(1)
+//        setupLocationModel()
+//        NotificationCenter.default.addObserver(self, selector: #selector(setupMapForConnection(notification:)), name: connectNotificationName, object: nil)
+        meetupLocationObservable = meetupLocationVariable.asObservable().ignoreNil().take(1)
     }
 
-    private func setupLocationModel() {
-        locationService.locationManager.delegate = self
-        locationService.locationManager.requestAlwaysAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            locationService.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationService.locationManager.startUpdatingHeading()
-            locationService.locationManager.startUpdatingLocation()
-            Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
-                self?.willUpdateCurrentLocation = true
-            }
-        }
-
-        guard let coordinate = locationService.locationManager.location?.coordinate else { return }
-        LocationService.setMapProperties(for: map, in: super.view, atCoordinate: coordinate, withCoordinateSpan: 0.01)
-    }
+//    private func setupLocationModel() {
+//        locationService.locationManager.delegate = self
+//        locationService.locationManager.requestAlwaysAuthorization()
+//        if CLLocationManager.locationServicesEnabled() {
+//            locationService.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+//            locationService.locationManager.startUpdatingHeading()
+//            locationService.locationManager.startUpdatingLocation()
+//            Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
+//                self?.willUpdateCurrentLocation = true
+//            }
+//        }
+//
+//        guard let coordinate = locationService.locationManager.location?.coordinate else { return }
+//        LocationService.setMapProperties(for: map, in: super.view, atCoordinate: coordinate, withCoordinateSpan: 0.01)
+//    }
 
     // MARK: Directions Requests
 
@@ -120,7 +149,7 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
 
     @objc func centerAtLocation() {
         if let coordinate = currentLocation?.coordinate {
-            LocationService.setMapProperties(for: map, in: super.view, atCoordinate: coordinate, withCoordinateSpan: 0.003)
+            self.centerMap(atCoordinate: coordinate, withCoordinateSpan: 0.01)
         }
     }
 
@@ -129,75 +158,76 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
             map.setVisibleMapRect(MKMapRect(origin: path.boundingMapRect.origin,
                                             size: MKMapSize(width: path.boundingMapRect.size.width,
                                                             height: path.boundingMapRect.size.height)),
-                                            edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: true)
+                                            edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40),
+                                            animated: true)
         }
     }
 
-    @objc private func setupMapForConnection(notification: NSNotification) {
-        guard let didConnect = notification.userInfo?["didConnect"] as? Bool,
-            didConnect, let currentLocation = currentLocation else { return }
-        let user = notification.userInfo?["user"] as! LocalUser
-        let meetupLocation = notification.userInfo?["meetupLocation"] as! CLLocation
-
-        let group = DispatchGroup()
-        var userLine: MKPolyline?
-        var connectedUserLine: MKPolyline?
-        group.enter()
-        NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: meetupLocation.coordinate) { result in
-            defer {
-                group.leave()
-            }
-            if let error = result.error {
-                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-                return
-            }
-            userLine = result.line
-        }
-
-        group.enter()
-        FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
-            guard let lat = latitude, let lon = longitude else {
-                group.leave()
-                return
-            }
-            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            NavigationClient.requestLineAndSteps(from: coordinate, to: meetupLocation.coordinate) { result in
-                defer {
-                    group.leave()
-                }
-                if let error = result.error {
-                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
-                    return
-                }
-                connectedUserLine = result.line
-            }
-        }
-
-        group.notify(queue: .main) { [unowned self] in
-            guard let userPath = userLine else { return }
-            self.pathOverlay = userPath
-            self.draw(polyline: userPath, color: ColorConstants.primaryColor)
-            for index in 0..<userPath.pointCount {
-                self.tripCoordinates.append(userPath.points()[index].coordinate)
-            }
-            var current = self.tripCoordinates.first!
-            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
-                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
-                current = step
-                return coordinates
-            }
-            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
-            if let connectedUserPath = connectedUserLine {
-                self.draw(polyline: connectedUserPath, color: ColorConstants.secondaryColor)
-                self.map.setVisibleMapRect(connectedUserPath.boundingMapRect.union(self.pathOverlay!.boundingMapRect), animated: true)
-            } else {
-                self.map.setVisibleMapRect(self.pathOverlay!.boundingMapRect, animated: true)
-            }
-//            connectedUserLine = MKPolyline(coordinates:
-//                                            UnsafeMutablePointer(mutating: self.tripCoordinates.map { CLLocationCoordinate2D(latitude: $0.latitude + 0.01,
-//                                                                                                                             longitude: $0.longitude + 0.01) }),
-//                                                                 count: self.tripCoordinates.count)
-        }
+//    @objc private func setupMapForConnection(notification: NSNotification) {
+//        guard let didConnect = notification.userInfo?["didConnect"] as? Bool,
+//            didConnect, let currentLocation = currentLocation else { return }
+//        let user = notification.userInfo?["user"] as! LocalUser
+//        let meetupLocation = notification.userInfo?["meetupLocation"] as! CLLocation
+//
+//        let group = DispatchGroup()
+//        var userLine: MKPolyline?
+//        var connectedUserLine: MKPolyline?
+//        group.enter()
+//        NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: meetupLocation.coordinate) { result in
+//            defer {
+//                group.leave()
+//            }
+//            if let error = result.error {
+//                self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+//                return
+//            }
+//            userLine = result.line
+//        }
+//
+//        group.enter()
+//        FirebaseClient.fetchCoordinates(uid: user.uid!) { (latitude, longitude) -> Void in
+//            guard let lat = latitude, let lon = longitude else {
+//                group.leave()
+//                return
+//            }
+//            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+//            NavigationClient.requestLineAndSteps(from: coordinate, to: meetupLocation.coordinate) { result in
+//                defer {
+//                    group.leave()
+//                }
+//                if let error = result.error {
+//                    self.createAndDisplayAlert(withTitle: "Direction Request Error", body: error.localizedDescription)
+//                    return
+//                }
+//                connectedUserLine = result.line
+//            }
+//        }
+//
+//        group.notify(queue: .main) { [unowned self] in
+//            guard let userPath = userLine else { return }
+//            self.pathOverlay = userPath
+//            self.draw(polyline: userPath, color: ColorConstants.primaryColor)
+//            for index in 0..<userPath.pointCount {
+//                self.tripCoordinates.append(userPath.points()[index].coordinate)
+//            }
+//            var current = self.tripCoordinates.first!
+//            self.tripCoordinates = self.tripCoordinates.dropFirst().flatMap { step -> [CLLocationCoordinate2D] in
+//                let coordinates = LocationHelper.createIntermediaryCoordinates(from: current, to: step, withInterval: 5)
+//                current = step
+//                return coordinates
+//            }
+//            self.delegate?.didReceiveTripSteps(self.tripCoordinates)
+//            if let connectedUserPath = connectedUserLine {
+//                self.draw(polyline: connectedUserPath, color: ColorConstants.secondaryColor)
+//                self.map.setVisibleMapRect(connectedUserPath.boundingMapRect.union(self.pathOverlay!.boundingMapRect), animated: true)
+//            } else {
+//                self.map.setVisibleMapRect(self.pathOverlay!.boundingMapRect, animated: true)
+//            }
+////            connectedUserLine = MKPolyline(coordinates:
+////                                            UnsafeMutablePointer(mutating: self.tripCoordinates.map { CLLocationCoordinate2D(latitude: $0.latitude + 0.01,
+////                                                                                                                             longitude: $0.longitude + 0.01) }),
+////                                                                 count: self.tripCoordinates.count)
+//        }
 //        NetworkRequests.directionsRequest(from: currentLocation.coordinate, to: meetupLocation) { [weak self] points in
 //            guard let self = self, points != nil else { return }
 //            self.tripCoordinates = points!
@@ -235,7 +265,7 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
 //                }
 //            }
 //        }
-    }
+//    }
 
     // MARK: Updates to Map
 
@@ -244,11 +274,20 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
         map.addOverlay(line)
     }
 
+    func centerMap(atCoordinate coordinate: CLLocationCoordinate2D, withCoordinateSpan span: Double) {
+        map.frame = view.frame
+        map.center = view.center
+        map.showsUserLocation = true
+        map.setCenter(coordinate, animated: true)
+        map.setUserTrackingMode(.follow, animated: true)
+        let region = MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: span, longitudeDelta: span))
+        map.setRegion(region, animated: true)
+    }
+
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         let polylineRenderer = MKPolylineRenderer(overlay: overlay)
         if overlay is MKPolyline {
-            polylineRenderer.strokeColor =
-                tempPolylineColor
+            polylineRenderer.strokeColor = tempPolylineColor
             polylineRenderer.lineWidth = 5
         }
         return polylineRenderer
@@ -260,7 +299,7 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
         }
 
         if let currentCoordinate = currentLocation?.coordinate {
-            LocationService.setMapProperties(for: map, in: super.view, atCoordinate: currentCoordinate, withCoordinateSpan: 0.01)
+            self.centerMap(atCoordinate: currentCoordinate, withCoordinateSpan: 0.01)
         }
     }
 
@@ -288,7 +327,7 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
         locationSetterIcon = nil
         setMeetupLocationButton = nil
 
-        meetupLocationVariable.accept(map.centerCoordinate)
+        meetupLocationVariable.accept(CLLocation(coordinate: map.centerCoordinate))
         meetupLocationVariable.accept(nil)
     }
 
@@ -297,37 +336,37 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
     }
 }
 
-// MARK: CLLocationManagerDelegate
-extension MapViewController: CLLocationManagerDelegate {
-
-    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        guard let locValue = manager.location else { return }
-        headingAccuracy[recentLocationIndex] = newHeading.headingAccuracy
-        locationAccuracy[recentLocationIndex] = locValue.horizontalAccuracy
-        recentLocationIndex = (recentLocationIndex + 1) % 4
-        if headingAccuracy.contains(where: { $0 >= 0 && $0 <= 30 }) {
-            shouldUseAlignment = .gravityAndHeading
-        } else {
-            shouldUseAlignment = .gravity
-        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard willUpdateCurrentLocation, let locValue = manager.location, let user = currentUser else { return }
-        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude": locValue.coordinate.latitude, "longitude": locValue.coordinate.longitude])
-
-//        if currentLocation == nil { setTestingConnection(location: locValue) }
-        delegate?.didReceiveLocationUpdate(to: locValue)
-        currentLocation = locValue
-    }
-
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedAlways || status == .authorizedWhenInUse {
-            setupLocationModel()
-        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        delegate?.failedToUpdateLocation()
-    }
-}
+//// MARK: CLLocationManagerDelegate
+//extension MapViewController: CLLocationManagerDelegate {
+//
+//    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+//        guard let locValue = manager.location else { return }
+//        headingAccuracy[recentLocationIndex] = newHeading.headingAccuracy
+//        locationAccuracy[recentLocationIndex] = locValue.horizontalAccuracy
+//        recentLocationIndex = (recentLocationIndex + 1) % 4
+//        if headingAccuracy.contains(where: { $0 >= 0 && $0 <= 30 }) {
+//            shouldUseAlignment = .gravityAndHeading
+//        } else {
+//            shouldUseAlignment = .gravity
+//        }
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        guard willUpdateCurrentLocation, let locValue = manager.location, let user = currentUser else { return }
+//        FirebaseClient.usersRef.child(user.uid).updateChildValues(["latitude": locValue.coordinate.latitude, "longitude": locValue.coordinate.longitude])
+//
+////        if currentLocation == nil { setTestingConnection(location: locValue) }
+//        delegate?.didReceiveLocationUpdate(to: locValue)
+//        currentLocation = locValue
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+//        if status == .authorizedAlways || status == .authorizedWhenInUse {
+//            setupLocationModel()
+//        }
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+//        delegate?.failedToUpdateLocation()
+//    }
+//}

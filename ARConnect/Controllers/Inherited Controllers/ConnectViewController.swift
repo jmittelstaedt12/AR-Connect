@@ -24,20 +24,28 @@ class ConnectViewController: UIViewController {
     var meetupLocation: CLLocation!
     var currentLocation: CLLocation?
 
-    init(requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation? = nil) {
-        super.init(nibName: nil, bundle: nil)
-        self.user = requestingUser
-        self.meetupLocation = meetupLocation
-        self.currentLocation = currentLocation
-    }
 
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
+
+//    init(viewModel: ViewModelType) {
+//        super.init(nibName: nil, bundle: nil)
+//        self.viewModel = viewModel
+//        configure(with: viewModel)
+//    }
+//    init(requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation? = nil) {
+//        super.init(nibName: nil, bundle: nil)
+//        self.user = requestingUser
+//        self.meetupLocation = meetupLocation
+//        self.currentLocation = currentLocation
+//    }
+
+//    required init?(coder aDecoder: NSCoder) {
+//        super.init(coder: aDecoder)
+//    }
 
     let requestingUserImageView: UIImageView = {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
+        view.image = UIImage(named: "person-placeholder")
         view.backgroundColor = .lightGray
         view.layer.cornerRadius = view.frame.width / 2
         return view

@@ -23,10 +23,12 @@ class UserCell: UITableViewCell {
             nameLabel.text = userCellModel.name
             usernameLabel.text = userCellModel.username
             profileImageView.image = UIImage(named: "person-placeholder")
-
+            
             userCellModel.profileImageData
                 .subscribe(onNext: { [weak self] data in
-                    self?.profileImageView.image = UIImage(data: data)
+                    DispatchQueue.main.async {
+                        self?.profileImageView.image = UIImage(data: data)
+                    }
                 })
                 .disposed(by: disposeBag)
 

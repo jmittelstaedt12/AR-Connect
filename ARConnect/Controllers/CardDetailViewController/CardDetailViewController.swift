@@ -11,7 +11,7 @@ import Firebase
 import RxSwift
 
 protocol CardDetailDelegate: class {
-    func willSetMeetupLocation(withUser user: LocalUser)
+    func willSetMeetupLocation(withCellModel cellModel: UserCellModel)
     func removeFromHierarchy()
 }
 
@@ -25,15 +25,23 @@ final class CardDetailViewController: UIViewController {
 
     weak var delegate: CardDetailDelegate?
 
-    let currentUser = Auth.auth().currentUser
-    let bag = DisposeBag()
+    let disposeBag = DisposeBag()
 
-    var userForCell: LocalUser! {
+    var cellModel: UserCellModel! {
         didSet {
-            userImageView.image = (userForCell?.profileImageData != nil) ? UIImage(data: userForCell!.profileImageData!) : UIImage(named: "person-placeholder")
+            nameLabel.text = cellModel.name
+
+            userImageView.image = UIImage(named: "person-placeholder")
+            cellModel.profileImageData
+                .subscribe(onNext: { [weak self] data in
+                    DispatchQueue.main.async {
+                        self?.userImageView.image = UIImage(data: data)
+                    }
+                })
+                .disposed(by: disposeBag)
             userImageView.contentMode = .scaleAspectFill
+
             userImageView.clipsToBounds = true
-            nameLabel.text = userForCell?.name
         }
     }
 
@@ -65,7 +73,7 @@ final class CardDetailViewController: UIViewController {
     }
 
     @IBAction func connectToUser(_ sender: UIButton) {
-        delegate?.willSetMeetupLocation(withUser: userForCell)
+        delegate?.willSetMeetupLocation(withCellModel: cellModel)
         delegate?.removeFromHierarchy()
         willMove(toParent: nil)
         view.removeFromSuperview()

@@ -25,22 +25,6 @@ struct FirebaseClient {
     static let usersRef = Database.database().reference().child("Users")
     static var observedReferences = [DatabaseReference]()
 
-    enum UserUnavailableError: LocalizedError {
-        case isOffline
-        case unavailable
-        case amOffline
-        public var errorDescription: String? {
-            switch self {
-            case .isOffline:
-                return NSLocalizedString("User is offline", comment: "")
-            case .unavailable:
-                return NSLocalizedString("User is unavailable", comment: "")
-            case .amOffline:
-                return NSLocalizedString("You are offline", comment: "")
-            }
-        }
-    }
-
     /// Request to authorize a new user and add them to database
     static func createNewUser(user: RegisterUser, handler: @escaping ((Error?) -> Void)) {
         guard let png = user.pngData else {
@@ -212,6 +196,7 @@ struct FirebaseClient {
                 user.name = dictionary["name"] as? String
                 user.email = dictionary["email"] as? String
                 user.uid = uid
+                if let urlString = dictionary["profileImageUrl"] as? String, !urlString.isEmpty, let url = URL(string: urlString) { user.profileUrl = url }
                 return user
         }
     }
@@ -338,7 +323,7 @@ struct FirebaseClient {
 
     /// Create single event observable for user online with uid
     static func createUserOnlineObservable(forUid uid: String) -> Observable<Bool> {
-        return rxFirebaseSingleEvent(forRef: usersRef.child(uid).child("isOnline"), andEvent: .value)
+        return rxFirebaseListener(forRef: usersRef.child(uid).child("isOnline"), andEvent: .value)
             .filter { $0.value is Bool }
             .map { $0.value as! Bool }
     }
@@ -365,8 +350,10 @@ struct FirebaseClient {
             .map { $0.value as! Bool }
 
         return Observable.combineLatest(isOnlineObservable, isInSessionObservable, isPendingObservable) {
-            if !$0 { throw UserUnavailableError.isOffline }
-            if $1 || $2 { throw UserUnavailableError.unavailable }
+            if !$0 { throw FirebaseError.isOffline(userName: nil) }
+            if $1 || $2 {
+                throw FirebaseError.unavailable
+            }
             return $0 && !$1 && !$2
         }
     }
@@ -376,8 +363,10 @@ struct FirebaseClient {
         let isAvailableObservable = createUserAvailableObservable(forUid: uid)
         let amOnlineObservable = createAmOnlineObservable()
         return Observable.combineLatest(isAvailableObservable, amOnlineObservable) {
-            if !$0 { throw UserUnavailableError.unavailable }
-            if !$1 { throw UserUnavailableError.amOffline }
+            if !$0 {
+                throw FirebaseError.unavailable
+            }
+            if !$1 { throw FirebaseError.amOffline }
             return $0 && $1
             }
             .filter { $0 }
@@ -472,4 +461,41 @@ struct FirebaseClient {
         }
     }
 
+}
+
+enum FirebaseError: LocalizedError {
+    case noResponse(userName: String?)
+    case isOffline(userName: String?)
+    case unavailable
+    case amOffline
+    case custom(title: String, errorDescription: String)
+    public var title: String {
+        switch self {
+        case .noResponse(_):
+            return "Timed Out"
+        case .isOffline:
+            return "Connection Error"
+        case .unavailable:
+            return "Connection Error"
+        case .amOffline:
+            return "Network Error"
+        case .custom(let title, _):
+            return title
+        }
+    }
+
+    public var errorDescription: String {
+        switch self {
+        case .noResponse(let name):
+            return NSLocalizedString("\(name ?? "User") did not respond", comment: "")
+        case .isOffline:
+            return NSLocalizedString("User is offline", comment: "")
+        case .unavailable:
+            return NSLocalizedString("User is unavailable", comment: "")
+        case .amOffline:
+            return NSLocalizedString("You are offline", comment: "")
+        case .custom(_, let description):
+            return NSLocalizedString(description, comment: "")
+        }
+    }
 }

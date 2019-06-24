@@ -131,11 +131,14 @@ final class LoginViewController: UIViewController, KeyboardHandler, ControllerPr
 
     }
 
-    static func create(with viewModel: ViewModelType) -> UIViewController {
-        let controller = LoginViewController()
-        controller.viewModel = viewModel
-        controller.configure(with: controller.viewModel)
-        return controller
+    init(viewModel: ViewModelType) {
+        super.init(nibName: nil, bundle: nil)
+        self.viewModel = viewModel
+        configure(with: viewModel)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {

@@ -9,8 +9,10 @@
 import UIKit
 import MapKit
 
-struct LocationService {
+class LocationService: NSObject {
 
+    static let shared = LocationService()
+    
     let locationManager = CLLocationManager()
 
     /// Set up behavior for MKMapView object

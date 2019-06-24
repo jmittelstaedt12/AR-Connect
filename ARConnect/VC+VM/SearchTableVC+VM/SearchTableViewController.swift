@@ -71,11 +71,14 @@ final class SearchTableViewController: UIViewController, ControllerProtocol {
             .disposed(by: disposeBag)
     }
 
-    static func create(with viewModel: ViewModelType) -> UIViewController {
-        let controller = SearchTableViewController()
-        controller.viewModel = viewModel
-        controller.configure(with: controller.viewModel)
-        return controller
+    init(viewModel: ViewModelType) {
+        super.init(nibName: nil, bundle: nil)
+        self.viewModel = viewModel
+        configure(with: viewModel)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
@@ -205,10 +208,9 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserCell,
-//            let email = cell.usernameLabel, let user = users?.first(where: { $0.email == email.text }) else { return }
-//        cell.isSelected = false
-//        delegate.setUserDetailCardVisible(withUser: user)
+        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserCell else { return }
+        cell.isSelected = false
+        delegate.setUserDetailCardVisible(withModel: cell.userCellModel)
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -270,6 +272,6 @@ protocol SearchTableViewControllerDelegate: class {
     func updateCoordinatesDuringPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
     func updateCoordinatesAfterPan(to translationPoint: CGPoint, withVelocity velocity: CGPoint)
     func animateToExpanded()
-    func setUserDetailCardVisible(withUser user: LocalUser)
-    func updateDetailCard(withUser user: LocalUser)
+    func setUserDetailCardVisible(withModel userModel: UserCellModel)
+//    func updateDetailCard(withUser user: LocalUser)
 }

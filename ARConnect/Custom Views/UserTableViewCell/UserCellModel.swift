@@ -10,15 +10,17 @@ import Foundation
 import RxSwift
 
 class UserCellModel {
+    let user: LocalUser
     let uid: String
     let name: String
     let username: String
     let isOnline: PublishSubject<Bool> = PublishSubject()
-    let profileImageData: PublishSubject<Data> = PublishSubject()
+    let profileImageData = ReplaySubject<Data>.create(bufferSize: 1)
 
     let disposeBag = DisposeBag()
 
     init(user: LocalUser) {
+        self.user = user
         uid = user.uid
         name = user.name
         username = user.email
@@ -36,11 +38,13 @@ class UserCellModel {
             })
             .disposed(by: disposeBag)
 
-        NetworkRequests.profilePictureNetworkRequest(withUrl: url) { data in
-            DispatchQueue.main.async {
-                #warning("need to fix this to cancel when cell is removed")
+        NetworkRequests.profilePictureNetworkRequest(withUrl: url) { result in
+            switch result {
+            case .success(let data):
                 self.profileImageData.onNext(data)
                 self.profileImageData.onCompleted()
+            case .failure(let error):
+                print(error.localizedDescription)
             }
         }
     }

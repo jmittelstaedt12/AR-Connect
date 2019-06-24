@@ -27,11 +27,24 @@ final class MainViewController: UIViewController, ControllerProtocol {
     let bag = DisposeBag()
 
     private let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
-    let mapViewController = MapViewController()
-    var searchViewController: SearchTableViewController? = SearchTableViewController.create(with: SearchTableViewModel()) as? SearchTableViewController
+    let mapViewController: MapViewController
+    var searchViewController: SearchTableViewController? = SearchTableViewController(viewModel: SearchTableViewModel())
     var arSessionVC: ARSessionViewController?
 
     var buttonCollection: CollapsibleCollectionView?
+
+    let profileBarButton: UIButton = {
+        let rightButton = UIButton(type: .system)
+        rightButton.backgroundColor = .lightGray
+        rightButton.setBackgroundImage(UIImage(named: "person-placeholder"), for: .normal)
+        rightButton.addTarget(self, action: #selector(didTapProfileImage), for: .touchUpInside)
+        rightButton.translatesAutoresizingMaskIntoConstraints = false
+        rightButton.dimensionAnchors(height: 34, width: 34)
+        rightButton.layer.cornerRadius = 17
+        rightButton.layer.masksToBounds = true
+        rightButton.subviews.first?.contentMode = .scaleAspectFill
+        return rightButton
+    }()
 
     var viewARSessionButton: ARSessionButton? {
         willSet {
@@ -83,27 +96,31 @@ final class MainViewController: UIViewController, ControllerProtocol {
 
     func configure(with viewModel: ViewModelType) {
 
+        viewModel.output.profileImageDataObservable
+            .subscribe(onNext: { [weak self] data in
+                DispatchQueue.main.async {
+                    self?.profileBarButton.setBackgroundImage(UIImage(data: data), for: .normal)
+                }
+            })
+            .disposed(by: disposeBag)
+
         viewModel.output.authenticatedUserObservable
-            .subscribe(onNext: { isAuthenticated in
-                if !isAuthenticated {
+            .subscribe(onNext: { [weak self] result in
+                switch result {
+                case .success(_):
+                    return
+                case .failure(let error):
+                    self?.createAndDisplayAlert(withTitle: error.title, body: error.errorDescription)
                     AppDelegate.shared.rootViewController.switchToLogout()
                 }
             })
             .disposed(by: disposeBag)
 
-        viewModel.output.userImageDataObservable
-            .subscribe(onNext: { data in
-                #warning("display image")
-            })
-            .disposed(by: disposeBag)
-
         viewModel.output.connectRequestObservable
-            .subscribe(onNext: { [weak self] connectRequest in
-                guard let self = self else { return }
-                let connectRequestVC = ConnectRequestViewController(requestingUser: connectRequest.requestingUser,
-                                                                    meetupLocation: connectRequest.meetupLocation,
-                                                                    currentLocation: self.mapViewController.currentLocation)
-                self.present(connectRequestVC, animated: true, completion: nil)
+            .subscribe(onNext: { [weak self] connectRequestViewModel in
+                DispatchQueue.main.async {
+                    self?.present(ConnectRequestViewController(viewModel: connectRequestViewModel), animated: true)
+                }
             })
             .disposed(by: disposeBag)
 
@@ -114,39 +131,83 @@ final class MainViewController: UIViewController, ControllerProtocol {
             .disposed(by: disposeBag)
 
         viewModel.output.sessionStartObservable
-            .subscribe(onNext: { [weak self] errorMessage in
-                guard let message = errorMessage else {
+            .subscribe(onNext: { [weak self] result in
+                switch result {
+                case .success(_):
                     self?.handleSessionStart()
-                    return
+                case .failure(let error):
+                    self?.createAndDisplayAlert(withTitle: error.title, body: error.errorDescription)
+                    if let searchVC = self?.searchViewController {
+                        searchVC.expansionState = .compressed
+                        self?.setChildSearchVCState(toState: searchVC.expansionState)
+                        self?.animateTopConstraint()
+                    }
                 }
-                self?.createAndDisplayAlert(withTitle: "Call Ending", body: message)
-                if let searchVC = self?.searchViewController {
-                    searchVC.expansionState = .compressed
-                    self?.setChildSearchVCState(toState: searchVC.expansionState)
-                    self?.animateTopConstraint()
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.output.didSendConnectRequestObservable
+            .subscribe(onNext: { [weak self] result in
+                switch result {
+                case .success(let connectPendingViewModel):
+                    DispatchQueue.main.async {
+                        self?.present(ConnectPendingViewController(viewModel: connectPendingViewModel), animated: true)
+                    }
+                case .failure(let error):
+                    self?.createAndDisplayAlert(withTitle: error.title, body: error.errorDescription)
                 }
+            })
+            .disposed(by: disposeBag)
+
+        mapViewController.viewModel.output.updatedCurrentLocationObservable
+            .subscribe(onNext: { [weak self] location in
+                self?.viewModel.currentLocation = location
             })
             .disposed(by: disposeBag)
 
     }
 
-    static func create(with viewModel: ViewModelType) -> UIViewController {
-        let controller = MainViewController()
-        controller.viewModel = viewModel
-        controller.configure(with: controller.viewModel)
-        return controller
+    init(viewModel: ViewModelType) {
+        self.viewModel = viewModel
+        let mapVM = MapViewModel(uid: viewModel.uid)
+        mapViewController = MapViewController(viewModel: mapVM)
+        super.init(nibName: nil, bundle: nil)
+        configure(with: viewModel)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let logoutButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
-        navigationItem.setLeftBarButton(logoutButton, animated: true)
-
+        setupNavigationBarItems()
         addSubviewsAndChildVCs()
         setupSubviewsAndChildVCs()
         searchViewController?.delegate = self
         hideKeyboardWhenTappedAround()
     }
+
+    private func setupNavigationBarItems() {
+        let titleView = UILabel()
+        titleView.text = "AR Connect"
+        titleView.textColor = .white
+        navigationItem.titleView = titleView
+
+        let leftButton = UIBarButtonItem(title: "Log Out", style: .plain, target: self, action: #selector(logout))
+        navigationItem.leftBarButtonItem = leftButton
+
+        navigationItem.rightBarButtonItems = [UIBarButtonItem(customView: profileBarButton)]
+    }
+
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        let connectedUser = LocalUser(name: "Kevin", email: "Kevin@gmail.com", uid: "n13XNUAEb1bIcZF57fqVE9BHEzo2", isOnline: true)
+//        let meetupLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: 40.686991, longitude: -73.931020))
+//        NotificationCenter.default.post(name: self.connectNotificationName, object: nil, userInfo: ["user": connectedUser,
+//                                                                            "meetupLocation": meetupLocation,
+//                                                                            "didConnect": true])
+//    }
 
     /// Add all subviews and child view controllers to main view controller
     private func addSubviewsAndChildVCs() {
@@ -190,21 +251,25 @@ final class MainViewController: UIViewController, ControllerProtocol {
         }
     }
 
-    private func requestToConnectWithUser(_ user: LocalUser, atCoordinate coordinate: CLLocationCoordinate2D) {
-        FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
-            guard let self = self else { return }
-            if let err = error {
-                self.createAndDisplayAlert(withTitle: "Error", body: err.localizedDescription)
-                return
-            }
-            FirebaseClient.createCallUserObservable(forUid: user.uid!, atCoordinateTuple: (latitude: coordinate.latitude, longitude: coordinate.longitude)).subscribe(onNext: { [weak self] completed in
-                guard completed else { return }
-                let connectPendingVC = ConnectPendingViewController(requestingUser: user, meetupLocation: CLLocation(coordinate: coordinate))
-                self?.present(connectPendingVC, animated: true, completion: nil)
-            }, onError: { [weak self] error in
-                self?.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
-            }).disposed(by: self.bag)
-        }
+//    private func requestToConnectWithUser(_ user: LocalUser, atCoordinate coordinate: CLLocationCoordinate2D) {
+//        FirebaseClient.usersRef.child(Auth.auth().currentUser!.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
+//            guard let self = self else { return }
+//            if let err = error {
+//                self.createAndDisplayAlert(withTitle: "Error", body: err.localizedDescription)
+//                return
+//            }
+//            FirebaseClient.createCallUserObservable(forUid: user.uid!, atCoordinateTuple: (latitude: coordinate.latitude, longitude: coordinate.longitude)).subscribe(onNext: { [weak self] completed in
+//                guard completed else { return }
+//                let connectPendingVC = ConnectPendingViewController(requestingUser: user, meetupLocation: CLLocation(coordinate: coordinate))
+//                self?.present(connectPendingVC, animated: true, completion: nil)
+//            }, onError: { [weak self] error in
+//                self?.createAndDisplayAlert(withTitle: "Connection Error", body: error.localizedDescription)
+//            }).disposed(by: self.bag)
+//        }
+//    }
+
+    @objc private func didTapProfileImage() {
+
     }
 
     /// When connect to user, transition into AR Session state
@@ -260,7 +325,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         viewARSessionButton = nil
         endConnectSessionButton = nil
         buttonCollection = nil
-        searchViewController = SearchTableViewController.create(with: SearchTableViewModel()) as? SearchTableViewController
+        searchViewController = SearchTableViewController(viewModel: SearchTableViewModel())
         searchViewController!.delegate = self
         addChild(searchViewController!)
         view.addSubview(searchViewController!.view)
@@ -296,13 +361,9 @@ final class MainViewController: UIViewController, ControllerProtocol {
                                                   worldAlignment: .gravityAndHeading)
         }
 
-        mapViewController.delegate = arSessionVC
-        mapViewController.locationService.locationManager.stopUpdatingHeading()
+        mapViewController.viewModel.delegate = arSessionVC
+//        mapViewController.locationService.locationManager.stopUpdatingHeading()
         present(arSessionVC!, animated: true, completion: nil)
-    }
-
-    deinit {
-        mapViewController.locationService.locationManager.stopUpdatingLocation()
     }
 
 }
@@ -389,12 +450,13 @@ extension MainViewController: SearchTableViewControllerDelegate {
     }
 
     /// Make card for tapped user visible in view
-    func setUserDetailCardVisible(withUser user: LocalUser) {
+    func setUserDetailCardVisible(withModel userModel: UserCellModel) {
         cardDetailViewController = CardDetailViewController()
         addChild(cardDetailViewController!)
         view.addSubview(cardDetailViewController!.view)
         cardDetailViewController!.didMove(toParent: self)
-        cardDetailViewController!.userForCell = user
+        cardDetailViewController!.cellModel = userModel
+//        cardDetailViewController!.userForCe
         cardDetailViewController!.delegate = self
         let scale = min(view.bounds.height/896.0, view.bounds.width/414.0)
         cardDetailViewController!.view.transform = CGAffineTransform.identity.scaledBy(x: scale, y: scale)
@@ -403,11 +465,10 @@ extension MainViewController: SearchTableViewControllerDelegate {
 
         view.updateConstraintsIfNeeded()
     }
-
-    func updateDetailCard(withUser user: LocalUser) {
-        guard let cardDetailVC = cardDetailViewController, let cellUser = cardDetailVC.userForCell, cellUser != user else { return }
-        cardDetailVC.userForCell = user
-    }
+//    func updateDetailCard(withUser user: LocalUser) {
+//        guard let cardDetailVC = cardDetailViewController, let cellUser = cardDetailVC.userForCell, cellUser != user else { return }
+//        cardDetailVC.userForCell = user
+//    }
 }
 
 extension MainViewController: CardDetailDelegate {
@@ -419,7 +480,7 @@ extension MainViewController: CardDetailDelegate {
         cardDetailViewController = nil
     }
 
-    func willSetMeetupLocation(withUser user: LocalUser) {
+    func willSetMeetupLocation(withCellModel cellModel: UserCellModel) {
         searchViewController?.willMove(toParent: nil)
         searchViewController?.view.removeFromSuperview()
         searchViewController?.removeFromParent()
@@ -428,12 +489,15 @@ extension MainViewController: CardDetailDelegate {
 
         mapViewController.willSetLocationMarker()
 
-        mapViewController.meetupLocationObservable?.subscribe(onNext: { [weak self] coordinate in
-            guard let self = self else { return }
-            self.navigationController?.navigationBar.isHidden = false
-            self.handleSessionEnd()
-            self.requestToConnectWithUser(user, atCoordinate: coordinate)
-        }).disposed(by: bag)
+        mapViewController.meetupLocationObservable?
+            .subscribe(onNext: { [weak self] location in
+                guard let self = self else { return }
+                self.navigationController?.navigationBar.isHidden = false
+                self.handleSessionEnd()
+                self.viewModel.requestToConnect(cellModel: cellModel, location: location)
+//                self.requestToConnectWithUser(user, atCoordinate: coordinate)
+            })
+            .disposed(by: bag)
 
 //
 //        mapViewController.meetupLocationObservable?.subscribe(onNext: { [unowned self] coordinate in

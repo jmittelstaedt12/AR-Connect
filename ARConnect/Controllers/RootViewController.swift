@@ -34,7 +34,7 @@ final class RootViewController: UIViewController {
     // Displays the login screen
     // If there was no user signed in on last app close, this will display the login screen
     func showLoginScreen() {
-        let new = UINavigationController(rootViewController: LoginViewController.create(with: LoginViewModel()))
+        let new = UINavigationController(rootViewController: LoginViewController(viewModel: LoginViewModel()))
         customizeNavigationBar(new.navigationBar)
         addChild(new)
         new.view.frame = view.bounds
@@ -63,14 +63,14 @@ final class RootViewController: UIViewController {
     // If a user signs in, display the main map screen
     func switchToMainScreen() {
         //        let mainScreen = UINavigationController(rootViewController: TestingViewController())
-        let mainScreen = UINavigationController(rootViewController: MainViewController.create(with: MainViewModel()))
+        let mainScreen = UINavigationController(rootViewController: MainViewController(viewModel: MainViewModel()))
         customizeNavigationBar(mainScreen.navigationBar)
         animateFadeTransition(to: mainScreen)
     }
 
     // If the user signs out, switch to the login screen
     func switchToLogout() {
-        let logoutScreen = UINavigationController(rootViewController: LoginViewController.create(with: LoginViewModel()))
+        let logoutScreen = UINavigationController(rootViewController: LoginViewController(viewModel: LoginViewModel()))
         customizeNavigationBar(logoutScreen.navigationBar)
         animateDismissTransition(to: logoutScreen)
     }
