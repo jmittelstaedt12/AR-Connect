@@ -1,6 +1,6 @@
 AR-Connect
 ======
-
+![](https://i.imgur.com/evlKiCn.png)
 AR-Connect is an iOS application for helping users find each other using augmented reality. Using Firebase, RxSwift, and ARKit, AR Connect provides a simple and easy way to set a meetup location with a friend and find their way there.
 
 ## Motivation
