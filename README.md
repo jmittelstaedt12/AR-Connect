@@ -27,7 +27,7 @@ Users can:
 ## Features
 
 * Backend communication using Firebase's Realtime Database
-* Reactive design pattern using Observables in RxSwift
+* Reactive design pattern using MVVM and RxSwift
 * Geographic coordinate to ARKit Node conversions
 
 ## Frameworks/Technologies
