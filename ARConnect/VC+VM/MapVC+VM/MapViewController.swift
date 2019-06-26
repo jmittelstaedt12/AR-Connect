@@ -79,11 +79,12 @@ final class MapViewController: UIViewController, MKMapViewDelegate, ControllerPr
         viewModel.output.setMapForConnectionObservable
             .subscribe(onNext: { [weak self] data in
                 guard let self = self, data != nil else { return }
+                self.pathOverlay = data!.userLine
                 self.draw(polyline: data!.userLine, color: ColorConstants.primaryColor)
                 if let line = data!.connectedUserLine {
                     self.draw(polyline: line, color: ColorConstants.secondaryColor)
                 }
-                self.map.setVisibleMapRect(data!.visibleMapRect, animated: true)
+                self.map.setVisibleMapRect(data!.visibleMapRect, edgePadding: UIEdgeInsets(top: 80, left: 80, bottom: 80, right: 80), animated: true)
             })
             .disposed(by: disposeBag)
 
@@ -92,12 +93,19 @@ final class MapViewController: UIViewController, MKMapViewDelegate, ControllerPr
                 self?.currentLocation = location
             })
             .disposed(by: disposeBag)
+
+        viewModel.output.setTripCoordinatesObservable
+            .subscribe(onNext: { [weak self] coordinates in
+                self?.tripCoordinates = coordinates
+            })
+            .disposed(by: disposeBag)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = map
-        map.compassButton.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor,
+        map.compassButton.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor,
+                                      leading: view.safeAreaLayoutGuide.leadingAnchor,
                                       padding: UIEdgeInsets(top: 12, left: 12, bottom: 0, right: 0))
         map.delegate = self
         meetupLocationObservable = meetupLocationVariable.asObservable().ignoreNil().take(1)
@@ -167,8 +175,10 @@ final class MapViewController: UIViewController, MKMapViewDelegate, ControllerPr
         locationSetterIcon?.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
         locationSetterIcon?.dimensionAnchors(height: 25, width: 25)
 
-        setMeetupLocationButton?.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor,
-                                             trailing: view.safeAreaLayoutGuide.trailingAnchor, padding: UIEdgeInsets(top: 0, left: 32, bottom: -12, right: -32))
+        setMeetupLocationButton?.edgeAnchors(leading: view.safeAreaLayoutGuide.leadingAnchor,
+                                             bottom: view.safeAreaLayoutGuide.bottomAnchor,
+                                             trailing: view.safeAreaLayoutGuide.trailingAnchor,
+                                             padding: UIEdgeInsets(top: 0, left: 32, bottom: -12, right: -32))
         setMeetupLocationButton?.dimensionAnchors(height: 50)
     }
 
@@ -181,9 +191,5 @@ final class MapViewController: UIViewController, MKMapViewDelegate, ControllerPr
 
         meetupLocationVariable.accept(CLLocation(coordinate: map.centerCoordinate))
         meetupLocationVariable.accept(nil)
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
     }
 }

@@ -28,6 +28,16 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1998D25D22C3D0F20040F990"
+               BuildableName = "ARConnectTests.xctest"
+               BlueprintName = "ARConnectTests"
+               ReferencedContainer = "container:ARConnect.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
@@ -62,6 +72,21 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
+         <AdditionalOption
+            key = "MallocStackLogging"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
+            key = "PrefersMallocStackLoggingLite"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
+            key = "MallocScribble"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
       </AdditionalOptions>
    </LaunchAction>
    <ProfileAction

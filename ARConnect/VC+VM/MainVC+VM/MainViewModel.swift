@@ -191,7 +191,10 @@ class MainViewModel: ViewModelProtocol {
                 self.didSendConnectRequestSubject.onNext(.failure(.custom(title: "Networking Error", errorDescription: err.localizedDescription)))
                 return
             }
-            FirebaseClient.createCallUserObservable(forUid: cellModel.uid, atCoordinateTuple: (latitude: location.coordinate.latitude, longitude: location.coordinate.longitude))
+            FirebaseClient.createCallUserObservable(forUid: cellModel.uid,
+                                                    atCoordinateTuple: (latitude: location.coordinate.latitude,
+                                                                        longitude: location.coordinate.longitude))
+
                 .subscribe(onNext: { [weak self] completed in
                     guard let self = self else { return }
                     guard let currentUser = self.currentUser, let currentLocation = self.currentLocation else {

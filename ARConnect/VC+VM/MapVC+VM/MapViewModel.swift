@@ -24,8 +24,12 @@ class MapViewModel: NSObject, ViewModelProtocol {
             locationManager.stopUpdatingHeading()
         }
     }
-    
-    var tripCoordinates: [CLLocationCoordinate2D] = []
+
+    var tripCoordinates: [CLLocationCoordinate2D] = [] {
+        didSet {
+            setTripCoordinatesSubject.onNext(tripCoordinates)
+        }
+    }
     private var pathOverlay: MKPolyline?
     var headingAccuracy = [Double](repeating: 360.0, count: 4)
     var locationAccuracy = [Double](repeating: 100.0, count: 4)
@@ -48,6 +52,7 @@ class MapViewModel: NSObject, ViewModelProtocol {
         let setCurrentLocationObservable: Observable<CLLocationCoordinate2D>
         let setMapForConnectionObservable: Observable<MapConnectionData>
         let updatedCurrentLocationObservable: Observable<CLLocation>
+        let setTripCoordinatesObservable: Observable<[CLLocationCoordinate2D]>
     }
 
     let input: Input
@@ -56,13 +61,15 @@ class MapViewModel: NSObject, ViewModelProtocol {
     private let setCurrentLocationSubject = PublishSubject<CLLocationCoordinate2D>()
     private let setMapForConnectionSubject = PublishSubject<MapConnectionData>()
     private let updatedCurrentLocationSubject = PublishSubject<CLLocation>()
+    private let setTripCoordinatesSubject = PublishSubject<[CLLocationCoordinate2D]>()
 
     init(uid: String) {
         self.uid = uid
         input = Input()
-        output = Output(setCurrentLocationObservable: setCurrentLocationSubject.asObserver(),
-                        setMapForConnectionObservable: setMapForConnectionSubject.asObserver(),
-                        updatedCurrentLocationObservable: updatedCurrentLocationSubject.asObserver())
+        output = Output(setCurrentLocationObservable: setCurrentLocationSubject,
+                        setMapForConnectionObservable: setMapForConnectionSubject,
+                        updatedCurrentLocationObservable: updatedCurrentLocationSubject,
+                        setTripCoordinatesObservable: setTripCoordinatesSubject)
         super.init()
         setupLocationModel()
         NotificationCenter.default.addObserver(self,
@@ -118,6 +125,7 @@ class MapViewModel: NSObject, ViewModelProtocol {
         var connectedUserLine: MKPolyline?
 
         group.enter()
+        group.enter()
         NavigationClient.requestLineAndSteps(from: currentLocation.coordinate, to: meetupLocation.coordinate) { result in
             defer {
                 group.leave()
@@ -130,7 +138,6 @@ class MapViewModel: NSObject, ViewModelProtocol {
             }
         }
 
-        group.enter()
         FirebaseClient.fetchCoordinates(uid: connectedUid) { (latitude, longitude) -> Void in
             guard let lat = latitude, let lon = longitude else {
                 group.leave()
@@ -173,10 +180,6 @@ class MapViewModel: NSObject, ViewModelProtocol {
             } else {
                 self.setMapForConnectionSubject.onNext((userLine: userPath, connectedUserLine: nil, visibleMapRect: userPath.boundingMapRect))
             }
-            //            connectedUserLine = MKPolyline(coordinates:
-            //                                            UnsafeMutablePointer(mutating: self.tripCoordinates.map { CLLocationCoordinate2D(latitude: $0.latitude + 0.01,
-            //                                                                                                                             longitude: $0.longitude + 0.01) }),
-            //                                                                 count: self.tripCoordinates.count)
         }
     }
 

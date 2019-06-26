@@ -21,13 +21,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ARConnect/Services/FirebaseClient.swift"
-            timestampString = "583096376.318746"
+            filePath = "ARConnect/VC+VM/MapVC+VM/MapViewModel.swift"
+            timestampString = "583164646.417176"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "355"
-            endingLineNumber = "355"
-            landmarkName = "createUserAvailableObservable(forUid:)"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
+            landmarkName = "setupMapForConnection(notification:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -37,13 +37,29 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ARConnect/Services/FirebaseClient.swift"
-            timestampString = "583096376.32151"
+            filePath = "ARConnect/VC+VM/MapVC+VM/MapViewModel.swift"
+            timestampString = "583164646.418099"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "367"
-            endingLineNumber = "367"
-            landmarkName = "createCallUserObservable(forUid:atCoordinateTuple:)"
+            startingLineNumber = "149"
+            endingLineNumber = "149"
+            landmarkName = "setupMapForConnection(notification:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ARConnect/VC+VM/MapVC+VM/MapViewModel.swift"
+            timestampString = "583164646.418256"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "161"
+            endingLineNumber = "161"
+            landmarkName = "setupMapForConnection(notification:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

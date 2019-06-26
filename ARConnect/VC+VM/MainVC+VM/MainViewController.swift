@@ -75,7 +75,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         }
     }
 
-    let compressedHeight: CGFloat = 100
+    let compressedHeight: CGFloat = 50
 
     // MARK: Methods
     private func setChildSearchVCState(toState state: SearchTableViewController.ExpansionState) {
@@ -84,7 +84,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
         }
         switch state {
         case .compressed:
-            topConstraint.constant = -100
+            topConstraint.constant = -50
             searchViewControllerPreviousYCoordinate = view.bounds.height - compressedHeight
         case .expanded:
             topConstraint.constant = -400
@@ -325,17 +325,14 @@ final class MainViewController: UIViewController, ControllerProtocol {
             createAndDisplayAlert(withTitle: "Error", body: "Current location is not available")
             return
         }
-        if let vc = arSessionVC {
-            present(vc, animated: true, completion: nil)
-            return
-        }
-        guard !mapViewController.tripCoordinates.isEmpty else {
-            createAndDisplayAlert(withTitle: "Error", body: "Route has no steps to display")
+        if let arSessionVC = arSessionVC {
+            present(arSessionVC, animated: true, completion: nil)
             return
         }
         switch mapViewController.shouldUseAlignment {
         case .gravity:
-            createAndDisplayAlert(withTitle: "Poor Heading Accuracy", body: "Tap left and right side of the screen to adjust direction of True North")
+            createAndDisplayAlert(withTitle: "Poor Heading Accuracy",
+                                  body: "Tap left and right side of the screen to adjust direction of True North")
             arSessionVC = ARSessionViewController(startLocation: location,
                                                   tripLocations: mapViewController.tripCoordinates.map { CLLocation(coordinate: $0) },
                                                   worldAlignment: .gravity)
@@ -346,7 +343,6 @@ final class MainViewController: UIViewController, ControllerProtocol {
         }
 
         mapViewController.viewModel.delegate = arSessionVC
-//        mapViewController.locationService.locationManager.stopUpdatingHeading()
         present(arSessionVC!, animated: true, completion: nil)
     }
 
@@ -362,7 +358,7 @@ extension MainViewController: SearchTableViewControllerDelegate {
         }
         let constraintOffset = previousYCoordinate - view.bounds.height
         let newTopConstraint = previousYCoordinate + translationPoint.y
-        let compressedYCoordinate = view.bounds.height - 100
+        let compressedYCoordinate = view.bounds.height - 50
         let expandedYCoordinate = view.bounds.height - 400
         if newTopConstraint >= expandedYCoordinate && newTopConstraint <= compressedYCoordinate + 40 {
             topConstraint.constant = constraintOffset + translationPoint.y
@@ -378,7 +374,7 @@ extension MainViewController: SearchTableViewControllerDelegate {
         guard let searchVC = searchViewController, let previousYCoordinate = searchViewControllerPreviousYCoordinate else { return }
         expandedHeight = 400
         let newTopConstraint = previousYCoordinate + translationPoint.y
-        let compressedYCoordinate = view.frame.height - 100
+        let compressedYCoordinate = view.frame.height - 50
         let expandedYCoordinate = view.frame.height - 400
         let velocityThreshold: CGFloat = 100
         if abs(velocity.y) < velocityThreshold {
@@ -444,10 +440,14 @@ extension MainViewController: SearchTableViewControllerDelegate {
         cardDetailViewController!.delegate = self
         let scale = min(view.bounds.height/896.0, view.bounds.width/414.0)
         cardDetailViewController!.view.transform = CGAffineTransform.identity.scaledBy(x: scale, y: scale)
-        cardDetailViewController!.view.dimensionAnchors(height: cardDetailViewController!.view.bounds.height, width: cardDetailViewController!.view.bounds.width)
+        cardDetailViewController!.view.dimensionAnchors(height: cardDetailViewController!.view.bounds.height,
+                                                        width: cardDetailViewController!.view.bounds.width)
         cardDetailViewController!.view.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
-
+        cardDetailViewController!.view.alpha = 0
         view.updateConstraintsIfNeeded()
+        UIView.animate(withDuration: 0.1) {
+            self.cardDetailViewController!.view.alpha = 1
+        }
     }
 }
 

@@ -39,6 +39,7 @@
 		199383C42195EE58001BE7FD /* MessageViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 199383C22195EE58001BE7FD /* MessageViewController.xib */; };
 		19948E10216FB7E8008C39DA /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E0F216FB7E8008C39DA /* RootViewController.swift */; };
 		19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19948E11216FB7FB008C39DA /* SplashViewController.swift */; };
+		1998D26122C3D0F20040F990 /* ARConnectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1998D26022C3D0F20040F990 /* ARConnectTests.swift */; };
 		19997E8721E4F6970023C3EC /* ConnectPendingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8621E4F6970023C3EC /* ConnectPendingViewController.swift */; };
 		19997E8921E500560023C3EC /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8821E500560023C3EC /* ConnectViewController.swift */; };
 		19997E8E21E65F4A0023C3EC /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8C21E65F4A0023C3EC /* UserCell.swift */; };
@@ -66,6 +67,16 @@
 		19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FA6924219D3D1F00FF754D /* ConnectRequestViewController.swift */; };
 		C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20AE0DD63A20E16C23709C39 /* Pods_ARConnect.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1998D26322C3D0F20040F990 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19913A02216CED7500174187 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 19913A09216CED7500174187;
+			remoteInfo = ARConnect;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		1912576B22B3469100200DA5 /* SearchTableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewModel.swift; sourceTree = "<group>"; };
@@ -102,6 +113,9 @@
 		199383C22195EE58001BE7FD /* MessageViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MessageViewController.xib; sourceTree = "<group>"; };
 		19948E0F216FB7E8008C39DA /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		19948E11216FB7FB008C39DA /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
+		1998D25E22C3D0F20040F990 /* ARConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ARConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1998D26022C3D0F20040F990 /* ARConnectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARConnectTests.swift; sourceTree = "<group>"; };
+		1998D26222C3D0F20040F990 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		19997E8621E4F6970023C3EC /* ConnectPendingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectPendingViewController.swift; sourceTree = "<group>"; };
 		19997E8821E500560023C3EC /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
 		19997E8C21E65F4A0023C3EC /* UserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
@@ -138,6 +152,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3DA7BDC40A2DCB9B807D870 /* Pods_ARConnect.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1998D25B22C3D0F20040F990 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,6 +236,7 @@
 			isa = PBXGroup;
 			children = (
 				19913A0C216CED7500174187 /* ARConnect */,
+				1998D25F22C3D0F20040F990 /* ARConnectTests */,
 				19913A0B216CED7500174187 /* Products */,
 				BB929971DADCCBDD956900DE /* Pods */,
 				E03C9D2E721D42771969AC8E /* Frameworks */,
@@ -225,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				19913A0A216CED7500174187 /* ARConnect.app */,
+				1998D25E22C3D0F20040F990 /* ARConnectTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -290,6 +313,15 @@
 				199383C22195EE58001BE7FD /* MessageViewController.xib */,
 			);
 			path = MessageViewController;
+			sourceTree = "<group>";
+		};
+		1998D25F22C3D0F20040F990 /* ARConnectTests */ = {
+			isa = PBXGroup;
+			children = (
+				1998D26022C3D0F20040F990 /* ARConnectTests.swift */,
+				1998D26222C3D0F20040F990 /* Info.plist */,
+			);
+			path = ARConnectTests;
 			sourceTree = "<group>";
 		};
 		19997E7E21E404FD0023C3EC /* Inherited Controllers */ = {
@@ -419,19 +451,41 @@
 			productReference = 19913A0A216CED7500174187 /* ARConnect.app */;
 			productType = "com.apple.product-type.application";
 		};
+		1998D25D22C3D0F20040F990 /* ARConnectTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1998D26722C3D0F20040F990 /* Build configuration list for PBXNativeTarget "ARConnectTests" */;
+			buildPhases = (
+				1998D25A22C3D0F20040F990 /* Sources */,
+				1998D25B22C3D0F20040F990 /* Frameworks */,
+				1998D25C22C3D0F20040F990 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1998D26422C3D0F20040F990 /* PBXTargetDependency */,
+			);
+			name = ARConnectTests;
+			productName = ARConnectTests;
+			productReference = 1998D25E22C3D0F20040F990 /* ARConnectTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		19913A02216CED7500174187 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1000;
+				LastSwiftUpdateCheck = 1020;
 				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = "Jacob Mittelstaedt";
 				TargetAttributes = {
 					19913A09216CED7500174187 = {
 						CreatedOnToolsVersion = 10.0;
 						LastSwiftMigration = 1020;
+					};
+					1998D25D22C3D0F20040F990 = {
+						CreatedOnToolsVersion = 10.2.1;
+						TestTargetID = 19913A09216CED7500174187;
 					};
 				};
 			};
@@ -449,6 +503,7 @@
 			projectRoot = "";
 			targets = (
 				19913A09216CED7500174187 /* ARConnect */,
+				1998D25D22C3D0F20040F990 /* ARConnectTests */,
 			);
 		};
 /* End PBXProject section */
@@ -466,6 +521,13 @@
 				19913A17216CED7800174187 /* Assets.xcassets in Resources */,
 				19913A15216CED7600174187 /* Main.storyboard in Resources */,
 				19DD8D4C219486E200C01EDC /* CardDetailViewController.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1998D25C22C3D0F20040F990 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -604,7 +666,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1998D25A22C3D0F20040F990 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1998D26122C3D0F20040F990 /* ARConnectTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1998D26422C3D0F20040F990 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 19913A09216CED7500174187 /* ARConnect */;
+			targetProxy = 1998D26322C3D0F20040F990 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		19913A13216CED7600174187 /* Main.storyboard */ = {
@@ -784,6 +862,48 @@
 			};
 			name = Release;
 		};
+		1998D26522C3D0F20040F990 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = FB653T9YQ9;
+				INFOPLIST_FILE = ARConnectTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = jacobm.ARConnectTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ARConnect.app/ARConnect";
+			};
+			name = Debug;
+		};
+		1998D26622C3D0F20040F990 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = FB653T9YQ9;
+				INFOPLIST_FILE = ARConnectTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = jacobm.ARConnectTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ARConnect.app/ARConnect";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -801,6 +921,15 @@
 			buildConfigurations = (
 				19913A1F216CED7800174187 /* Debug */,
 				19913A20216CED7800174187 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1998D26722C3D0F20040F990 /* Build configuration list for PBXNativeTarget "ARConnectTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1998D26522C3D0F20040F990 /* Debug */,
+				1998D26622C3D0F20040F990 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

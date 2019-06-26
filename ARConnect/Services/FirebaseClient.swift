@@ -9,6 +9,7 @@
 import Firebase
 import Foundation
 import RxSwift
+import MapKit
 
 fileprivate struct FIRObservables {
     var usersObservable: Observable<[LocalUser]>?
@@ -193,8 +194,8 @@ struct FirebaseClient {
             .map { snapshot in
                 let dictionary = snapshot.value as! [String: AnyObject]
                 var user = LocalUser()
-                user.name = dictionary["name"] as? String
-                user.email = dictionary["email"] as? String
+                user.name = dictionary["name"] as! String
+                user.email = dictionary["email"] as! String
                 user.uid = uid
                 if let urlString = dictionary["profileImageUrl"] as? String, !urlString.isEmpty, let url = URL(string: urlString) { user.profileUrl = url }
                 return user
@@ -221,9 +222,9 @@ struct FirebaseClient {
                     .map { $0 as! [String: AnyObject] }
                     .map { userDictionary -> LocalUser in
                         var user = LocalUser()
-                        user.name = userDictionary["name"] as? String
-                        user.email = userDictionary["email"] as? String
-                        user.isOnline = userDictionary["isOnline"] as? Bool
+                        user.name = userDictionary["name"] as! String
+                        user.email = userDictionary["email"] as! String
+                        user.isOnline = userDictionary["isOnline"] as! Bool
                         if let urlString = userDictionary["profileImageUrl"] as? String, !urlString.isEmpty, let url = URL(string: urlString) { user.profileUrl = url }
                         return user
                 }
@@ -264,9 +265,11 @@ struct FirebaseClient {
             requestingUserRef.observeSingleEvent(of: .value, with: { snapshot in
                 if let dictionary = snapshot.value as? [String: AnyObject] {
                     requestingUser.uid = uid
-                    requestingUser.name = dictionary["name"] as? String
-                    requestingUser.email = dictionary["email"] as? String
-                    if let urlString = dictionary["profileImageUrl"] as? String, !urlString.isEmpty, let url = URL(string: urlString) { requestingUser.profileUrl = url }
+                    requestingUser.name = dictionary["name"] as! String
+                    requestingUser.email = dictionary["email"] as! String
+                    if let urlString = dictionary["profileImageUrl"] as? String, !urlString.isEmpty, let url = URL(string: urlString) {
+                        requestingUser.profileUrl = url
+                    }
                 }
                 group.leave()
             }, withCancel: { error in

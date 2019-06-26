@@ -63,7 +63,8 @@ final class ConnectRequestViewModel: ViewModelProtocol {
         let group = DispatchGroup()
 
         // Work item if firebase updates succeed
-        let workItem = DispatchWorkItem {
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
             FirebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser").updateChildValues(["uid": "",
                                                                                           "latitude": 0,
                                                                                           "longitude": 0])
@@ -76,13 +77,13 @@ final class ConnectRequestViewModel: ViewModelProtocol {
         }
 
         // Completion handler for firebase requests
-        let updateCompletionHandler: (Error?, DatabaseReference) -> Void = {(error, _) in
+        let updateCompletionHandler: (Error?, DatabaseReference) -> Void = { [weak self] (error, _) in
             defer {
                 group.leave()
             }
             if let err = error {
                 workItem.cancel()
-                self.processedResponseSubject.onNext(.failure(.custom(title: "Network Error", errorDescription: err.localizedDescription)))
+                self?.processedResponseSubject.onNext(.failure(.custom(title: "Network Error", errorDescription: err.localizedDescription)))
                 return
             }
         }

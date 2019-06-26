@@ -93,9 +93,11 @@ final class RootViewController: UIViewController {
     private func animateDismissTransition(to new: UIViewController, completion: (() -> Void)? = nil) {
         current.willMove(toParent: nil)
         addChild(new)
-        transition(from: current, to: new, duration: 0.3, options: [], animations: {
-                new.view.frame = self.view.bounds
-            }, completion: { _ in
+        transition(from: current, to: new, duration: 0.3,
+                   options: [],
+                   animations: {
+                        new.view.frame = self.view.bounds
+                   }, completion: { _ in
             self.current.removeFromParent()
             new.didMove(toParent: self)
             self.current = new

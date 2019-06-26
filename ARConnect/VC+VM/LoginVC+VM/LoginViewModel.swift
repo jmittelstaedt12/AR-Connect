@@ -46,8 +46,8 @@ class LoginViewModel: ViewModelProtocol {
                       password: passwordSubject.asObserver(),
                       signInDidTap: signInDidTapSubject.asObserver())
 
-        output = Output(loginResultObservable: loginResultSubject.asObserver(),
-                        errorsObservable: errorsSubject.asObserver())
+        output = Output(loginResultObservable: loginResultSubject.asObservable(),
+                        errorsObservable: errorsSubject.asObservable())
 
         setNetworkObservers()
     }

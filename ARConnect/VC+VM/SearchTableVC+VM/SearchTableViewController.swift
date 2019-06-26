@@ -137,11 +137,6 @@ final class SearchTableViewController: UIViewController, ControllerProtocol {
         }
     }
 
-    /// If user taps on text field from compressed, expand before editing
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        delegate.animateToExpanded()
-    }
-
     @objc private func dismissVC() {
         dismiss(animated: true, completion: nil)
     }
@@ -198,7 +193,8 @@ extension SearchTableViewController: UITableViewDelegate, UITableViewDataSource 
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard tableView.panGestureRecognizer.isEnabled, let cell = tableView.cellForRow(at: indexPath) as? UserCell else { return }
+        guard tableView.panGestureRecognizer.isEnabled,
+            let cell = tableView.cellForRow(at: indexPath) as? UserCell else { return }
         cell.isSelected = false
         delegate.setUserDetailCardVisible(withModel: cell.userCellModel)
     }
@@ -254,6 +250,10 @@ extension SearchTableViewController: UISearchBarDelegate {
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText.onNext(searchText)
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        userSearchBar.endEditing(true)
     }
 
 }

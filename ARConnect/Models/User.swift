@@ -17,9 +17,9 @@ struct RegisterUser {
 }
 
 struct LocalUser {
-    var name: String!
-    var email: String!
-    var uid: String!
+    var name: String
+    var email: String
+    var uid: String
     var isOnline: Bool!
     var profileUrl: URL?
     var profileImageData: Data?

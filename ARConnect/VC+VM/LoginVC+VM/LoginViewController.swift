@@ -71,6 +71,7 @@ final class LoginViewController: UIViewController, KeyboardHandler, ControllerPr
 //        btn.addTarget(self, action: #selector(logIn), for: .touchUpInside)
         return btn
     }()
+
     let signUpLabel: UILabel = {
         let label = UILabel()
         label.text = "Don't have an account?"
@@ -118,8 +119,8 @@ final class LoginViewController: UIViewController, KeyboardHandler, ControllerPr
             .disposed(by: disposeBag)
 
         viewModel.output.errorsObservable
-            .subscribe(onNext: { error in
-                self.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
+            .subscribe(onNext: { [weak self] error in
+                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
             })
             .disposed(by: disposeBag)
 
@@ -188,7 +189,8 @@ final class LoginViewController: UIViewController, KeyboardHandler, ControllerPr
         logInButton.dimensionAnchors(height: 50)
         logInButton.centerAnchors(centerX: view.centerXAnchor)
 
-        signUpStackView.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor, padding: UIEdgeInsets(top: 0, left: 0, bottom: -20, right: 0))
+        signUpStackView.edgeAnchors(bottom: view.safeAreaLayoutGuide.bottomAnchor,
+                                    padding: UIEdgeInsets(top: 0, left: 0, bottom: -20, right: 0))
         signUpStackView.centerAnchors(centerX: view.centerXAnchor)
 //        signUpButton.edgeAnchors(leading: signUpLabel.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor,
 //                                 padding: UIEdgeInsets(top: 0, left: 0, bottom: -16, right: 0))
@@ -197,21 +199,12 @@ final class LoginViewController: UIViewController, KeyboardHandler, ControllerPr
 //        signUpButton.centerAnchors(centerX: view.centerXAnchor)
     }
 
-    /// Request to login to database and segue into MainVC
-//    @objc private func logIn() {
-//        guard let email = emailTextField.text, !email.isEmpty,
-//            let password = passwordTextField.text, !password.isEmpty else {
-//            createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
-//            return
-//        }
-//        FirebaseClient.logInToDB(email: email, password: password)
-//    }
-
     @objc private func signUp() {
         self.present(RegisterViewController(), animated: true, completion: nil)
     }
 
     deinit {
+        print("login vc deinit")
         if let keyboardWillShow = keyboardWillShowObserver {
             NotificationCenter.default.removeObserver(keyboardWillShow)
         }
