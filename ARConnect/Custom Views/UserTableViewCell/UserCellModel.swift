@@ -16,14 +16,16 @@ class UserCellModel {
     let username: String
     let isOnline: PublishSubject<Bool> = PublishSubject()
     let profileImageData = ReplaySubject<Data>.create(bufferSize: 1)
+    let firebaseClient: FirebaseClient
 
     let disposeBag = DisposeBag()
 
-    init(user: LocalUser) {
+    init(user: LocalUser, firebaseClient: FirebaseClient = FirebaseClient()) {
         self.user = user
         uid = user.uid
         name = user.name
         username = user.email
+        self.firebaseClient = firebaseClient
         if let data = user.profileImageData {
             profileImageData.onNext(data)
             profileImageData.onCompleted()
@@ -32,7 +34,7 @@ class UserCellModel {
         guard let url = user.profileUrl else {
             return
         }
-        FirebaseClient.createUserOnlineObservable(forUid: user.uid)
+        firebaseClient.createUserOnlineObservable(forUid: user.uid)
             .subscribe(onNext: { [weak self] online in
                 self?.isOnline.onNext(online)
             })

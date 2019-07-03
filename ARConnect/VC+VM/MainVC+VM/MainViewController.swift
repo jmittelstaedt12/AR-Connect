@@ -168,10 +168,12 @@ final class MainViewController: UIViewController, ControllerProtocol {
 
     }
 
-    init(viewModel: ViewModelType) {
+    let firebaseClient: FirebaseClient
+    init(viewModel: ViewModelType, firebaseClient: FirebaseClient = FirebaseClient()) {
         self.viewModel = viewModel
         let mapVM = MapViewModel(uid: viewModel.uid)
         mapViewController = MapViewController(viewModel: mapVM)
+        self.firebaseClient = firebaseClient
         super.init(nibName: nil, bundle: nil)
         configure(with: viewModel)
     }
@@ -245,7 +247,7 @@ final class MainViewController: UIViewController, ControllerProtocol {
     /// Log out current user and return to login screen
     @objc private func logout() {
         do {
-            try FirebaseClient.logoutOfDB()
+            try firebaseClient.logoutOfDB()
             AppDelegate.shared.rootViewController.switchToLogout()
         } catch let logoutError {
             createAndDisplayAlert(withTitle: "Log out Error", body: logoutError.localizedDescription)

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 struct RegisterUser {
     var firstName: String!
@@ -20,18 +21,23 @@ struct LocalUser {
     var name: String
     var email: String
     var uid: String
-    var isOnline: Bool!
+    var isOnline: Bool?
     var profileUrl: URL?
     var profileImageData: Data?
     var connectedUid: String?
 
-    init(name: String = "", email: String = "", uid: String = "", isOnline: Bool = false) {
+    init(name: String = "", email: String = "", uid: String = "") {
         self.name = name
         self.email = email
         self.uid = uid
-        self.isOnline = isOnline
     }
-}
+
+    init(user: User) {
+        self.name = user.displayName ?? ""
+        self.email = user.email ?? ""
+        self.uid = user.uid
+    }
+ }
 
 extension LocalUser: Equatable {
     static func ==(lhs: LocalUser, rhs: LocalUser) -> Bool {

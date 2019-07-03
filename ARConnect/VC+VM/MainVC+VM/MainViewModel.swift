@@ -57,13 +57,15 @@ class MainViewModel: ViewModelProtocol {
     }
     let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
     var currentLocation: CLLocation?
+    let firebaseClient: FirebaseClient
 
-    init() {
+    init(firebaseClient: FirebaseClient = FirebaseClient()) {
         if Auth.auth().currentUser == nil {
             AppDelegate.shared.rootViewController.switchToLogout()
         }
         self.uid = Auth.auth().currentUser!.uid
-        FirebaseClient.setOnDisconnectUpdates(forUid: uid)
+        self.firebaseClient = firebaseClient
+        self.firebaseClient.setOnDisconnectUpdates(forUid: uid)
 
         self.input = Input(disconnectDidTap: disconnectDidTapSubject.asObserver())
         self.output = Output(profileImageDataObservable: profileImageDataSubject.asObserver(),
@@ -84,7 +86,7 @@ class MainViewModel: ViewModelProtocol {
     private func setUserObservers() {
 
         /// Fetch user profile image
-        FirebaseClient.fetchObservableUser(forUid: uid)
+        firebaseClient.fetchObservableUser(forUid: uid)
             .subscribe(onNext: { [weak self] user in
                 guard let self = self else { return }
                 self.currentUser = user
@@ -103,15 +105,15 @@ class MainViewModel: ViewModelProtocol {
             .disposed(by: disposeBag)
 
         /// Online status observer
-        FirebaseClient.createAmOnlineObservable()
+        firebaseClient.createAmOnlineObservable()
             .subscribe(onNext: { [weak self] connected in
                 guard let self = self else { return }
-                FirebaseClient.usersRef.child(self.uid).updateChildValues(["isOnline": connected])
+                self.firebaseClient.usersRef.child(self.uid).updateChildValues(["isOnline": connected])
             })
             .disposed(by: disposeBag)
 
         /// Setting connection request observer
-        FirebaseClient.willDisplayRequestingUserObservable()?
+        firebaseClient.willDisplayRequestingUserObservable()?
             .subscribe(onNext: { [weak self] (requestingUser, requestDictionary) in
                 guard let self = self, let currentUser = self.currentUser, let currentLocation = self.currentLocation else {
                     return
@@ -131,14 +133,16 @@ class MainViewModel: ViewModelProtocol {
                         connectRequestViewModel = ConnectRequestViewModel(currentUser: currentUser,
                                                                           requestingUser: requestingUserWithImageData,
                                                                           meetupLocation: location,
-                                                                          currentLocation: currentLocation)
+                                                                          currentLocation: currentLocation,
+                                                                          firebaseClient: FirebaseClient())
                         self.connectRequestSubject.onNext(connectRequestViewModel!)
                     }
                 } else {
                     connectRequestViewModel = ConnectRequestViewModel(currentUser: currentUser,
                                                                       requestingUser: requestingUser,
                                                                       meetupLocation: location,
-                                                                      currentLocation: currentLocation)
+                                                                      currentLocation: currentLocation,
+                                                                      firebaseClient: FirebaseClient())
                     self.connectRequestSubject.onNext(connectRequestViewModel!)
                 }
             })
@@ -149,7 +153,7 @@ class MainViewModel: ViewModelProtocol {
         disconnectDidTapSubject
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
-                FirebaseClient.usersRef
+                self.firebaseClient.usersRef
                     .child(self.uid)
                     .updateChildValues(["connectedTo": "",
                                         "isConnected": false])
@@ -167,15 +171,15 @@ class MainViewModel: ViewModelProtocol {
         }
         sessionStartSubject.onNext(.success(connectedUid))
 
-        FirebaseClient.usersRef.child(uid)
+        firebaseClient.usersRef.child(uid)
             .updateChildValues(["isPending": false,
                                 "isConnected": true,
                                 "connectedTo": connectedUid])
 
-        FirebaseClient.createEndSessionObservable(forUid: connectedUid)?
+        firebaseClient.createEndSessionObservable(forUid: connectedUid)?
             .subscribe(onNext: { [weak self] _ in
                 guard let self = self else { return }
-                FirebaseClient.usersRef
+                self.firebaseClient.usersRef
                     .child(self.uid)
                     .updateChildValues(["connectedTo": "",
                                         "isConnected": false])
@@ -185,14 +189,14 @@ class MainViewModel: ViewModelProtocol {
     }
 
     func requestToConnect(cellModel: UserCellModel, location: CLLocation) {
-        FirebaseClient.usersRef.child(self.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
+        firebaseClient.usersRef.child(self.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
             guard let self = self else { return }
             if let err = error {
                 self.didSendConnectRequestSubject.onNext(.failure(.custom(title: "Networking Error", errorDescription: err.localizedDescription)))
                 return
             }
-            FirebaseClient.createCallUserObservable(forUid: cellModel.uid,
-                                                    atCoordinateTuple: (latitude: location.coordinate.latitude,
+            self.firebaseClient.createCallUserObservable(forUid: cellModel.uid,
+                                                    atCoordinate: (latitude: location.coordinate.latitude,
                                                                         longitude: location.coordinate.longitude))
 
                 .subscribe(onNext: { [weak self] completed in
@@ -208,7 +212,8 @@ class MainViewModel: ViewModelProtocol {
                     self.didSendConnectRequestSubject.onNext(.success(ConnectPendingViewModel(currentUser: currentUser,
                                                                                                requestingUser: cellModel.user,
                                                                                                meetupLocation: location,
-                                                                                               currentLocation: currentLocation)))
+                                                                                               currentLocation: currentLocation,
+                                                                                               firebaseClient: FirebaseClient())))
                 }, onError: { [weak self] error in
                     self?.didSendConnectRequestSubject.onNext(.failure(error as! FirebaseError))
                 })

@@ -12,8 +12,6 @@ import Firebase
 
 class LoginViewModel: ViewModelProtocol {
 
-    typealias Credentials = (email: String, password: String)
-
     struct Input {
         let email: AnyObserver<String>
         let password: AnyObserver<String>
@@ -21,7 +19,7 @@ class LoginViewModel: ViewModelProtocol {
     }
 
     struct Output {
-        let loginResultObservable: Observable<AuthDataResult>
+        let loginResultObservable: Observable<LocalUser>
         let errorsObservable: Observable<Error>
     }
 
@@ -31,17 +29,20 @@ class LoginViewModel: ViewModelProtocol {
     private let emailSubject = PublishSubject<String>()
     private let passwordSubject = PublishSubject<String>()
     private let signInDidTapSubject = PublishSubject<Void>()
-    private let loginResultSubject = PublishSubject<AuthDataResult>()
+    private let loginResultSubject = PublishSubject<LocalUser>()
     private let errorsSubject = PublishSubject<Error>()
     private let disposeBag = DisposeBag()
 
-    private var credentialsObservable: Observable<Credentials> {
+    typealias Credentials = (email: String, password: String)
+    let firebaseClient: FirebaseClient
+    
+    var credentialsObservable: Observable<Credentials> {
         return Observable.combineLatest(emailSubject.asObservable(), passwordSubject.asObservable()) { (email, password) in
             return Credentials(email: email, password: password)
         }
     }
-
-    init() {
+    
+    init(firebaseClient: FirebaseClient = FirebaseClient()) {
         input = Input(email: emailSubject.asObserver(),
                       password: passwordSubject.asObserver(),
                       signInDidTap: signInDidTapSubject.asObserver())
@@ -49,15 +50,18 @@ class LoginViewModel: ViewModelProtocol {
         output = Output(loginResultObservable: loginResultSubject.asObservable(),
                         errorsObservable: errorsSubject.asObservable())
 
+        self.firebaseClient = firebaseClient
+
         setNetworkObservers()
     }
 
     private func setNetworkObservers() {
         signInDidTapSubject
             .withLatestFrom(credentialsObservable)
-            .flatMapLatest { credentials in
+            .flatMapLatest { [weak self] credentials -> Observable<Result<LocalUser, Error>> in
+                guard let self = self else { return Observable.empty() }
 //                print("credentials: ", credentials)
-                return FirebaseClient.logInToDB(email: credentials.email, password: credentials.password)
+                return self.firebaseClient.logInToDB(email: credentials.email, password: credentials.password)
             }
             .subscribe(onNext: { [weak self] result in
                 switch result {

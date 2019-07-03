@@ -22,17 +22,20 @@ class SearchTableViewModel: ViewModelProtocol {
     let input: Input
     let output: Output
 
-    private var searchItem: DispatchWorkItem?
-    var userCellModels: [UserCellModel]? = []
-    let disposeBag = DisposeBag()
-
     private let searchValueSubject = PublishSubject<String>()
     private let reloadTableSubject = PublishSubject<Void>()
+    let disposeBag = DisposeBag()
 
-    init() {
+    private var searchItem: DispatchWorkItem?
+    var userCellModels: [UserCellModel]? = []
+    let firebaseClient: FirebaseClient
+
+    init(firebaseClient: FirebaseClient = FirebaseClient()) {
         input = Input(searchValue: searchValueSubject.asObserver())
         output = Output(reloadTableObservable: reloadTableSubject.asObserver())
 
+        self.firebaseClient = firebaseClient
+        
         setObservers()
     }
 
@@ -46,12 +49,13 @@ class SearchTableViewModel: ViewModelProtocol {
                     self.reloadTableSubject.onNext(())
                     return
                 }
-                let newWorkItem = DispatchWorkItem {
-                    let query = FirebaseClient.usersRef.queryOrdered(byChild: "name")
+                let newWorkItem = DispatchWorkItem { [weak self] in
+                    guard let self = self else { return }
+                    let query = self.firebaseClient.usersRef.queryOrdered(byChild: "name")
                         .queryStarting(atValue: searchValue)
                         .queryEnding(atValue: searchValue+"\u{f8ff}")
 
-                    FirebaseClient.fetchObservableUsers(withObservableType: .singleEvent, queryReference: query)
+                    self.firebaseClient.fetchObservableUsers(withObservableType: .singleEvent, queryReference: query)
                         .subscribe(onNext: { [weak self] fetchedUsers in
                             let newUserSet = fetchedUsers.map { UserCellModel(user: $0) }
                             if let currentSet = self?.userCellModels, newUserSet != currentSet {

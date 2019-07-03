@@ -13,14 +13,6 @@ import Firebase
 
 final class ConnectPendingViewModel: ViewModelProtocol {
 
-    private let currentUser: LocalUser
-    private let requestingUser: LocalUser
-    let meetupLocation: CLLocation
-    let currentLocation: CLLocation
-    let nameString: String
-    let profileImageData: Data?
-    var timer: Timer?
-
     struct Input {
 
     }
@@ -39,7 +31,16 @@ final class ConnectPendingViewModel: ViewModelProtocol {
     private let callDroppedSubject = PublishSubject<FirebaseError>()
     private let disposeBag = DisposeBag()
 
-    init(currentUser: LocalUser, requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation) {
+    private let currentUser: LocalUser
+    private let requestingUser: LocalUser
+    let meetupLocation: CLLocation
+    let currentLocation: CLLocation
+    let nameString: String
+    let profileImageData: Data?
+    var timer: Timer?
+    let firebaseClient: FirebaseClient
+    
+    init(currentUser: LocalUser, requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation, firebaseClient: FirebaseClient = FirebaseClient()) {
         input = Input()
         output = Output(wentOfflineObservable: wentOfflineSubject,
                         receivedResponseObservable: receivedResponseSubject,
@@ -50,26 +51,27 @@ final class ConnectPendingViewModel: ViewModelProtocol {
         self.currentLocation = currentLocation
         self.nameString = requestingUser.name
         self.profileImageData = requestingUser.profileImageData
+        self.firebaseClient = firebaseClient
         setObservers()
         setTimer()
     }
 
     func didCancel() {
-        FirebaseClient.usersRef.child(currentUser.uid).updateChildValues(["pendingRequest": false])
+        firebaseClient.usersRef.child(currentUser.uid).updateChildValues(["pendingRequest": false])
         timer?.invalidate()
     }
 
     private func setObservers() {
-        FirebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] amOnline in
+        firebaseClient.createAmOnlineObservable().subscribe(onNext: { [weak self] amOnline in
             if !amOnline {
                 self?.wentOfflineSubject.onNext(.amOffline)
             }
         }).disposed(by: disposeBag)
 
-        FirebaseClient.createCalledUserResponseObservable(forUid: requestingUser.uid)?
+        firebaseClient.createCalledUserResponseObservable(forUid: requestingUser.uid)?
             .subscribe(onNext: { [weak self] didConnect in
                 guard let self = self else { return }
-                FirebaseClient.usersRef.child(self.currentUser.uid).updateChildValues(["pendingRequest": false])
+                self.firebaseClient.usersRef.child(self.currentUser.uid).updateChildValues(["pendingRequest": false])
                 let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
                 NotificationCenter.default.post(name: name, object: nil, userInfo: ["uid": self.requestingUser.uid,
                                                                                     "meetupLocation": self.meetupLocation,
@@ -82,7 +84,7 @@ final class ConnectPendingViewModel: ViewModelProtocol {
     private func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 20, repeats: false) { [weak self] _ in
             guard let self = self else { return }
-            FirebaseClient.usersRef.child(self.currentUser.uid).updateChildValues(["pendingRequest": false])
+            self.firebaseClient.usersRef.child(self.currentUser.uid).updateChildValues(["pendingRequest": false])
             self.callDroppedSubject.onNext(.noResponse(userName: self.requestingUser.name))
         }
     }

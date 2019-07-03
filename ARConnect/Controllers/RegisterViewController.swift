@@ -92,6 +92,17 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         return .lightContent
     }
 
+    let firebaseClient: FirebaseClient
+
+    init(firebaseClient: FirebaseClient = FirebaseClient()) {
+        self.firebaseClient = firebaseClient
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = ColorConstants.primaryColor
@@ -213,7 +224,7 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
                                         lastName: lastName,
                                         email: email, password: password,
                                         pngData: profileImageView.image?.pngData())
-        FirebaseClient.createNewUser(user: registerUser) { [weak self] error in
+        firebaseClient.createNewUser(user: registerUser) { [weak self] error in
             if let error = error {
                 self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
                 return

@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "5C0A7577DEF068B2905071274902AC78"
+               BlueprintIdentifier = "512AD0B5287E3AC58C3EB6BDBA51653D"
                BuildableName = "Pods_ARConnect.framework"
                BlueprintName = "Pods-ARConnect"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -45,7 +45,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5C0A7577DEF068B2905071274902AC78"
+            BlueprintIdentifier = "512AD0B5287E3AC58C3EB6BDBA51653D"
             BuildableName = "Pods_ARConnect.framework"
             BlueprintName = "Pods-ARConnect"
             ReferencedContainer = "container:Pods.xcodeproj">

@@ -13,13 +13,6 @@ import Firebase
 
 final class ConnectRequestViewModel: ViewModelProtocol {
 
-    private let currentUser: LocalUser
-    private let requestingUser: LocalUser
-    let meetupLocation: CLLocation
-    let currentLocation: CLLocation
-    let nameString: String
-    let profileImageData: Data?
-
     struct Input {
 
     }
@@ -37,7 +30,15 @@ final class ConnectRequestViewModel: ViewModelProtocol {
     private let callDroppedSubject = PublishSubject<Void>()
     private let disposeBag = DisposeBag()
 
-    init(currentUser: LocalUser, requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation) {
+    private let currentUser: LocalUser
+    private let requestingUser: LocalUser
+    let meetupLocation: CLLocation
+    let currentLocation: CLLocation
+    let nameString: String
+    let profileImageData: Data?
+    let firebaseClient: FirebaseClient
+
+    init(currentUser: LocalUser, requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation, firebaseClient: FirebaseClient = FirebaseClient()) {
         input = Input()
         output = Output(processedResponseObservable: processedResponseSubject,
                         callDroppedObservable: callDroppedSubject)
@@ -47,13 +48,14 @@ final class ConnectRequestViewModel: ViewModelProtocol {
         self.currentLocation = currentLocation
         self.nameString = requestingUser.name
         self.profileImageData = requestingUser.profileImageData
+        self.firebaseClient = firebaseClient
         setObservers()
     }
 
     private func setObservers() {
-        FirebaseClient.createCallDroppedObservable(forUid: requestingUser.uid)?.subscribe(onNext: { [weak self] _ in
+        firebaseClient.createCallDroppedObservable(forUid: requestingUser.uid)?.subscribe(onNext: { [weak self] _ in
             guard let self = self else { return }
-            FirebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser")
+            self.firebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser")
                 .updateChildValues(["uid": "", "latitude": 0, "longitude": 0])
             self.callDroppedSubject.onNext(())
         }).disposed(by: disposeBag)
@@ -65,7 +67,7 @@ final class ConnectRequestViewModel: ViewModelProtocol {
         // Work item if firebase updates succeed
         let workItem = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
-            FirebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser").updateChildValues(["uid": "",
+            self.firebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser").updateChildValues(["uid": "",
                                                                                           "latitude": 0,
                                                                                           "longitude": 0])
             let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
@@ -95,10 +97,10 @@ final class ConnectRequestViewModel: ViewModelProtocol {
                 return
             }
             group.enter()
-            FirebaseClient.usersRef.child(currentUser.uid).updateChildValues(["isConnected": true, "connectedTo": requestingUser.uid],
+            firebaseClient.usersRef.child(currentUser.uid).updateChildValues(["isConnected": true, "connectedTo": requestingUser.uid],
                                                                       withCompletionBlock: updateCompletionHandler)
             group.enter()
-            FirebaseClient.usersRef.child(requestingUser.uid).updateChildValues(["isConnected": true],
+            firebaseClient.usersRef.child(requestingUser.uid).updateChildValues(["isConnected": true],
                                                                                 withCompletionBlock: updateCompletionHandler)
         }
 

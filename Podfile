@@ -13,5 +13,13 @@ target 'ARConnect' do
   pod 'RxSwift',                '~> 4.4', inhibit_warnings: true
   pod 'RxCocoa',                '~> 4.4'
   pod 'SwiftLint'
+  abstract_target 'Tests' do
+    target "ARConnectTests"
+    pod 'Quick'
+    pod 'Nimble'
+    pod 'RxNimble'
+    pod 'RxBlocking'
+    pod 'RxTest'
+  end
 # pod 'RxAtomic',               '~> 4.0', :modular_headers => true
 end

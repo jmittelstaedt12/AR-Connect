@@ -22,11 +22,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ARConnect/VC+VM/MapVC+VM/MapViewModel.swift"
-            timestampString = "583164646.417176"
+            timestampString = "583426183.60955"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "143"
-            endingLineNumber = "143"
+            startingLineNumber = "144"
+            endingLineNumber = "144"
             landmarkName = "setupMapForConnection(notification:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -38,11 +38,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ARConnect/VC+VM/MapVC+VM/MapViewModel.swift"
-            timestampString = "583164646.418099"
+            timestampString = "583426183.611096"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "149"
-            endingLineNumber = "149"
+            startingLineNumber = "150"
+            endingLineNumber = "150"
             landmarkName = "setupMapForConnection(notification:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -54,11 +54,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ARConnect/VC+VM/MapVC+VM/MapViewModel.swift"
-            timestampString = "583164646.418256"
+            timestampString = "583426183.611191"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "161"
-            endingLineNumber = "161"
+            startingLineNumber = "162"
+            endingLineNumber = "162"
             landmarkName = "setupMapForConnection(notification:)"
             landmarkType = "7">
          </BreakpointContent>

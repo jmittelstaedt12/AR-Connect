@@ -12,38 +12,6 @@ import RxSwift
 
 class MapViewModel: NSObject, ViewModelProtocol {
 
-    typealias MapConnectionData = (userLine: MKPolyline, connectedUserLine: MKPolyline?, visibleMapRect: MKMapRect)?
-
-    let uid: String
-    let locationManager = CLLocationManager()
-    var currentLocation: CLLocation?
-    let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
-
-    weak var delegate: LocationUpdateDelegate? {
-        didSet {
-            locationManager.stopUpdatingHeading()
-        }
-    }
-
-    var tripCoordinates: [CLLocationCoordinate2D] = [] {
-        didSet {
-            setTripCoordinatesSubject.onNext(tripCoordinates)
-        }
-    }
-    private var pathOverlay: MKPolyline?
-    var headingAccuracy = [Double](repeating: 360.0, count: 4)
-    var locationAccuracy = [Double](repeating: 100.0, count: 4)
-    var recentLocationIndex = 0
-    var willUpdateCurrentLocation = true
-    private var tempPolylineColor: UIColor?
-
-    enum WorldAlignment {
-        case gravity
-        case gravityAndHeading
-    }
-
-    var shouldUseAlignment = WorldAlignment.gravity
-
     struct Input {
 
     }
@@ -63,13 +31,46 @@ class MapViewModel: NSObject, ViewModelProtocol {
     private let updatedCurrentLocationSubject = PublishSubject<CLLocation>()
     private let setTripCoordinatesSubject = PublishSubject<[CLLocationCoordinate2D]>()
 
-    init(uid: String) {
+    typealias MapConnectionData = (userLine: MKPolyline, connectedUserLine: MKPolyline?, visibleMapRect: MKMapRect)?
+    let firebaseClient: FirebaseClient
+    let uid: String
+    let locationManager = CLLocationManager()
+    var currentLocation: CLLocation?
+    let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
+    private var pathOverlay: MKPolyline?
+    var headingAccuracy = [Double](repeating: 360.0, count: 4)
+    var locationAccuracy = [Double](repeating: 100.0, count: 4)
+    var recentLocationIndex = 0
+    var willUpdateCurrentLocation = true
+    private var tempPolylineColor: UIColor?
+
+    enum WorldAlignment {
+        case gravity
+        case gravityAndHeading
+    }
+
+    var shouldUseAlignment = WorldAlignment.gravity
+    
+    weak var delegate: LocationUpdateDelegate? {
+        didSet {
+            locationManager.stopUpdatingHeading()
+        }
+    }
+
+    var tripCoordinates: [CLLocationCoordinate2D] = [] {
+        didSet {
+            setTripCoordinatesSubject.onNext(tripCoordinates)
+        }
+    }
+
+    init(uid: String, firebaseClient: FirebaseClient = FirebaseClient()) {
         self.uid = uid
         input = Input()
         output = Output(setCurrentLocationObservable: setCurrentLocationSubject,
                         setMapForConnectionObservable: setMapForConnectionSubject,
                         updatedCurrentLocationObservable: updatedCurrentLocationSubject,
                         setTripCoordinatesObservable: setTripCoordinatesSubject)
+        self.firebaseClient = firebaseClient
         super.init()
         setupLocationModel()
         NotificationCenter.default.addObserver(self,
@@ -138,7 +139,7 @@ class MapViewModel: NSObject, ViewModelProtocol {
             }
         }
 
-        FirebaseClient.fetchCoordinates(uid: connectedUid) { (latitude, longitude) -> Void in
+        firebaseClient.fetchCoordinates(uid: connectedUid) { (latitude, longitude) -> Void in
             guard let lat = latitude, let lon = longitude else {
                 group.leave()
                 return
@@ -205,7 +206,7 @@ extension MapViewModel: CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard willUpdateCurrentLocation, let locValue = manager.location else { return }
-        FirebaseClient.usersRef.child(uid)
+        firebaseClient.usersRef.child(uid)
             .updateChildValues(["latitude": locValue.coordinate.latitude,
                                 "longitude": locValue.coordinate.longitude])
 
