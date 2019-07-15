@@ -20,4 +20,3 @@ class ARConnectTests: XCTestCase {
     }
 
 }
-

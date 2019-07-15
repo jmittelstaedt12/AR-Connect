@@ -99,7 +99,6 @@ class DatabaseeReferenceMock: DatabaseReference {
         }
         var dict = DatabaseeReferenceMock.databaseObservable.value
         for value in values {
-            if dict[keyPath: KeyPath((self.pathStrings + [value.key]).joined(separator: "."))] == nil { return }
             dict[keyPath: KeyPath((self.pathStrings + [value.key]).joined(separator: "."))] = value.value as Any
         }
         print(dict)

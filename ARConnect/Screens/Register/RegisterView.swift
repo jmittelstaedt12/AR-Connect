@@ -1,25 +1,31 @@
 //
-//  ViewController.swift
+//  RegisterView.swift
 //  ARConnect
 //
-//  Created by Jacob Mittelstaedt on 10/9/18.
-//  Copyright © 2018 Jacob Mittelstaedt. All rights reserved.
+//  Created by Jacob Mittelstaedt on 7/11/19.
+//  Copyright © 2019 Jacob Mittelstaedt. All rights reserved.
 //
 
 import UIKit
-import Firebase
 
-final class RegisterViewController: UIViewController, KeyboardHandler {
+protocol RegisterViewDelegate: AnyObject {
+    func onCancel()
+    func onImageViewTap(presentPicker picker: UIImagePickerController)
+    func handleRegister(firstName: String?, lastName: String?, email: String?, password: String?, imageData: Data?)
+    func dismissImagePicker()
+}
+final class RegisterView: UIView, KeyboardHandler {
 
     var keyboardWillShow = true
     var keyboardWillHide = false
     var keyboardWillShowObserver: NSObjectProtocol?
     var keyboardWillHideObserver: NSObjectProtocol?
 
+    weak var delegate: RegisterViewDelegate?
+
     let cancelButton: UIButton = {
         let btn = UIButton()
         btn.setImage(UIImage(named: "cancel"), for: .normal)
-        btn.addTarget(self, action: #selector(onCancel), for: .touchUpInside)
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
@@ -27,7 +33,6 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
     lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.backgroundColor = .gray
-        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onImageViewTap)))
         imageView.isUserInteractionEnabled = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -84,50 +89,70 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitleColor(UIColor.white, for: .normal)
         btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        btn.addTarget(self, action: #selector(handleRegister), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(prepareForRegister), for: .touchUpInside)
         return btn
     }()
 
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+    /// Returns line separator views to be placed between text fields
+    private func createSeparatorView() -> UIView {
+        let view = UIView()
+        view.backgroundColor = UIColor(red: 220, green: 220, blue: 220)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }
 
-    let firebaseClient: FirebaseClient
-
-    init(firebaseClient: FirebaseClient = FirebaseClient()) {
-        self.firebaseClient = firebaseClient
-        super.init(nibName: nil, bundle: nil)
+    @objc private func onImageViewTap() {
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        picker.allowsEditing = true
+        delegate?.onImageViewTap(presentPicker: picker)
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    @objc private func onCancel() {
+        delegate?.onCancel()
     }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = ColorConstants.primaryColor
+    @objc private func prepareForRegister() {
+        delegate?.handleRegister(firstName: firstNameTextField.text,
+                                 lastName: lastNameTextField.text,
+                                 email: emailTextField.text,
+                                 password: passwordTextField.text,
+                                 imageData: profileImageView.image?.pngData())
+    }
 
-        addSubviews()
-        setSubviewConstraints()
+    deinit {
+        if let keyboardWillShow = keyboardWillShowObserver { NotificationCenter.default.removeObserver(keyboardWillShow) }
+        if let keyboardWillHide = keyboardWillHideObserver { NotificationCenter.default.removeObserver(keyboardWillHide) }
+    }
+}
 
-        hideKeyboardWhenTappedAround()
+extension RegisterView: ProgrammaticUI {
 
+    func setupView() {
         firstNameTextField.delegate = self
         emailTextField.delegate = self
         passwordTextField.delegate = self
+        profileImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onImageViewTap)))
+        cancelButton.addTarget(self, action: #selector(onCancel), for: .touchUpInside)
+        registerButton.addTarget(self, action: #selector(prepareForRegister), for: .touchUpInside)
 
+        backgroundColor = ColorConstants.primaryColor
+
+        addSubviews()
+        setSubviewAutoLayoutConstraints()
+        hideKeyboardWhenTappedAround()
         startObservingKeyboardChanges()
     }
 
-    private func addSubviews() {
+    func addSubviews() {
         firstNameSeparatorView = createSeparatorView()
         lastNameSeparatorView = createSeparatorView()
         emailSeparatorView = createSeparatorView()
 
-        view.addSubview(cancelButton)
-        view.addSubview(profileImageView)
-        view.addSubview(inputsContainerView)
-        view.addSubview(registerButton)
+        addSubview(cancelButton)
+        addSubview(profileImageView)
+        addSubview(inputsContainerView)
+        addSubview(registerButton)
 
         inputsContainerView.addSubview(firstNameTextField)
         inputsContainerView.addSubview(lastNameTextField)
@@ -135,21 +160,20 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         inputsContainerView.addSubview(passwordTextField)
     }
 
-    private func setSubviewConstraints() {
-
+    func setSubviewAutoLayoutConstraints() {
         // Set constraints for cancel button
-        cancelButton.edgeAnchors(top: view.safeAreaLayoutGuide.topAnchor, leading: view.safeAreaLayoutGuide.leadingAnchor, padding: UIEdgeInsets(top: 16, left: 16, bottom: 0, right: 0))
+        cancelButton.edgeAnchors(top: safeAreaLayoutGuide.topAnchor, leading: safeAreaLayoutGuide.leadingAnchor, padding: UIEdgeInsets(top: 16, left: 16, bottom: 0, right: 0))
         cancelButton.dimensionAnchors(height: 32, width: 32)
 
         // Set constraints for profile image view
-        profileImageView.edgeAnchors(top: view.topAnchor, bottom: inputsContainerView.topAnchor, padding: UIEdgeInsets(top: 48, left: 0, bottom: -16, right: 0))
-        profileImageView.centerAnchors(centerX: view.centerXAnchor)
+        profileImageView.edgeAnchors(top: cancelButton.bottomAnchor, bottom: inputsContainerView.topAnchor, padding: UIEdgeInsets(top: 48, left: 0, bottom: -16, right: 0))
+        profileImageView.centerAnchors(centerX: centerXAnchor)
         profileImageView.dimensionAnchors(width: profileImageView.heightAnchor)
 
         // Set constraints for input container view
-        inputsContainerView.centerAnchors(centerX: view.centerXAnchor, centerY: view.centerYAnchor)
+        inputsContainerView.centerAnchors(centerX: centerXAnchor, centerY: centerYAnchor)
         inputsContainerView.dimensionAnchors(height: 200)
-        inputsContainerView.dimensionAnchors(width: view.widthAnchor, widthConstant: -24)
+        inputsContainerView.dimensionAnchors(width: widthAnchor, widthConstant: -24)
 
         inputsContainerView.addSubview(firstNameSeparatorView!)
         inputsContainerView.addSubview(lastNameSeparatorView!)
@@ -187,60 +211,14 @@ final class RegisterViewController: UIViewController, KeyboardHandler {
         passwordTextField.dimensionAnchors(height: inputsContainerView.heightAnchor, heightMultiplier: 1 / 4, width: inputsContainerView.widthAnchor, widthConstant: -12)
 
         // Set constraints for register button
-        registerButton.centerAnchors(centerX: view.centerXAnchor)
+        registerButton.centerAnchors(centerX: centerXAnchor)
         registerButton.edgeAnchors(top: inputsContainerView.bottomAnchor, padding: UIEdgeInsets(top: 12, left: 0, bottom: 0, right: 0))
         registerButton.dimensionAnchors(width: inputsContainerView.widthAnchor)
         registerButton.dimensionAnchors(height: 50)
     }
-
-    /// Returns line separator views to be placed between text fields
-    private func createSeparatorView() -> UIView {
-        let view = UIView()
-        view.backgroundColor = UIColor(red: 220, green: 220, blue: 220)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }
-
-    @objc private func onImageViewTap() {
-        let picker = UIImagePickerController()
-        picker.delegate = self
-        picker.allowsEditing = true
-        present(picker, animated: true, completion: nil)
-    }
-
-    @objc private func onCancel() {
-        self.dismiss(animated: true, completion: nil)
-    }
-
-    /// Request to register user in database
-    @objc private func handleRegister() {
-        guard let firstName = firstNameTextField.text, !firstName.isEmpty, let lastName = lastNameTextField.text,
-            !lastName.isEmpty, let email = emailTextField.text, !email.isEmpty, let password = passwordTextField.text,
-            !password.isEmpty else {
-                createAndDisplayAlert(withTitle: "Error", body: "Please populate all fields")
-                return
-        }
-        let registerUser = RegisterUser(firstName: firstName,
-                                        lastName: lastName,
-                                        email: email, password: password,
-                                        pngData: profileImageView.image?.pngData())
-        firebaseClient.createNewUser(user: registerUser) { [weak self] error in
-            if let error = error {
-                self?.createAndDisplayAlert(withTitle: "Error", body: error.localizedDescription)
-                return
-            }
-            self?.dismiss(animated: true, completion: nil)
-            AppDelegate.shared.rootViewController.switchToMainScreen()
-        }
-    }
-
-    deinit {
-        if let keyboardWillShow = keyboardWillShowObserver { NotificationCenter.default.removeObserver(keyboardWillShow) }
-        if let keyboardWillHide = keyboardWillHideObserver { NotificationCenter.default.removeObserver(keyboardWillHide) }
-    }
 }
 
-extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+extension RegisterView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         if let image = info[UIImagePickerController.InfoKey.init(rawValue: "UIImagePickerControllerEditedImage")] as? UIImage {
@@ -248,17 +226,11 @@ extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationC
         } else if let image = info[UIImagePickerController.InfoKey.init(rawValue: "UIImagePickerControllerOriginalImage")] as? UIImage {
             profileImageView.image = image
         }
-        dismiss(animated: true, completion: nil)
+        delegate?.dismissImagePicker()
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        dismiss(animated: true, completion: nil)
+        delegate?.dismissImagePicker()
     }
 
-}
-
-extension UIColor {
-    convenience init(red: CGFloat, green: CGFloat, blue: CGFloat) {
-        self.init(red: red / 255, green: green / 255, blue: blue / 255, alpha: 1)
-    }
 }

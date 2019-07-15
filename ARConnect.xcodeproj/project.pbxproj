@@ -7,10 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		190FB31422D7D4AF009D62EB /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190FB31322D7D4AF009D62EB /* LoginView.swift */; };
+		190FB31622D7D5B4009D62EB /* ProgrammaticUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190FB31522D7D5B4009D62EB /* ProgrammaticUI.swift */; };
+		190FB31822D7D8D6009D62EB /* KeyboardHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190FB31722D7D8D6009D62EB /* KeyboardHandler.swift */; };
+		190FB31A22D7F29A009D62EB /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190FB31922D7F29A009D62EB /* RegisterView.swift */; };
 		1912576C22B3469100200DA5 /* SearchTableViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1912576B22B3469100200DA5 /* SearchTableViewModel.swift */; };
 		1912576F22B3D94B00200DA5 /* UserCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1912576E22B3D94B00200DA5 /* UserCellModel.swift */; };
 		192C58AB21F9089600162543 /* JMNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192C58AA21F9089600162543 /* JMNode.swift */; };
 		1937026521727136008B46EE /* LocationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937026421727136008B46EE /* LocationHelper.swift */; };
+		1937D81922DBF78900249AF9 /* UIColor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1937D81822DBF78900249AF9 /* UIColor+Extension.swift */; };
 		1944C38522B1FEFD00753E49 /* ViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1944C38422B1FEFD00753E49 /* ViewModelProtocol.swift */; };
 		1944C38722B2008F00753E49 /* ControllerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1944C38622B2008F00753E49 /* ControllerProtocol.swift */; };
 		1944C38922B285B400753E49 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1944C38822B285B400753E49 /* MapViewModel.swift */; };
@@ -22,6 +27,8 @@
 		1974B80322BEC03A00D665D9 /* ConnectRequestViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1974B80222BEC03900D665D9 /* ConnectRequestViewModel.swift */; };
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
 		1981CB6921A604C600B69138 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* Constants.swift */; };
+		19841DFF22D65FFB00D54B23 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19841DFE22D65FFB00D54B23 /* MainView.swift */; };
+		19841E0122D6807400D54B23 /* SearchTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19841E0022D6807400D54B23 /* SearchTableView.swift */; };
 		1986BBC621F2506900DA9611 /* NetworkRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1986BBC521F2506900DA9611 /* NetworkRequests.swift */; };
 		198DA98A218A5C230054E1BD /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198DA989218A5C230054E1BD /* User.swift */; };
 		19913A0E216CED7500174187 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19913A0D216CED7500174187 /* AppDelegate.swift */; };
@@ -44,7 +51,7 @@
 		19997E8921E500560023C3EC /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8821E500560023C3EC /* ConnectViewController.swift */; };
 		19997E8E21E65F4A0023C3EC /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8C21E65F4A0023C3EC /* UserCell.swift */; };
 		19997E8F21E65F4A0023C3EC /* UserCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19997E8D21E65F4A0023C3EC /* UserCell.xib */; };
-		199DE78522C4015A00D31E11 /* LoginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78422C4015A00D31E11 /* LoginTests.swift */; };
+		199DE78522C4015A00D31E11 /* LoginViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78422C4015A00D31E11 /* LoginViewModelTests.swift */; };
 		199DE78822C4F8FB00D31E11 /* JMAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78722C4F8FB00D31E11 /* JMAuth.swift */; };
 		199DE78A22C56E5700D31E11 /* DatabaseReferenceMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78922C56E5700D31E11 /* DatabaseReferenceMock.swift */; };
 		199DE78C22C56E9400D31E11 /* DataSnapshotMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78B22C56E9400D31E11 /* DataSnapshotMock.swift */; };
@@ -88,10 +95,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		190FB31322D7D4AF009D62EB /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		190FB31522D7D5B4009D62EB /* ProgrammaticUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgrammaticUI.swift; sourceTree = "<group>"; };
+		190FB31722D7D8D6009D62EB /* KeyboardHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHandler.swift; sourceTree = "<group>"; };
+		190FB31922D7F29A009D62EB /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		1912576B22B3469100200DA5 /* SearchTableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewModel.swift; sourceTree = "<group>"; };
 		1912576E22B3D94B00200DA5 /* UserCellModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCellModel.swift; sourceTree = "<group>"; };
 		192C58AA21F9089600162543 /* JMNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMNode.swift; sourceTree = "<group>"; };
 		1937026421727136008B46EE /* LocationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationHelper.swift; sourceTree = "<group>"; };
+		1937D81822DBF78900249AF9 /* UIColor+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Extension.swift"; sourceTree = "<group>"; };
 		1944C38422B1FEFD00753E49 /* ViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModelProtocol.swift; sourceTree = "<group>"; };
 		1944C38622B2008F00753E49 /* ControllerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerProtocol.swift; sourceTree = "<group>"; };
 		1944C38822B285B400753E49 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
@@ -103,6 +115,8 @@
 		1974B80222BEC03900D665D9 /* ConnectRequestViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectRequestViewModel.swift; sourceTree = "<group>"; };
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		1981CB6821A604C600B69138 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		19841DFE22D65FFB00D54B23 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		19841E0022D6807400D54B23 /* SearchTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableView.swift; sourceTree = "<group>"; };
 		1986BBC521F2506900DA9611 /* NetworkRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequests.swift; sourceTree = "<group>"; };
 		198DA989218A5C230054E1BD /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		19913A0A216CED7500174187 /* ARConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -129,7 +143,7 @@
 		19997E8821E500560023C3EC /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
 		19997E8C21E65F4A0023C3EC /* UserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
 		19997E8D21E65F4A0023C3EC /* UserCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UserCell.xib; sourceTree = "<group>"; };
-		199DE78422C4015A00D31E11 /* LoginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginTests.swift; sourceTree = "<group>"; };
+		199DE78422C4015A00D31E11 /* LoginViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModelTests.swift; sourceTree = "<group>"; };
 		199DE78722C4F8FB00D31E11 /* JMAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMAuth.swift; sourceTree = "<group>"; };
 		199DE78922C56E5700D31E11 /* DatabaseReferenceMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseReferenceMock.swift; sourceTree = "<group>"; };
 		199DE78B22C56E9400D31E11 /* DataSnapshotMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSnapshotMock.swift; sourceTree = "<group>"; };
@@ -186,31 +200,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1912576822B3390F00200DA5 /* MainVC+VM */ = {
+		1912576822B3390F00200DA5 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				19841DFE22D65FFB00D54B23 /* MainView.swift */,
 				19913A2B216D2FBF00174187 /* MainViewController.swift */,
 				1944C38F22B2C35C00753E49 /* MainViewModel.swift */,
 			);
-			path = "MainVC+VM";
+			path = Main;
 			sourceTree = "<group>";
 		};
-		1912576922B3393300200DA5 /* LoginVC+VM */ = {
+		1912576922B3393300200DA5 /* Login */ = {
 			isa = PBXGroup;
 			children = (
+				190FB31322D7D4AF009D62EB /* LoginView.swift */,
 				19913A26216CF7A100174187 /* LoginViewController.swift */,
 				1944C38B22B2878700753E49 /* LoginViewModel.swift */,
 			);
-			path = "LoginVC+VM";
+			path = Login;
 			sourceTree = "<group>";
 		};
-		1912576A22B3467C00200DA5 /* SearchTableVC+VM */ = {
+		1912576A22B3467C00200DA5 /* SearchTable */ = {
 			isa = PBXGroup;
 			children = (
+				19841E0022D6807400D54B23 /* SearchTableView.swift */,
 				19BE2A04218A665C007304CF /* SearchTableViewController.swift */,
 				1912576B22B3469100200DA5 /* SearchTableViewModel.swift */,
 			);
-			path = "SearchTableVC+VM";
+			path = SearchTable;
 			sourceTree = "<group>";
 		};
 		1912576D22B3470F00200DA5 /* MapVC+VM */ = {
@@ -222,26 +239,38 @@
 			path = "MapVC+VM";
 			sourceTree = "<group>";
 		};
+		1937D81A22DBF7AB00249AF9 /* Register */ = {
+			isa = PBXGroup;
+			children = (
+				190FB31922D7F29A009D62EB /* RegisterView.swift */,
+				19913A11216CED7600174187 /* RegisterViewController.swift */,
+			);
+			path = Register;
+			sourceTree = "<group>";
+		};
 		1944C38322B1FE7200753E49 /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
 				1944C38422B1FEFD00753E49 /* ViewModelProtocol.swift */,
 				1944C38622B2008F00753E49 /* ControllerProtocol.swift */,
+				190FB31522D7D5B4009D62EB /* ProgrammaticUI.swift */,
+				190FB31722D7D8D6009D62EB /* KeyboardHandler.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
 		};
-		1944C38A22B2875B00753E49 /* VC+VM */ = {
+		1944C38A22B2875B00753E49 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				1912576922B3393300200DA5 /* Login */,
+				1912576822B3390F00200DA5 /* Main */,
+				1912576A22B3467C00200DA5 /* SearchTable */,
+				1937D81A22DBF7AB00249AF9 /* Register */,
+				1912576D22B3470F00200DA5 /* MapVC+VM */,
 				19C43EFE22BFF94400279D7E /* ConnectPendingVC+VM */,
 				1974B80122BEC01100D665D9 /* ConnectRequestVC+VM */,
-				1912576D22B3470F00200DA5 /* MapVC+VM */,
-				1912576A22B3467C00200DA5 /* SearchTableVC+VM */,
-				1912576922B3393300200DA5 /* LoginVC+VM */,
-				1912576822B3390F00200DA5 /* MainVC+VM */,
 			);
-			path = "VC+VM";
+			path = Screens;
 			sourceTree = "<group>";
 		};
 		1974B80122BEC01100D665D9 /* ConnectRequestVC+VM */ = {
@@ -276,8 +305,8 @@
 		19913A0C216CED7500174187 /* ARConnect */ = {
 			isa = PBXGroup;
 			children = (
-				199DE78622C4F8D200D31E11 /* New Group */,
-				1944C38A22B2875B00753E49 /* VC+VM */,
+				199DE78622C4F8D200D31E11 /* Mocks */,
+				1944C38A22B2875B00753E49 /* Screens */,
 				1944C38322B1FE7200753E49 /* Protocols */,
 				19913A21216CEE6300174187 /* Controllers */,
 				19D7E68821C41DF60046D737 /* Services */,
@@ -302,7 +331,6 @@
 				19948E0F216FB7E8008C39DA /* RootViewController.swift */,
 				19948E11216FB7FB008C39DA /* SplashViewController.swift */,
 				19D736B121CAE15D00D6D92A /* InitialViewController.swift */,
-				19913A11216CED7600174187 /* RegisterViewController.swift */,
 				19913A24216CF46100174187 /* ARSessionViewController.swift */,
 				199383C62195EE99001BE7FD /* CardDetailViewController */,
 				199383C72195EEAA001BE7FD /* MessageViewController */,
@@ -343,7 +371,7 @@
 			children = (
 				1998D26022C3D0F20040F990 /* ARConnectTests.swift */,
 				1998D26222C3D0F20040F990 /* Info.plist */,
-				199DE78422C4015A00D31E11 /* LoginTests.swift */,
+				199DE78422C4015A00D31E11 /* LoginViewModelTests.swift */,
 				199DE79122C64E2200D31E11 /* FirebaseClientTests.swift */,
 			);
 			path = ARConnectTests;
@@ -357,7 +385,7 @@
 			path = "Inherited Controllers";
 			sourceTree = "<group>";
 		};
-		199DE78622C4F8D200D31E11 /* New Group */ = {
+		199DE78622C4F8D200D31E11 /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
 				199DE78722C4F8FB00D31E11 /* JMAuth.swift */,
@@ -365,7 +393,7 @@
 				199DE78B22C56E9400D31E11 /* DataSnapshotMock.swift */,
 				199DE78D22C56EBA00D31E11 /* ErrorMock.swift */,
 			);
-			path = "New Group";
+			path = Mocks;
 			sourceTree = "<group>";
 		};
 		19A5C09C21EB86E700C2FD74 /* UserTableViewCell */ = {
@@ -428,6 +456,7 @@
 				19E30D9922A5EB3000A1F981 /* MainViewController+UICollectionViewDataSource.swift */,
 				1944C38D22B2AD1500753E49 /* Observable+Extension.swift */,
 				19F821E922CAAC87007456EF /* Dictionary+Extension.swift */,
+				1937D81822DBF78900249AF9 /* UIColor+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -719,6 +748,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				19D53CBD21FCC961000984FE /* UIView+Extension.swift in Sources */,
+				19841DFF22D65FFB00D54B23 /* MainView.swift in Sources */,
 				192C58AB21F9089600162543 /* JMNode.swift in Sources */,
 				19913A27216CF7A100174187 /* LoginViewController.swift in Sources */,
 				19E30D9A22A5EB3000A1F981 /* MainViewController+UICollectionViewDataSource.swift in Sources */,
@@ -732,7 +762,9 @@
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
 				19D7E69221C43C5D0046D737 /* CLLocation+Extension.swift in Sources */,
 				1944C38922B285B400753E49 /* MapViewModel.swift in Sources */,
+				190FB31822D7D8D6009D62EB /* KeyboardHandler.swift in Sources */,
 				19913A12216CED7600174187 /* RegisterViewController.swift in Sources */,
+				190FB31A22D7F29A009D62EB /* RegisterView.swift in Sources */,
 				1912576C22B3469100200DA5 /* SearchTableViewModel.swift in Sources */,
 				1958B81221F12CD800B1840F /* TestingViewController.swift in Sources */,
 				19997E8921E500560023C3EC /* ConnectViewController.swift in Sources */,
@@ -744,14 +776,17 @@
 				1944C38C22B2878700753E49 /* LoginViewModel.swift in Sources */,
 				19D7E68D21C41E9E0046D737 /* ARSessionButton.swift in Sources */,
 				19913A2C216D2FBF00174187 /* MainViewController.swift in Sources */,
+				190FB31622D7D5B4009D62EB /* ProgrammaticUI.swift in Sources */,
 				1981CB6921A604C600B69138 /* Constants.swift in Sources */,
 				19DC1D9B21C3436D0079AD25 /* NavigationClient.swift in Sources */,
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
+				190FB31422D7D4AF009D62EB /* LoginView.swift in Sources */,
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
 				19D736B221CAE15D00D6D92A /* InitialViewController.swift in Sources */,
 				19E30DA422A814B300A1F981 /* ButtonCollectionViewCell.swift in Sources */,
 				19D53CC121FCC9ED000984FE /* UIAlertController+Extension.swift in Sources */,
+				1937D81922DBF78900249AF9 /* UIColor+Extension.swift in Sources */,
 				198DA98A218A5C230054E1BD /* User.swift in Sources */,
 				199DE78E22C56EBA00D31E11 /* ErrorMock.swift in Sources */,
 				19997E8721E4F6970023C3EC /* ConnectPendingViewController.swift in Sources */,
@@ -761,6 +796,7 @@
 				19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */,
 				19DD8D4B219486E200C01EDC /* CardDetailViewController.swift in Sources */,
 				199DE79022C5B99B00D31E11 /* Firebase.swift in Sources */,
+				19841E0122D6807400D54B23 /* SearchTableView.swift in Sources */,
 				19E5D19D220632A4002EDCD6 /* SensitiveData.swift in Sources */,
 				1912576F22B3D94B00200DA5 /* UserCellModel.swift in Sources */,
 				199DE78822C4F8FB00D31E11 /* JMAuth.swift in Sources */,
@@ -781,7 +817,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1998D26122C3D0F20040F990 /* ARConnectTests.swift in Sources */,
-				199DE78522C4015A00D31E11 /* LoginTests.swift in Sources */,
+				199DE78522C4015A00D31E11 /* LoginViewModelTests.swift in Sources */,
 				199DE79222C64E2200D31E11 /* FirebaseClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

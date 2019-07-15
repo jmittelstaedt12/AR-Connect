@@ -52,7 +52,7 @@ class FirebaseClientTests: QuickSpec {
                 ]
                 DatabaseeReferenceMock.initializeDatabase(mockDatabaseDictionary: mockDatabase)
                 referenceMock = DatabaseeReferenceMock(pointsTo: [])
-                firebase = Firebase(auth: auth, usersRef: referenceMock)
+                firebase = Firebase(functionality: .mock, auth: auth, usersRef: referenceMock)
                 client = FirebaseClient(firebase: firebase)
                 scheduler = TestScheduler(initialClock: 0)
                 disposeBag = DisposeBag()
@@ -68,7 +68,7 @@ class FirebaseClientTests: QuickSpec {
                 it("should end sequence after event") {
                     expect(snapshot).toNot(beNil())
                 }
-                it("should have a dictionary") {
+                it("should return a dictionary") {
                     let user = snapshot?["S1HrJFwrwUalb37PzVHny6B5qry2"] as? [String: Any]
                     expect(user).toNot(beNil())
                 }

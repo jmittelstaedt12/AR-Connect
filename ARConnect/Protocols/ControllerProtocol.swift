@@ -13,7 +13,6 @@ protocol ControllerProtocol where Self:UIViewController {
     associatedtype ViewModelType: ViewModelProtocol
     var viewModel: ViewModelType! { get set }
     func configure(with viewModel: ViewModelType)
-//    static func create(with viewModel: ViewModelType) -> UIViewController
 }
 
 extension ControllerProtocol {
@@ -23,5 +22,4 @@ extension ControllerProtocol {
         self.viewModel = viewModel
         configure(with: viewModel)
     }
-    
 }

@@ -35,20 +35,20 @@ class LoginViewModel: ViewModelProtocol {
 
     typealias Credentials = (email: String, password: String)
     let firebaseClient: FirebaseClient
-    
+
     var credentialsObservable: Observable<Credentials> {
         return Observable.combineLatest(emailSubject.asObservable(), passwordSubject.asObservable()) { (email, password) in
             return Credentials(email: email, password: password)
         }
     }
-    
+
     init(firebaseClient: FirebaseClient = FirebaseClient()) {
         input = Input(email: emailSubject.asObserver(),
                       password: passwordSubject.asObserver(),
                       signInDidTap: signInDidTapSubject.asObserver())
 
-        output = Output(loginResultObservable: loginResultSubject.asObservable(),
-                        errorsObservable: errorsSubject.asObservable())
+        output = Output(loginResultObservable: loginResultSubject,
+                        errorsObservable: errorsSubject)
 
         self.firebaseClient = firebaseClient
 
@@ -64,11 +64,12 @@ class LoginViewModel: ViewModelProtocol {
                 return self.firebaseClient.logInToDB(email: credentials.email, password: credentials.password)
             }
             .subscribe(onNext: { [weak self] result in
+                guard let self = self else { return }
                 switch result {
                 case .success(let data):
-                    self?.loginResultSubject.onNext(data)
+                    self.loginResultSubject.onNext(data)
                 case .failure(let error):
-                    self?.errorsSubject.onNext(error)
+                    self.errorsSubject.onNext(error)
                 }
             })
             .disposed(by: disposeBag)

@@ -69,7 +69,7 @@ final class RootViewController: UIViewController {
     }
 
     // If the user signs out, switch to the login screen
-    func switchToLogout() {
+    @objc func switchToLogout() {
         let logoutScreen = UINavigationController(rootViewController: LoginViewController(viewModel: LoginViewModel()))
         customizeNavigationBar(logoutScreen.navigationBar)
         animateDismissTransition(to: logoutScreen)

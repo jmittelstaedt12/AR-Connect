@@ -16,7 +16,8 @@ class MainViewModel: ViewModelProtocol {
 
     typealias ErrorMessage = (title: String, body: String)
     struct Input {
-        let disconnectDidTap: AnyObserver<Void>
+        let disconnectRequest: AnyObserver<Void>
+        let logoutRequest: AnyObserver<Void>
     }
 
     struct Output {
@@ -31,8 +32,9 @@ class MainViewModel: ViewModelProtocol {
     let input: Input
     let output: Output
 
+    private let disconnectRequestSubject = PublishSubject<Void>()
+    private let logoutRequestSubject = PublishSubject<Void>()
     private let profileImageDataSubject = PublishSubject<Data>()
-    private let disconnectDidTapSubject = PublishSubject<Void>()
     private let isAuthenticatedSubject = PublishSubject<Result<String, FirebaseError>>()
     private let connectRequestSubject = PublishSubject<ConnectRequestViewModel>()
     private let endSessionSubject = PublishSubject<Void>()
@@ -67,15 +69,16 @@ class MainViewModel: ViewModelProtocol {
         self.firebaseClient = firebaseClient
         self.firebaseClient.setOnDisconnectUpdates(forUid: uid)
 
-        self.input = Input(disconnectDidTap: disconnectDidTapSubject.asObserver())
-        self.output = Output(profileImageDataObservable: profileImageDataSubject.asObserver(),
-                        authenticatedUserObservable: isAuthenticatedSubject.asObserver(),
-                        connectRequestObservable: connectRequestSubject.asObserver(),
-                        endSessionObservable: endSessionSubject.asObserver(),
-                        sessionStartObservable: sessionStartSubject.asObserver(),
-                        didSendConnectRequestObservable: didSendConnectRequestSubject.asObserver())
+        self.input = Input(disconnectRequest: disconnectRequestSubject.asObserver(),
+                           logoutRequest: logoutRequestSubject.asObserver())
+        self.output = Output(profileImageDataObservable: profileImageDataSubject.asObservable(),
+                        authenticatedUserObservable: isAuthenticatedSubject.asObservable(),
+                        connectRequestObservable: connectRequestSubject.asObservable(),
+                        endSessionObservable: endSessionSubject.asObservable(),
+                        sessionStartObservable: sessionStartSubject.asObservable(),
+                        didSendConnectRequestObservable: didSendConnectRequestSubject.asObservable())
 
-        setUserObservers()
+        setNetworkObservers()
         setUIEventObservers()
 
         NotificationCenter.default.addObserver(self,
@@ -83,9 +86,9 @@ class MainViewModel: ViewModelProtocol {
                                                name: connectNotificationName, object: nil)
     }
 
-    private func setUserObservers() {
+    private func setNetworkObservers() {
 
-        /// Fetch user profile image
+        // Fetch user profile image
         firebaseClient.fetchObservableUser(forUid: uid)
             .subscribe(onNext: { [weak self] user in
                 guard let self = self else { return }
@@ -93,7 +96,7 @@ class MainViewModel: ViewModelProtocol {
             })
             .disposed(by: disposeBag)
 
-        /// Observe if current user becomes invalid
+        // Observe if current user becomes invalid
         BehaviorRelay<User?>(value: Auth.auth().currentUser).asObservable()
             .subscribe(onNext: { [weak self] currentUser in
                 if currentUser == nil {
@@ -104,7 +107,7 @@ class MainViewModel: ViewModelProtocol {
             })
             .disposed(by: disposeBag)
 
-        /// Online status observer
+        // Online status observer
         firebaseClient.createAmOnlineObservable()
             .subscribe(onNext: { [weak self] connected in
                 guard let self = self else { return }
@@ -112,7 +115,7 @@ class MainViewModel: ViewModelProtocol {
             })
             .disposed(by: disposeBag)
 
-        /// Setting connection request observer
+        // Setting connection request observer
         firebaseClient.willDisplayRequestingUserObservable()?
             .subscribe(onNext: { [weak self] (requestingUser, requestDictionary) in
                 guard let self = self, let currentUser = self.currentUser, let currentLocation = self.currentLocation else {
@@ -150,7 +153,7 @@ class MainViewModel: ViewModelProtocol {
     }
 
     private func setUIEventObservers() {
-        disconnectDidTapSubject
+        disconnectRequestSubject
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
                 self.firebaseClient.usersRef
@@ -158,9 +161,18 @@ class MainViewModel: ViewModelProtocol {
                     .updateChildValues(["connectedTo": "",
                                         "isConnected": false])
                 self.endSessionSubject.onNext(())
+                }, onCompleted: {
+                    print("Completed")
+                })
+                .disposed(by: disposeBag)
+
+        logoutRequestSubject
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                try? self.firebaseClient.logoutOfDB()
             })
             .disposed(by: disposeBag)
-    }
+        }
 
     @objc func handleSessionStart(notification: NSNotification) {
         let connectedUid = notification.userInfo?["uid"] as! String

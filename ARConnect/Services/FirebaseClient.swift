@@ -27,7 +27,7 @@ class FirebaseClient {
     var observedReferences = [DatabaseReference]()
 
     init() {
-        let firebase = Firebase()
+        let firebase = Firebase(functionality: .network)
         auth = firebase.auth
         usersRef = firebase.usersRef
     }

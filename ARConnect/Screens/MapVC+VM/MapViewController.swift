@@ -111,22 +111,6 @@ final class MapViewController: UIViewController, MKMapViewDelegate, ControllerPr
         meetupLocationObservable = meetupLocationVariable.asObservable().ignoreNil().take(1)
     }
 
-    @objc func centerAtLocation() {
-        if let coordinate = currentLocation?.coordinate {
-            self.centerMap(atCoordinate: coordinate, withCoordinateSpan: 0.01)
-        }
-    }
-
-    @objc func centerAtPath() {
-        if let path = pathOverlay {
-            map.setVisibleMapRect(MKMapRect(origin: path.boundingMapRect.origin,
-                                            size: MKMapSize(width: path.boundingMapRect.size.width,
-                                                            height: path.boundingMapRect.size.height)),
-                                            edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40),
-                                            animated: true)
-        }
-    }
-
     // MARK: Updates to Map
 
     func draw(polyline line: MKPolyline, color: UIColor) {
@@ -191,5 +175,24 @@ final class MapViewController: UIViewController, MKMapViewDelegate, ControllerPr
 
         meetupLocationVariable.accept(CLLocation(coordinate: map.centerCoordinate))
         meetupLocationVariable.accept(nil)
+    }
+}
+
+extension MapViewController: MainViewMapDelegate {
+    
+    func centerAtLocation() {
+        if let coordinate = currentLocation?.coordinate {
+            self.centerMap(atCoordinate: coordinate, withCoordinateSpan: 0.01)
+        }
+    }
+
+    func centerAtPath() {
+        if let path = pathOverlay {
+            map.setVisibleMapRect(MKMapRect(origin: path.boundingMapRect.origin,
+                                            size: MKMapSize(width: path.boundingMapRect.size.width,
+                                                            height: path.boundingMapRect.size.height)),
+                                  edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40),
+                                  animated: true)
+        }
     }
 }

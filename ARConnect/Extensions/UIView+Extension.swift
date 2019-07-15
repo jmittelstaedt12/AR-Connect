@@ -10,7 +10,7 @@ import UIKit
 
 extension UIView {
 
-    // Used to set auto layout anchors for UIView edges
+    /// Wrapper for setting auto layout anchors for UIView edges
     func edgeAnchors(top: NSLayoutYAxisAnchor? = nil, leading: NSLayoutXAxisAnchor? = nil, bottom: NSLayoutYAxisAnchor? = nil, trailing: NSLayoutXAxisAnchor? = nil, padding: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)) {
         if let top = top {
             topAnchor.constraint(equalTo: top, constant: padding.top).isActive = true
@@ -26,7 +26,7 @@ extension UIView {
         }
     }
 
-    // Usex to set auto layout anchors for UIView center coordinates
+    /// Wrapper for setting auto layout anchors for UIView center coordinates
     func centerAnchors(centerX: NSLayoutXAxisAnchor? = nil, centerY: NSLayoutYAxisAnchor? = nil) {
         if let centerX = centerX {
             centerXAnchor.constraint(equalTo: centerX).isActive = true
@@ -36,7 +36,7 @@ extension UIView {
         }
     }
 
-    // Used to set auto layout anchors for UIView width and height
+    /// Wrapper for setting auto layout anchors for UIView width and height using constants
     func dimensionAnchors(height: CGFloat? = nil, heightMultiplier: CGFloat = 1, width: CGFloat? = nil, widthMultiplier: CGFloat = 1) {
         if let height = height {
             heightAnchor.constraint(equalToConstant: height * heightMultiplier).isActive = true
@@ -46,6 +46,7 @@ extension UIView {
         }
     }
 
+    /// Wrapper for setting auto layout anchors for UIView width and height using dimensions
     func dimensionAnchors(height: NSLayoutDimension? = nil, heightMultiplier: CGFloat = 1, heightConstant: CGFloat = 0, width: NSLayoutDimension? = nil, widthMultiplier: CGFloat = 1, widthConstant: CGFloat = 0) {
         if let height = height {
             heightAnchor.constraint(equalTo: height, multiplier: heightMultiplier, constant: heightConstant).isActive = true
@@ -60,4 +61,25 @@ extension UIView {
             self.transform = CGAffineTransform(rotationAngle: degrees)
         }, completion: { _ in completion?() })
     }
+    
+    // Dismiss keyboard when tapping view
+    func hideKeyboardWhenTappedAround() {
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIView.dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        addGestureRecognizer(tap)
+    }
+
+    @objc func dismissKeyboard() {
+        endEditing(true)
+    }
+
+}
+
+extension UIView: UITextFieldDelegate {
+
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        endEditing(true)
+        return true
+    }
+
 }
