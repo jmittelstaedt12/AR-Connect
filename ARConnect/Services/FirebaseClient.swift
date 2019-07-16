@@ -10,20 +10,24 @@ import Firebase
 import Foundation
 import RxSwift
 
-fileprivate struct FIRObservables {
-    var usersObservable: Observable<[LocalUser]>?
-    var requestingUserUidObservable: Observable<String>?
-    var requestIsPendingObservable: Observable<Bool>?
-    var amOnlineObservable: Observable<Bool>?
-    var amInSessionObservable: Observable<Bool>?
+protocol FirebaseClientType {
+    var usersRef: DatabaseReferenceType! { get }
+    var auth: AuthType! { get }
+    func logInToDB(email: String, password: String) -> Observable<Result<LocalUser, Error>>
+    func setOnDisconnectUpdates(forUid uid: String)
+    func fetchObservableUser(forUid uid: String) -> Observable<LocalUser>
+    func createAmOnlineObservable() -> Observable<Bool>
+    func willDisplayRequestingUserObservable() -> Observable<(LocalUser, [String: AnyObject])>?
+    func logoutOfDB() throws
+    func createEndSessionObservable(forUid uid: String) -> Observable<Bool>?
+    func createCallUserObservable(forUid uid: String, atCoordinate coordinate: (latitude: Double, longitude: Double)) -> Observable<Bool>
+    func createUserOnlineObservable(forUid uid: String) -> Observable<Bool>
 }
 
-fileprivate var observables = FIRObservables()
+class FirebaseClient: FirebaseClientType {
 
-class FirebaseClient {
-
-    let auth: JMAuth
-    let usersRef: DatabaseReference
+    private(set) var auth: AuthType!
+    private(set) var usersRef: DatabaseReferenceType!
     var observedReferences = [DatabaseReference]()
 
     init() {
@@ -31,12 +35,12 @@ class FirebaseClient {
         auth = firebase.auth
         usersRef = firebase.usersRef
     }
-    
+
     init(firebase: Firebase) {
         auth = firebase.auth
         usersRef = firebase.usersRef
     }
-//    let usersRef = Database.database().reference().child("Users")
+//    let usersRef = Database.database().reference().child(at: "Users")
 
     /// Request to authorize a new user and add them to database
     func createNewUser(user: RegisterUser, handler: @escaping ((Error?) -> Void)) {
@@ -62,48 +66,53 @@ class FirebaseClient {
         }
     }
 
-    func registerNewUser(user: RegisterUser, imageUrl: String? = nil, handler: @escaping ((Error?) -> Void)) {
-        auth.createUser(withEmail: user.email, password: user.password) { [weak self] (data, error) in
+    private func registerNewUser(user: RegisterUser, imageUrl: String? = nil, handler: @escaping ((Error?) -> Void)) {
+        auth.createUser(withEmail: user.email, password: user.password) { [weak self] result in
             guard let self = self else { return }
-            if let err = error {
-                handler(err)
-                return
-            }
-            guard let uid = data?.user.uid else { return }
+            switch result {
+            case .failure(let error):
+                handler(error)
+            case .success(let user):
+                var postError: Error?
+                let userReference = self.usersRef.child(at: user.uid)
+                let requestingUserReference = userReference.child(at: "requestingUser")
 
-            var postError: Error?
-            let userReference = self.usersRef.child(uid)
-            let requestingUserReference = userReference.child("requestingUser")
+                let values: [String: Any] =
+                    [
+                        "email": user.email,
+                        "name": user.name,
+                        "connectedTo": "",
+                        "pendingRequest": false,
+                        "isConnected": false,
+                        "latitude": 0,
+                        "longitude": 0,
+                        "profileImageUrl": imageUrl ?? "",
+                        "isOnline": false
+                    ]
 
-            let values = ["email": user.email!,
-                          "name": "\(user.firstName!) \(user.lastName!)",
-                          "connectedTo": "",
-                          "pendingRequest": false,
-                          "isConnected": false,
-                          "latitude": 0,
-                          "longitude": 0,
-                          "profileImageUrl": imageUrl ?? "",
-                          "isOnline": false] as [String: Any]
+                let requestingUserValues: [String: Any] =
+                    [
+                        "uid": "",
+                        "latitude": 0,
+                        "longitude": 0
+                    ]
 
-            let requestingUserValues = ["uid": "",
-                                        "latitude": 0,
-                                        "longitude": 0] as [String: Any]
+                let group = DispatchGroup()
+                group.enter()
+                userReference.setValue(values, withCompletionBlock: { (error, _) in
+                    postError = error
+                    group.leave()
+                })
 
-            let group = DispatchGroup()
-            group.enter()
-            userReference.setValue(values, withCompletionBlock: { (error, _) in
-                postError = error
-                group.leave()
-            })
+                group.enter()
+                requestingUserReference.setValue(requestingUserValues, withCompletionBlock: { (error, _) in
+                    postError = error
+                    group.leave()
+                })
 
-            group.enter()
-            requestingUserReference.setValue(requestingUserValues, withCompletionBlock: { (error, _) in
-                postError = error
-                group.leave()
-            })
-
-            group.notify(queue: .main) {
-                handler(postError)
+                group.notify(queue: .main) {
+                    handler(postError)
+                }
             }
         }
     }
@@ -125,20 +134,20 @@ class FirebaseClient {
 
     /// Log out current user and return to login screen
     func logoutOfDB() throws {
-        guard let uid = auth.currentUser?.uid else { return }
+        guard let uid = auth.user?.uid else { return }
         for ref in observedReferences {
             ref.removeAllObservers()
         }
         do {
             try auth.signOut()
             observables = FIRObservables()
-            usersRef.child(uid).updateChildValues([
+            usersRef.child(at: uid).updateChildValues([
                 "connectedTo": "",
                 "isOnline": false,
                 "pendingRequest": false,
                 "isConnected": false
                 ])
-            usersRef.child(uid).child("requestingUser").updateChildValues([
+            usersRef.child(at: uid).child(at: "requestingUser").updateChildValues([
                 "uid": "",
                 "latitude": 0,
                 "longitude": 0
@@ -151,8 +160,8 @@ class FirebaseClient {
 //    func sendConnectRequestToUser(withUid uid: String, atCoordinateTuple coordinate: (latitude: Double, longitude: Double)) -> Observable<String> {
 //        #warning("combine with createCanCallObservable")
 //        return Observable.create({ (observer) -> Disposable in
-//            FirebaseClient.usersRef.child(auth.currentUser!.uid).updateChildValues(["pendingRequest": true])
-//            let requestingUserRef = usersRef.child(uid).child("requestingUser")
+//            FirebaseClient.usersRef.child(auth.user!.uid).updateChildValues(["pendingRequest": true])
+//            let requestingUserRef = usersRef.child(at: uid).child(at: "requestingUser")
 //            requestingUserRef.updateChildValues(["uid": uid,
 //                                                 "latitude": coordinate.latitude,
 //                                                 "longitude": coordinate.longitude
@@ -169,17 +178,17 @@ class FirebaseClient {
 //    }
 
     func setOnDisconnectUpdates(forUid uid: String) {
-        let userRef = usersRef.child(uid)
+        let userRef = usersRef.child(at: uid)
         userRef.onDisconnectUpdateChildValues(["connectedTo": "",
                                                "isOnline": false,
                                                "pendingRequest": false,
                                                "isConnected": false])
-        userRef.child("requestingUser").onDisconnectUpdateChildValues(["uid": "",
+        userRef.child(at: "requestingUser").onDisconnectUpdateChildValues(["uid": "",
                                                                        "latitude": 0,
                                                                        "longitude": 0])
     }
 
-    func rxFirebaseSingleEvent(forRef ref: DatabaseQuery, andEvent event: DataEventType) -> Observable<DataSnapshot> {
+    func rxFirebaseSingleEvent(forRef ref: DatabaseQueryType, andEvent event: DataEventType) -> Observable<DataSnapshot> {
         return Observable.create { (observer) -> Disposable in
             ref.observeSingleEvent(of: event, with: { (snapshot) in
                 observer.onNext(snapshot)
@@ -191,7 +200,7 @@ class FirebaseClient {
         }
     }
 
-    func rxFirebaseListener(forRef ref: DatabaseQuery, andEvent event: DataEventType) -> Observable<DataSnapshot> {
+    func rxFirebaseListener(forRef ref: DatabaseQueryType, andEvent event: DataEventType) -> Observable<DataSnapshot> {
         return Observable.create { (observer) -> Disposable in
             ref.observe(event, with: { (snapshot) in
                 observer.onNext(snapshot)
@@ -203,7 +212,7 @@ class FirebaseClient {
     }
 
     func fetchObservableUser(forUid uid: String) -> Observable<LocalUser> {
-        return rxFirebaseSingleEvent(forRef: usersRef.child(uid), andEvent: .value)
+        return rxFirebaseSingleEvent(forRef: usersRef.child(at: uid), andEvent: .value)
             .filter { $0.value is [String: AnyObject] }
             .map { snapshot in
                 let dictionary = snapshot.value as! [String: AnyObject]
@@ -228,7 +237,7 @@ class FirebaseClient {
         .filter { $0.value is [String: AnyObject] }
             .map { snapshot in
                 var dictionary = snapshot.value as! [String: AnyObject]
-                if let uid = self.auth.currentUser?.uid {
+                if let uid = self.auth.user?.uid {
                     dictionary.removeValue(forKey: uid)
                 }
                 var users = dictionary.values
@@ -258,13 +267,13 @@ class FirebaseClient {
 
     func fetchRequestingUser(uid: String) -> Observable<(LocalUser, [String: AnyObject])> {
         return Observable.create { (observer) -> Disposable in
-            let currentUserRef = self.usersRef.child(self.auth.currentUser!.uid)
-            let requestingUserRef = self.usersRef.child(uid)
+            let currentUserRef = self.usersRef.child(at: self.auth.user!.uid)
+            let requestingUserRef = self.usersRef.child(at: uid)
 
             let group = DispatchGroup()
             group.enter()
             var requestingUserDictionary: [String: AnyObject] = [:]
-            currentUserRef.child("requestingUser").observeSingleEvent(of: .value, with: { snapshot in
+            currentUserRef.child(at: "requestingUser").observeSingleEvent(of: .value, with: { snapshot in
                 if let dictionary = snapshot.value as? [String: AnyObject] {
                     requestingUserDictionary = dictionary
                 }
@@ -310,8 +319,8 @@ class FirebaseClient {
     /// Create observable to monitor incoming request user uid's
     func createRequestingUserUidObservable() -> Observable<String>? {
         if let observable = observables.requestingUserUidObservable { return observable }
-        guard let uid = auth.currentUser?.uid else { return nil }
-        observables.requestingUserUidObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser").child("uid"), andEvent: .value)
+        guard let uid = auth.user?.uid else { return nil }
+        observables.requestingUserUidObservable = rxFirebaseListener(forRef: usersRef.child(at: uid).child(at: "requestingUser").child(at: "uid"), andEvent: .value)
             .filter { $0.value is String }
             .map { $0.value as! String }
             .filter { !$0.isEmpty }
@@ -320,7 +329,7 @@ class FirebaseClient {
     }
 
     func createNoRequestingUserObservable(forUid uid: String) -> Observable<Bool> {
-        return rxFirebaseListener(forRef: usersRef.child(uid).child("requestingUser").child("uid"), andEvent: .value)
+        return rxFirebaseListener(forRef: usersRef.child(at: uid).child(at: "requestingUser").child(at: "uid"), andEvent: .value)
             .filter { $0.value is String }
             .map { $0.value as! String }
             .map { $0.isEmpty }
@@ -329,18 +338,18 @@ class FirebaseClient {
 
     /// Create requesting user for uid observable
     func createRequestIsPendingObservable(forUid uid: String) -> Observable<Bool> {
-        if uid == auth.currentUser?.uid, let observable = observables.requestIsPendingObservable { return observable }
-        let requestIsPendingObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("pendingRequest"), andEvent: .value)
+        if uid == auth.user?.uid, let observable = observables.requestIsPendingObservable { return observable }
+        let requestIsPendingObservable = rxFirebaseListener(forRef: usersRef.child(at: uid).child(at: "pendingRequest"), andEvent: .value)
             .filter { $0.value is Bool }
             .map { $0.value as! Bool }
             .share(replay: 1)
-        if uid == auth.currentUser?.uid { observables.requestIsPendingObservable = requestIsPendingObservable }
+        if uid == auth.user?.uid { observables.requestIsPendingObservable = requestIsPendingObservable }
         return requestIsPendingObservable
     }
 
     /// Create single event observable for user online with uid
     func createUserOnlineObservable(forUid uid: String) -> Observable<Bool> {
-        return rxFirebaseListener(forRef: usersRef.child(uid).child("isOnline"), andEvent: .value)
+        return rxFirebaseListener(forRef: usersRef.child(at: uid).child(at: "isOnline"), andEvent: .value)
             .filter { $0.value is Bool }
             .map { $0.value as! Bool }
     }
@@ -358,11 +367,11 @@ class FirebaseClient {
     /// Create observable to check if user is available to connect
     func createUserAvailableObservable(forUid uid: String) -> Observable<Bool> {
         let isOnlineObservable = createUserOnlineObservable(forUid: uid)
-        let isInSessionObservable = rxFirebaseSingleEvent(forRef: usersRef.child(uid).child("isConnected"), andEvent: .value)
+        let isInSessionObservable = rxFirebaseSingleEvent(forRef: usersRef.child(at: uid).child(at: "isConnected"), andEvent: .value)
             .filter { $0.value is Bool }
             .map { $0.value as! Bool }
 
-        let isPendingObservable = rxFirebaseSingleEvent(forRef: usersRef.child(uid).child("pendingRequest"), andEvent: .value)
+        let isPendingObservable = rxFirebaseSingleEvent(forRef: usersRef.child(at: uid).child(at: "pendingRequest"), andEvent: .value)
             .filter { $0.value is Bool }
             .map { $0.value as! Bool }
 
@@ -370,7 +379,7 @@ class FirebaseClient {
     }
 
     func createCallUserObservable(forUid uid: String, atCoordinate coordinate: (latitude: Double, longitude: Double)) -> Observable<Bool> {
-        let currentUid = auth.currentUser!.uid
+        let currentUid = auth.user!.uid
         let isAvailableObservable = createUserAvailableObservable(forUid: uid)
         let amOnlineObservable = createAmOnlineObservable()
         return Observable.combineLatest(isAvailableObservable, amOnlineObservable) {
@@ -382,7 +391,7 @@ class FirebaseClient {
             }
             .filter { $0 }
             .flatMap { _ in return Observable.create({ (observer) -> Disposable in
-                    let requestingUserRef = self.usersRef.child(uid).child("requestingUser")
+                    let requestingUserRef = self.usersRef.child(at: uid).child(at: "requestingUser")
                     requestingUserRef.updateChildValues(["uid": currentUid,
                                                          "latitude": coordinate.latitude,
                                                          "longitude": coordinate.longitude]
@@ -400,7 +409,7 @@ class FirebaseClient {
     }
 
     func willDisplayRequestingUserObservable() -> Observable<(LocalUser, [String: AnyObject])>? {
-        guard let currentUid = auth.currentUser?.uid else { return nil }
+        guard let currentUid = auth.user?.uid else { return nil }
         let requestingUidObservable = createRequestingUserUidObservable() // get requesting uid
         let isOnlineObservable = requestingUidObservable?.flatMap { self.createUserOnlineObservable(forUid: $0) } // requesting user is available
         let pendingObservable = createRequestIsPendingObservable(forUid: currentUid) // you are not awaiting a response from someone else
@@ -408,7 +417,7 @@ class FirebaseClient {
 
         return Observable.combineLatest(isOnlineObservable!, pendingObservable, amOnlineObservable) { [weak self] isOnline, amPending, amOnline -> Bool in
             guard let self = self else { return false }
-            return isOnline && !amPending && amOnline && self.auth.currentUser != nil
+            return isOnline && !amPending && amOnline && self.auth.user != nil
         }
             .filter { $0 }
             .flatMapLatest { _ -> Observable<String> in
@@ -430,23 +439,23 @@ class FirebaseClient {
     }
 
     func createCalledUserResponseObservable(forUid uid: String) -> Observable<Bool>? {
-        guard let currentUid = auth.currentUser?.uid else { return nil }
+        guard let currentUid = auth.user?.uid else { return nil }
         return createNoRequestingUserObservable(forUid: uid)
             .flatMapLatest { _ in return self.createIsInSessionObservable(forUid: currentUid) }
             .take(1)
     }
 
     func createIsInSessionObservable(forUid uid: String) -> Observable<Bool> {
-        if uid == auth.currentUser?.uid, let observable = observables.amInSessionObservable { return observable }
-        let isInSessionObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("isConnected"), andEvent: .value)
+        if uid == auth.user?.uid, let observable = observables.amInSessionObservable { return observable }
+        let isInSessionObservable = rxFirebaseListener(forRef: usersRef.child(at: uid).child(at: "isConnected"), andEvent: .value)
             .filter { $0.value is Bool }
             .map { $0.value as! Bool }
-        if uid == auth.currentUser?.uid { observables.amInSessionObservable = isInSessionObservable }
+        if uid == auth.user?.uid { observables.amInSessionObservable = isInSessionObservable }
         return isInSessionObservable
     }
 
     func createEndSessionObservable(forUid uid: String) -> Observable<Bool>? {
-        guard let currentUid = auth.currentUser?.uid else { return nil }
+        guard let currentUid = auth.user?.uid else { return nil }
         let amInSessionObservable = createIsInSessionObservable(forUid: currentUid)
         let isInSessionObservable = createIsInSessionObservable(forUid: uid)
         return Observable.combineLatest(amInSessionObservable, isInSessionObservable) { return !$0 || !$1 }
@@ -455,14 +464,14 @@ class FirebaseClient {
     }
 
 //    func createConnectedUserCoordinatesObservable(userUid uid: String) -> Observable<(Double?, Double?)> {
-//        let latitudeObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("latitude"), andEvent: .value)
-//        let longitudeObservable = rxFirebaseListener(forRef: usersRef.child(uid).child("latitude"), andEvent: .value)
+//        let latitudeObservable = rxFirebaseListener(forRef: usersRef.child(at: uid).child(at: "latitude"), andEvent: .value)
+//        let longitudeObservable = rxFirebaseListener(forRef: usersRef.child(at: uid).child(at: "latitude"), andEvent: .value)
 ////        return latitudeObservable.concat(longitudeObservable)
 //    }
 
     func fetchCoordinates(uid: String, handler: @escaping((Double?, Double?) -> Void)) {
-        let userRef = usersRef.child(uid)
-        userRef.observeSingleEvent(of: .value) { (snapshot) in
+        let userRef = usersRef.child(at: uid)
+        userRef.observeSingleEvent(of: .value, with: { (snapshot) in
             if let userDictionary = snapshot.value as? [String: Any] {
                 let latitude = userDictionary["latitude"] as? Double
                 let longitude = userDictionary["longitude"] as? Double
@@ -470,7 +479,7 @@ class FirebaseClient {
             } else {
                 handler(nil, nil)
             }
-        }
+        }, withCancel: nil)
     }
 
 }
@@ -483,7 +492,7 @@ enum FirebaseError: LocalizedError {
     case custom(title: String, errorDescription: String)
     public var title: String {
         switch self {
-        case .noResponse(_):
+        case .noResponse:
             return "Timed Out"
         case .isOffline:
             return "Connection Error"
@@ -511,3 +520,13 @@ enum FirebaseError: LocalizedError {
         }
     }
 }
+
+fileprivate struct FIRObservables {
+    var usersObservable: Observable<[LocalUser]>?
+    var requestingUserUidObservable: Observable<String>?
+    var requestIsPendingObservable: Observable<Bool>?
+    var amOnlineObservable: Observable<Bool>?
+    var amInSessionObservable: Observable<Bool>?
+}
+
+fileprivate var observables = FIRObservables()

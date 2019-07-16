@@ -61,7 +61,7 @@ extension UIView {
             self.transform = CGAffineTransform(rotationAngle: degrees)
         }, completion: { _ in completion?() })
     }
-    
+
     // Dismiss keyboard when tapping view
     func hideKeyboardWhenTappedAround() {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIView.dismissKeyboard))

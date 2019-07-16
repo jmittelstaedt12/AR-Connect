@@ -61,7 +61,7 @@ final class LoginViewController: UIViewController, ControllerProtocol {
             })
             .disposed(by: disposeBag)
 
-        viewModel.output.loginResultObservable
+        viewModel.output.didLogInObservable
             .subscribe(onNext: { _ in
                 AppDelegate.shared.rootViewController.switchToMainScreen()
             })

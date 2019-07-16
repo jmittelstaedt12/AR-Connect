@@ -9,7 +9,7 @@
 import Foundation
 import Firebase
 
-class DataSnapshotMock: DataSnapshot {
+class MockDataSnapshot: DataSnapshot {
     private var myValue: Any?
 
     override var value: Any? {

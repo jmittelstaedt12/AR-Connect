@@ -11,7 +11,7 @@ import UIKit
 final class ButtonCollectionViewCell: UICollectionViewCell {
 
     var button: UIButton?
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = false

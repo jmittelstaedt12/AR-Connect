@@ -56,7 +56,6 @@ extension String: StringProtocol {
     }
 }
 
-
 public extension Dictionary where Key: StringProtocol {
     subscript(keyPath keyPath: KeyPath)  -> Any {
         get {

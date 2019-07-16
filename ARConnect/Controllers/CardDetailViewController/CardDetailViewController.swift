@@ -68,12 +68,12 @@ final class CardDetailViewController: UIViewController {
     @IBAction func onCancel(_ sender: UIButton) {
         UIView.animate(withDuration: 0.8, animations: {
             self.view.alpha = 0
-        }) { _ in
+        }, completion: { _ in
             self.delegate?.removeFromHierarchy()
             self.willMove(toParent: nil)
             self.view.removeFromSuperview()
             self.removeFromParent()
-        }
+        })
     }
 
     @IBAction func connectToUser(_ sender: UIButton) {

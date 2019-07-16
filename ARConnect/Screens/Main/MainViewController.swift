@@ -76,7 +76,6 @@ final class MainViewController: UIViewController, ControllerProtocol {
 
     override func loadView() {
         self.view = MainView(mapView: mapViewController.view, searchView: (searchViewController!.view as! SearchTableView))
-        searchViewController!.searchTableView.delegate = mainView
         mainView.mainDelegate = self
         mainView.mapDelegate = mapViewController
     }

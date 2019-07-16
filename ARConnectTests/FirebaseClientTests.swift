@@ -6,7 +6,6 @@
 //  Copyright © 2019 Jacob Mittelstaedt. All rights reserved.
 //
 
-import Foundation
 import Quick
 import Nimble
 import RxSwift
@@ -14,45 +13,23 @@ import RxBlocking
 import RxTest
 
 @testable import ARConnect
+// swiftlint:disable function_body_length
 
 class FirebaseClientTests: QuickSpec {
 
     override func spec() {
-        var user: LocalUser!
-        var auth: JMAuth!
-        var mockDatabase: [String: Any]!
-        var referenceMock: DatabaseeReferenceMock!
+//        var user: LocalUser!
+//        var mockDatabase: [String: Any]!
         var firebase: Firebase!
+        var usersRef: MockDatabaseReference!
         var client: FirebaseClient!
         var scheduler: TestScheduler!
         var disposeBag: DisposeBag!
 
         describe("network requests") {
             beforeEach {
-                user = LocalUser(name: "Jacob Mittel", email: "jacob@gmail.com", uid: "S1HrJFwrwUalb37PzVHny6B5qry2")
-                auth = JMAuth(mock: true, willFail: false, mockUser: user)
-                mockDatabase =
-                    ["S1HrJFwrwUalb37PzVHny6B5qry2":
-                        ["connectedTo": "",
-                         "email": "jacob@gmail.com",
-                         "isConnected": false,
-                         "isOnline": true,
-                         "isPending": false,
-                         "latitude": 40.68776992071587,
-                         "longitude": -73.92892530229798,
-                         "name": "Jacob Mittel",
-                         "pendingRequest": false,
-                         "profileImageUrl": "https://firebasestorage.googleapis.com/v0/b/ar-connect.appspot.com/o/FF66F260-8C9B-4AC2-A604-B0BA9D2ED8D7.png?alt=media&token=6220e672-22b5-4abb-9fb3-756c0e3ef8ff",
-                         "requestingUser":
-                            ["latitude": 0.0,
-                             "longitude": 0.0,
-                             "uid": ""
-                            ]
-                        ]
-                ]
-                DatabaseeReferenceMock.initializeDatabase(mockDatabaseDictionary: mockDatabase)
-                referenceMock = DatabaseeReferenceMock(pointsTo: [])
-                firebase = Firebase(functionality: .mock, auth: auth, usersRef: referenceMock)
+                firebase = Firebase(functionality: .mock)
+                usersRef = firebase.usersRef as? MockDatabaseReference
                 client = FirebaseClient(firebase: firebase)
                 scheduler = TestScheduler(initialClock: 0)
                 disposeBag = DisposeBag()
@@ -61,7 +38,7 @@ class FirebaseClientTests: QuickSpec {
             context("firebase single event") {
                 var snapshot: [String: Any]?
                 beforeEach {
-                    snapshot = try? client.rxFirebaseSingleEvent(forRef: referenceMock, andEvent: .value)
+                    snapshot = try? client.rxFirebaseSingleEvent(forRef: firebase.usersRef, andEvent: .value)
                         .toBlocking(timeout: 1)
                         .last()?.value as? [String: Any]
                 }
@@ -76,14 +53,18 @@ class FirebaseClientTests: QuickSpec {
 
             context("firebase listener") {
                 it("should not end sequence after event") {
-                    let snapshot = try? client.rxFirebaseListener(forRef: referenceMock, andEvent: .value).toBlocking(timeout: 1).last()?.value as? [String: Any]
+                    let snapshot = try? client.rxFirebaseListener(forRef: firebase.usersRef, andEvent: .value)
+                        .toBlocking(timeout: 1)
+                        .last()?.value as? [String: Any]
                     expect(snapshot).to(beNil())
                 }
             }
 
             context("fetch user") {
                 it("should provide a user") {
-                    let user = try? client.fetchObservableUser(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2").toBlocking(timeout: 1).last()
+                    let user = try? client.fetchObservableUser(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2")
+                        .toBlocking(timeout: 1)
+                        .last()
                     expect(user?.name).to(equal("Jacob Mittel"))
                     expect(user?.email).to(equal("jacob@gmail.com"))
                     expect(user?.uid).to(equal("S1HrJFwrwUalb37PzVHny6B5qry2"))
@@ -104,33 +85,53 @@ class FirebaseClientTests: QuickSpec {
                     let scheduledIsOnline = scheduler.createObserver(Bool.self)
                     isOnline.subscribe(scheduledIsOnline).disposed(by: disposeBag)
                     scheduler.scheduleAt(10, action: {
-                        client.usersRef.child("S1HrJFwrwUalb37PzVHny6B5qry2").updateChildValues(["isOnline": false])
-                    })
-                    scheduler.scheduleAt(20, action: {
-                        client.usersRef.child("S1HrJFwrwUalb37PzVHny6B5qry2").updateChildValues(["isOnline": true])
+                        usersRef.databaseInstance.database[keyPath: KeyPath("Users.S1HrJFwrwUalb37PzVHny6B5qry2.isOnline")] = false
                     })
                     scheduler.start()
-                    expect(scheduledIsOnline.events).to(equal([
-                        .next(0, true),
-                        .next(10, false),
-                        .next(20, true)
-                    ]))
+                    expect(scheduledIsOnline.events).to(equal([.next(0, true), .next(10, false)]))
                 }
             }
 
-            context("check if user is available") {
-                it("should match user availability") {
-                    client.usersRef.child("S1HrJFwrwUalb37PzVHny6B5qry2").updateChildValues(["isOnline": true,
-                                                                                             "isConnected": false,
-                                                                                             "pendingRequest": true])
-                    let isAvailable = client.createUserAvailableObservable(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2")
-                    let scheduledIsAvailable = scheduler.createObserver(Bool.self)
-                    isAvailable.subscribe(scheduledIsAvailable).disposed(by: disposeBag)
+            context("user is available") {
+                var events: [Recorded<Event<Bool?>>] = []
+                beforeEach {
+                    let scheduledObserver = scheduler.createObserver(Bool?.self)
+                    scheduler.scheduleAt(0, action: {
+                        let isAvailable = try? client.createUserAvailableObservable(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2")
+                            .toBlocking(timeout: 1)
+                            .last()
+                        scheduledObserver.onNext(isAvailable!)
+                    })
+                    scheduler.scheduleAt(10, action: {
+                        usersRef.databaseInstance.database[keyPath: KeyPath("Users.S1HrJFwrwUalb37PzVHny6B5qry2.isOnline")] = false
+                        let isAvailable = try? client.createUserAvailableObservable(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2")
+                            .toBlocking(timeout: 1)
+                            .last()
+                        scheduledObserver.onNext(isAvailable!)
+                    })
+                    scheduler.scheduleAt(20, action: {
+                        usersRef.databaseInstance.database[keyPath: KeyPath("Users.S1HrJFwrwUalb37PzVHny6B5qry2.isConnected")] = true
+                        let isAvailable = try? client.createUserAvailableObservable(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2")
+                            .toBlocking(timeout: 1)
+                            .last()
+                        scheduledObserver.onNext(isAvailable!)
+                    })
+                    scheduler.scheduleAt(30, action: {
+                        usersRef.databaseInstance.database[keyPath: KeyPath("Users.S1HrJFwrwUalb37PzVHny6B5qry2.pendingRequest")] = true
+                        let isAvailable = try? client.createUserAvailableObservable(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2")
+                            .toBlocking(timeout: 1)
+                            .last()
+                        scheduledObserver.onNext(isAvailable!)
+                    })
                     scheduler.start()
-                    expect(scheduledIsAvailable.events)
-                        .to(equal([
-                            .next(0, false),
-                            .completed(0)
+                    events = scheduledObserver.events
+                }
+
+                it("returns true") {
+                    expect(events).to(equal([.next(0, true),
+                                             .next(10, false),
+                                             .next(20, false),
+                                             .next(30, false)
                         ]))
                 }
             }
@@ -159,3 +160,28 @@ class FirebaseClientTests: QuickSpec {
         }
     }
 }
+
+// swiftlint:enable function_body_length
+
+
+
+
+
+//                    var events: [Bool?]
+//                    beforeEach {
+//                        isA
+//                        let scheduledObserver = scheduler.createObserver(Bool.self)
+//                        isAvailable.subscribe(scheduledObserver).disposed(by: disposeBag)
+//                        scheduler.scheduleAt(10, action: {
+//                            usersRef.database[keyPath: KeyPath("S1HrJFwrwUalb37PzVHny6B5qry2.isOnline")] = false
+//                            isAvailable = client.createUserAvailableObservable(forUid: "S1HrJFwrwUalb37PzVHny6B5qry2")
+//                        })
+//                        scheduler.start()
+//                        events = scheduledObserver.events.map { $0.value.element }
+//
+//                    }
+//                    expect(events)
+//                        .to(equal([
+//                            .next(0, true),
+//                            .next(10, false),
+//                        ]))

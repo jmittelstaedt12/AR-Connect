@@ -39,7 +39,7 @@ final class ConnectPendingViewModel: ViewModelProtocol {
     let profileImageData: Data?
     var timer: Timer?
     let firebaseClient: FirebaseClient
-    
+
     init(currentUser: LocalUser, requestingUser: LocalUser, meetupLocation: CLLocation, currentLocation: CLLocation, firebaseClient: FirebaseClient = FirebaseClient()) {
         input = Input()
         output = Output(wentOfflineObservable: wentOfflineSubject,
@@ -57,7 +57,7 @@ final class ConnectPendingViewModel: ViewModelProtocol {
     }
 
     func didCancel() {
-        firebaseClient.usersRef.child(currentUser.uid).updateChildValues(["pendingRequest": false])
+        firebaseClient.usersRef.child(at: currentUser.uid).updateChildValues(["pendingRequest": false])
         timer?.invalidate()
     }
 
@@ -71,7 +71,7 @@ final class ConnectPendingViewModel: ViewModelProtocol {
         firebaseClient.createCalledUserResponseObservable(forUid: requestingUser.uid)?
             .subscribe(onNext: { [weak self] didConnect in
                 guard let self = self else { return }
-                self.firebaseClient.usersRef.child(self.currentUser.uid).updateChildValues(["pendingRequest": false])
+                self.firebaseClient.usersRef.child(at: self.currentUser.uid).updateChildValues(["pendingRequest": false])
                 let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
                 NotificationCenter.default.post(name: name, object: nil, userInfo: ["uid": self.requestingUser.uid,
                                                                                     "meetupLocation": self.meetupLocation,
@@ -84,7 +84,7 @@ final class ConnectPendingViewModel: ViewModelProtocol {
     private func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 20, repeats: false) { [weak self] _ in
             guard let self = self else { return }
-            self.firebaseClient.usersRef.child(self.currentUser.uid).updateChildValues(["pendingRequest": false])
+            self.firebaseClient.usersRef.child(at: self.currentUser.uid).updateChildValues(["pendingRequest": false])
             self.callDroppedSubject.onNext(.noResponse(userName: self.requestingUser.name))
         }
     }

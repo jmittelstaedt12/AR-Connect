@@ -179,7 +179,7 @@ final class MapViewController: UIViewController, MKMapViewDelegate, ControllerPr
 }
 
 extension MapViewController: MainViewMapDelegate {
-    
+
     func centerAtLocation() {
         if let coordinate = currentLocation?.coordinate {
             self.centerMap(atCoordinate: coordinate, withCoordinateSpan: 0.01)

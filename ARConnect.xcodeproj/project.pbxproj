@@ -24,6 +24,9 @@
 		1944C39022B2C35C00753E49 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1944C38F22B2C35C00753E49 /* MainViewModel.swift */; };
 		194CADB821FABA4100204E28 /* JMMKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194CADB721FABA4100204E28 /* JMMKMapView.swift */; };
 		1958B81221F12CD800B1840F /* TestingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1958B81121F12CD800B1840F /* TestingViewController.swift */; };
+		196BC69D22DD04C400C9FBD4 /* MockFirebaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196BC69C22DD04C400C9FBD4 /* MockFirebaseClient.swift */; };
+		196BC69F22DE1F8300C9FBD4 /* MockDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196BC69E22DE1F8300C9FBD4 /* MockDatabase.swift */; };
+		196BC6A122DE3E6700C9FBD4 /* MainViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196BC6A022DE3E6700C9FBD4 /* MainViewModelTests.swift */; };
 		1974B80322BEC03A00D665D9 /* ConnectRequestViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1974B80222BEC03900D665D9 /* ConnectRequestViewModel.swift */; };
 		1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6621A5FB3D00B69138 /* MapViewController.swift */; };
 		1981CB6921A604C600B69138 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1981CB6821A604C600B69138 /* Constants.swift */; };
@@ -52,10 +55,10 @@
 		19997E8E21E65F4A0023C3EC /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19997E8C21E65F4A0023C3EC /* UserCell.swift */; };
 		19997E8F21E65F4A0023C3EC /* UserCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19997E8D21E65F4A0023C3EC /* UserCell.xib */; };
 		199DE78522C4015A00D31E11 /* LoginViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78422C4015A00D31E11 /* LoginViewModelTests.swift */; };
-		199DE78822C4F8FB00D31E11 /* JMAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78722C4F8FB00D31E11 /* JMAuth.swift */; };
-		199DE78A22C56E5700D31E11 /* DatabaseReferenceMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78922C56E5700D31E11 /* DatabaseReferenceMock.swift */; };
-		199DE78C22C56E9400D31E11 /* DataSnapshotMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78B22C56E9400D31E11 /* DataSnapshotMock.swift */; };
-		199DE78E22C56EBA00D31E11 /* ErrorMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78D22C56EBA00D31E11 /* ErrorMock.swift */; };
+		199DE78822C4F8FB00D31E11 /* MockAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78722C4F8FB00D31E11 /* MockAuth.swift */; };
+		199DE78A22C56E5700D31E11 /* MockDatabaseReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78922C56E5700D31E11 /* MockDatabaseReference.swift */; };
+		199DE78C22C56E9400D31E11 /* MockDataSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78B22C56E9400D31E11 /* MockDataSnapshot.swift */; };
+		199DE78E22C56EBA00D31E11 /* MockError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78D22C56EBA00D31E11 /* MockError.swift */; };
 		199DE79022C5B99B00D31E11 /* Firebase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE78F22C5B99B00D31E11 /* Firebase.swift */; };
 		199DE79222C64E2200D31E11 /* FirebaseClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199DE79122C64E2200D31E11 /* FirebaseClientTests.swift */; };
 		19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BE2A04218A665C007304CF /* SearchTableViewController.swift */; };
@@ -112,6 +115,9 @@
 		1944C38F22B2C35C00753E49 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		194CADB721FABA4100204E28 /* JMMKMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMMKMapView.swift; sourceTree = "<group>"; };
 		1958B81121F12CD800B1840F /* TestingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingViewController.swift; sourceTree = "<group>"; };
+		196BC69C22DD04C400C9FBD4 /* MockFirebaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFirebaseClient.swift; sourceTree = "<group>"; };
+		196BC69E22DE1F8300C9FBD4 /* MockDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDatabase.swift; sourceTree = "<group>"; };
+		196BC6A022DE3E6700C9FBD4 /* MainViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModelTests.swift; sourceTree = "<group>"; };
 		1974B80222BEC03900D665D9 /* ConnectRequestViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectRequestViewModel.swift; sourceTree = "<group>"; };
 		1981CB6621A5FB3D00B69138 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		1981CB6821A604C600B69138 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -144,10 +150,10 @@
 		19997E8C21E65F4A0023C3EC /* UserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
 		19997E8D21E65F4A0023C3EC /* UserCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UserCell.xib; sourceTree = "<group>"; };
 		199DE78422C4015A00D31E11 /* LoginViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModelTests.swift; sourceTree = "<group>"; };
-		199DE78722C4F8FB00D31E11 /* JMAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMAuth.swift; sourceTree = "<group>"; };
-		199DE78922C56E5700D31E11 /* DatabaseReferenceMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseReferenceMock.swift; sourceTree = "<group>"; };
-		199DE78B22C56E9400D31E11 /* DataSnapshotMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSnapshotMock.swift; sourceTree = "<group>"; };
-		199DE78D22C56EBA00D31E11 /* ErrorMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorMock.swift; sourceTree = "<group>"; };
+		199DE78722C4F8FB00D31E11 /* MockAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAuth.swift; sourceTree = "<group>"; };
+		199DE78922C56E5700D31E11 /* MockDatabaseReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDatabaseReference.swift; sourceTree = "<group>"; };
+		199DE78B22C56E9400D31E11 /* MockDataSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDataSnapshot.swift; sourceTree = "<group>"; };
+		199DE78D22C56EBA00D31E11 /* MockError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockError.swift; sourceTree = "<group>"; };
 		199DE78F22C5B99B00D31E11 /* Firebase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Firebase.swift; sourceTree = "<group>"; };
 		199DE79122C64E2200D31E11 /* FirebaseClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseClientTests.swift; sourceTree = "<group>"; };
 		19BE2A04218A665C007304CF /* SearchTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewController.swift; sourceTree = "<group>"; };
@@ -373,6 +379,7 @@
 				1998D26222C3D0F20040F990 /* Info.plist */,
 				199DE78422C4015A00D31E11 /* LoginViewModelTests.swift */,
 				199DE79122C64E2200D31E11 /* FirebaseClientTests.swift */,
+				196BC6A022DE3E6700C9FBD4 /* MainViewModelTests.swift */,
 			);
 			path = ARConnectTests;
 			sourceTree = "<group>";
@@ -388,10 +395,12 @@
 		199DE78622C4F8D200D31E11 /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
-				199DE78722C4F8FB00D31E11 /* JMAuth.swift */,
-				199DE78922C56E5700D31E11 /* DatabaseReferenceMock.swift */,
-				199DE78B22C56E9400D31E11 /* DataSnapshotMock.swift */,
-				199DE78D22C56EBA00D31E11 /* ErrorMock.swift */,
+				199DE78722C4F8FB00D31E11 /* MockAuth.swift */,
+				199DE78922C56E5700D31E11 /* MockDatabaseReference.swift */,
+				199DE78B22C56E9400D31E11 /* MockDataSnapshot.swift */,
+				199DE78D22C56EBA00D31E11 /* MockError.swift */,
+				196BC69C22DD04C400C9FBD4 /* MockFirebaseClient.swift */,
+				196BC69E22DE1F8300C9FBD4 /* MockDatabase.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -759,6 +768,7 @@
 				199383C32195EE58001BE7FD /* MessageViewController.swift in Sources */,
 				19DC1D9621C29C110079AD25 /* JMButton.swift in Sources */,
 				19D53CBB21FCC7F1000984FE /* JMTextField.swift in Sources */,
+				196BC69F22DE1F8300C9FBD4 /* MockDatabase.swift in Sources */,
 				19913A25216CF46100174187 /* ARSessionViewController.swift in Sources */,
 				19D7E69221C43C5D0046D737 /* CLLocation+Extension.swift in Sources */,
 				1944C38922B285B400753E49 /* MapViewModel.swift in Sources */,
@@ -780,6 +790,7 @@
 				1981CB6921A604C600B69138 /* Constants.swift in Sources */,
 				19DC1D9B21C3436D0079AD25 /* NavigationClient.swift in Sources */,
 				19913A0E216CED7500174187 /* AppDelegate.swift in Sources */,
+				196BC69D22DD04C400C9FBD4 /* MockFirebaseClient.swift in Sources */,
 				190FB31422D7D4AF009D62EB /* LoginView.swift in Sources */,
 				19913A2F216D3A4300174187 /* FirebaseClient.swift in Sources */,
 				19BE2A05218A665C007304CF /* SearchTableViewController.swift in Sources */,
@@ -788,10 +799,10 @@
 				19D53CC121FCC9ED000984FE /* UIAlertController+Extension.swift in Sources */,
 				1937D81922DBF78900249AF9 /* UIColor+Extension.swift in Sources */,
 				198DA98A218A5C230054E1BD /* User.swift in Sources */,
-				199DE78E22C56EBA00D31E11 /* ErrorMock.swift in Sources */,
+				199DE78E22C56EBA00D31E11 /* MockError.swift in Sources */,
 				19997E8721E4F6970023C3EC /* ConnectPendingViewController.swift in Sources */,
 				19948E12216FB7FB008C39DA /* SplashViewController.swift in Sources */,
-				199DE78C22C56E9400D31E11 /* DataSnapshotMock.swift in Sources */,
+				199DE78C22C56E9400D31E11 /* MockDataSnapshot.swift in Sources */,
 				1944C39022B2C35C00753E49 /* MainViewModel.swift in Sources */,
 				19D736AE21CA9DF300D6D92A /* JMNavigationBar.swift in Sources */,
 				19DD8D4B219486E200C01EDC /* CardDetailViewController.swift in Sources */,
@@ -799,7 +810,7 @@
 				19841E0122D6807400D54B23 /* SearchTableView.swift in Sources */,
 				19E5D19D220632A4002EDCD6 /* SensitiveData.swift in Sources */,
 				1912576F22B3D94B00200DA5 /* UserCellModel.swift in Sources */,
-				199DE78822C4F8FB00D31E11 /* JMAuth.swift in Sources */,
+				199DE78822C4F8FB00D31E11 /* MockAuth.swift in Sources */,
 				1981CB6721A5FB3D00B69138 /* MapViewController.swift in Sources */,
 				19DC1D9921C341350079AD25 /* LocationService.swift in Sources */,
 				194CADB821FABA4100204E28 /* JMMKMapView.swift in Sources */,
@@ -807,7 +818,7 @@
 				19D7E69421C445550046D737 /* MatrixOperations.swift in Sources */,
 				19FA6925219D3D1F00FF754D /* ConnectRequestViewController.swift in Sources */,
 				19E30DA222A5FA1800A1F981 /* CollapsibleCollectionView.swift in Sources */,
-				199DE78A22C56E5700D31E11 /* DatabaseReferenceMock.swift in Sources */,
+				199DE78A22C56E5700D31E11 /* MockDatabaseReference.swift in Sources */,
 				19C43F0022C00DE100279D7E /* ConnectPendingViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -819,6 +830,7 @@
 				1998D26122C3D0F20040F990 /* ARConnectTests.swift in Sources */,
 				199DE78522C4015A00D31E11 /* LoginViewModelTests.swift in Sources */,
 				199DE79222C64E2200D31E11 /* FirebaseClientTests.swift in Sources */,
+				196BC6A122DE3E6700C9FBD4 /* MainViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

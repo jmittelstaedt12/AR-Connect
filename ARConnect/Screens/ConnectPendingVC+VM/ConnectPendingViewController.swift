@@ -25,7 +25,7 @@ final class ConnectPendingViewController: ConnectViewController, ControllerProto
         self.meetupLocation = viewModel.meetupLocation
         requestingUserNameLabel.text = viewModel.nameString
         requestingUserImageView.image = (viewModel.profileImageData != nil) ? UIImage(data: viewModel.profileImageData!) : UIImage(named: "person-placeholder")
-        
+
         viewModel.output.wentOfflineObservable
             .subscribe(onNext: { [weak self] error in
                 guard let self = self else { return }

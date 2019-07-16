@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol ControllerProtocol where Self:UIViewController {
+protocol ControllerProtocol where Self: UIViewController {
 
     associatedtype ViewModelType: ViewModelProtocol
     var viewModel: ViewModelType! { get set }

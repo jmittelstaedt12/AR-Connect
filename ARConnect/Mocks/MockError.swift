@@ -8,6 +8,6 @@
 
 import Foundation
 
-struct ErrorMock: Error {
+struct MockError: Error {
     var localizedDescription: String = "mock error"
 }

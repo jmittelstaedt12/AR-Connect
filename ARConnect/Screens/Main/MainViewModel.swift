@@ -59,13 +59,13 @@ class MainViewModel: ViewModelProtocol {
     }
     let connectNotificationName = Notification.Name(NotificationConstants.requestResponseNotificationKey)
     var currentLocation: CLLocation?
-    let firebaseClient: FirebaseClient
+    let firebaseClient: FirebaseClientType
 
-    init(firebaseClient: FirebaseClient = FirebaseClient()) {
-        if Auth.auth().currentUser == nil {
+    init(firebaseClient: FirebaseClientType = FirebaseClient()) {
+        if firebaseClient.auth.user == nil {
             AppDelegate.shared.rootViewController.switchToLogout()
         }
-        self.uid = Auth.auth().currentUser!.uid
+        self.uid = firebaseClient.auth.user!.uid
         self.firebaseClient = firebaseClient
         self.firebaseClient.setOnDisconnectUpdates(forUid: uid)
 
@@ -97,7 +97,7 @@ class MainViewModel: ViewModelProtocol {
             .disposed(by: disposeBag)
 
         // Observe if current user becomes invalid
-        BehaviorRelay<User?>(value: Auth.auth().currentUser).asObservable()
+        BehaviorRelay<LocalUser?>(value: firebaseClient.auth.user).asObservable()
             .subscribe(onNext: { [weak self] currentUser in
                 if currentUser == nil {
                     self?.isAuthenticatedSubject.onNext(.failure(.amOffline))
@@ -111,7 +111,7 @@ class MainViewModel: ViewModelProtocol {
         firebaseClient.createAmOnlineObservable()
             .subscribe(onNext: { [weak self] connected in
                 guard let self = self else { return }
-                self.firebaseClient.usersRef.child(self.uid).updateChildValues(["isOnline": connected])
+                self.firebaseClient.usersRef.child(at: self.uid).updateChildValues(["isOnline": connected])
             })
             .disposed(by: disposeBag)
 
@@ -157,7 +157,7 @@ class MainViewModel: ViewModelProtocol {
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
                 self.firebaseClient.usersRef
-                    .child(self.uid)
+                    .child(at: self.uid)
                     .updateChildValues(["connectedTo": "",
                                         "isConnected": false])
                 self.endSessionSubject.onNext(())
@@ -183,7 +183,7 @@ class MainViewModel: ViewModelProtocol {
         }
         sessionStartSubject.onNext(.success(connectedUid))
 
-        firebaseClient.usersRef.child(uid)
+        firebaseClient.usersRef.child(at: uid)
             .updateChildValues(["isPending": false,
                                 "isConnected": true,
                                 "connectedTo": connectedUid])
@@ -192,7 +192,7 @@ class MainViewModel: ViewModelProtocol {
             .subscribe(onNext: { [weak self] _ in
                 guard let self = self else { return }
                 self.firebaseClient.usersRef
-                    .child(self.uid)
+                    .child(at: self.uid)
                     .updateChildValues(["connectedTo": "",
                                         "isConnected": false])
                 self.endSessionSubject.onNext(())
@@ -201,7 +201,7 @@ class MainViewModel: ViewModelProtocol {
     }
 
     func requestToConnect(cellModel: UserCellModel, location: CLLocation) {
-        firebaseClient.usersRef.child(self.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
+        firebaseClient.usersRef.child(at: self.uid).updateChildValues(["pendingRequest": true]) { [weak self] (error, _) in
             guard let self = self else { return }
             if let err = error {
                 self.didSendConnectRequestSubject.onNext(.failure(.custom(title: "Networking Error", errorDescription: err.localizedDescription)))

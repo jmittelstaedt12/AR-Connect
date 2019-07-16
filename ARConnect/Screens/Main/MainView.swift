@@ -150,6 +150,7 @@ final class MainView: UIView {
 
 extension MainView: ProgrammaticUI {
     func setupView() {
+        searchView?.delegate = self
         mapView.translatesAutoresizingMaskIntoConstraints = false
         searchView?.translatesAutoresizingMaskIntoConstraints = false
         expandedHeight = (2*frame.height)/5
@@ -160,6 +161,7 @@ extension MainView: ProgrammaticUI {
 
         addSubviews()
         setSubviewAutoLayoutConstraints()
+        hideKeyboardWhenTappedAround()
     }
 
     /// Add all subviews and child view controllers to main view controller

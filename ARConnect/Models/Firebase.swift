@@ -10,51 +10,62 @@ import Foundation
 import Firebase
 
 struct Firebase {
-    let auth: JMAuth!
-    let usersRef: DatabaseReference!
+    let auth: AuthType
+    let usersRef: DatabaseReferenceType
 
     enum Functionality {
         case network, mock
     }
 
-    init(functionality: Functionality, auth: JMAuth? = nil, usersRef: DatabaseReference? = nil) {
+//    init(functionality: Functionality, auth: AuthType? = nil, usersRef: DatabaseReferenceType? = nil) {
+    init(functionality: Functionality) {
         switch functionality {
         case .network:
-            self.auth = JMAuth()
-            self.usersRef = Database.database().reference().child("Users")
+            self.auth = Auth.auth()
+            self.usersRef = Database.database().reference().child(at: "Users")
         case .mock:
-            if let auth = auth {
-                self.auth = auth
-            } else {
-                let user = LocalUser(name: "Jacob Mittel", email: "jacob@gmail.com", uid: "S1HrJFwrwUalb37PzVHny6B5qry2")
-                self.auth = JMAuth(mock: true, willFail: false, mockUser: user)
-            }
-
-            if let usersRef = usersRef {
-                self.usersRef = usersRef
-            } else {
-                let mockDatabase =
-                    ["S1HrJFwrwUalb37PzVHny6B5qry2":
-                        ["connectedTo": "",
-                         "email": "jacob@gmail.com",
-                         "isConnected": false,
-                         "isOnline": true,
-                         "isPending": false,
-                         "latitude": 40.68776992071587,
-                         "longitude": -73.92892530229798,
-                         "name": "Jacob Mittel",
-                         "pendingRequest": false,
-                         "profileImageUrl": "https://firebasestorage.googleapis.com/v0/b/ar-connect.appspot.com/o/FF66F260-8C9B-4AC2-A604-B0BA9D2ED8D7.png?alt=media&token=6220e672-22b5-4abb-9fb3-756c0e3ef8ff",
-                         "requestingUser":
-                            ["latitude": 0.0,
-                             "longitude": 0.0,
-                             "uid": ""
-                            ]
-                        ]
-                ]
-                DatabaseeReferenceMock.initializeDatabase(mockDatabaseDictionary: mockDatabase)
-                self.usersRef = DatabaseeReferenceMock(pointsTo: [])
-            }
+            self.auth = MockAuth()
+            self.usersRef = MockDatabaseReference(childStrings: ["Users"], database: MockDatabase())
         }
     }
 }
+
+extension Auth: AuthType {
+
+    var user: LocalUser? {
+        if let user = Auth.auth().currentUser {
+            return LocalUser(user: user)
+        } else {
+            return nil
+        }
+    }
+
+    func createUser(withEmail email: String, password: String, completion: ((Result<LocalUser, Error>) -> ())?) {
+        createUser(withEmail: email, password: password) { (result, error) in
+            if let error = error {
+                completion?(.failure(error))
+            } else if let result = result {
+                completion?(.success(LocalUser(user: result.user)))
+            }
+        }
+    }
+
+    func signIn(withEmail email: String, password: String, completion: ((Result<LocalUser, Error>) -> ())?) {
+        signIn(withEmail: email, password: password, completion: { (result, error) in
+            if let error = error {
+                completion?(.failure(error))
+            } else if let result = result {
+                completion?(.success(LocalUser(user: result.user)))
+            }
+        })
+    }
+}
+
+extension DatabaseReference: DatabaseReferenceType {
+    func child(at pathString: String) -> DatabaseReferenceType {
+        let ref: DatabaseReference = self.child(pathString)
+        return ref as DatabaseReferenceType
+    }
+}
+
+extension DatabaseQuery: DatabaseQueryType {}

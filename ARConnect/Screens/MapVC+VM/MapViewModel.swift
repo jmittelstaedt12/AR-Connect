@@ -50,7 +50,7 @@ class MapViewModel: NSObject, ViewModelProtocol {
     }
 
     var shouldUseAlignment = WorldAlignment.gravity
-    
+
     weak var delegate: LocationUpdateDelegate? {
         didSet {
             locationManager.stopUpdatingHeading()
@@ -206,7 +206,7 @@ extension MapViewModel: CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard willUpdateCurrentLocation, let locValue = manager.location else { return }
-        firebaseClient.usersRef.child(uid)
+        firebaseClient.usersRef.child(at: uid)
             .updateChildValues(["latitude": locValue.coordinate.latitude,
                                 "longitude": locValue.coordinate.longitude])
 

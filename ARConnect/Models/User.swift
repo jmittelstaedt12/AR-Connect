@@ -40,7 +40,8 @@ struct LocalUser {
  }
 
 extension LocalUser: Equatable {
-    static func ==(lhs: LocalUser, rhs: LocalUser) -> Bool {
+
+    static func == (lhs: LocalUser, rhs: LocalUser) -> Bool {
         return lhs.name == rhs.name && lhs.email == rhs.email && lhs.uid == rhs.uid && lhs.connectedUid == rhs.connectedUid &&
             lhs.profileUrl == rhs.profileUrl && lhs.profileImageData == rhs.profileImageData
     }

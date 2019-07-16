@@ -35,7 +35,7 @@ class SearchTableViewModel: ViewModelProtocol {
         output = Output(reloadTableObservable: reloadTableSubject.asObserver())
 
         self.firebaseClient = firebaseClient
-        
+
         setObservers()
     }
 

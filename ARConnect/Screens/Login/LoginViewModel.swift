@@ -19,7 +19,7 @@ class LoginViewModel: ViewModelProtocol {
     }
 
     struct Output {
-        let loginResultObservable: Observable<LocalUser>
+        let didLogInObservable: Observable<LocalUser>
         let errorsObservable: Observable<Error>
     }
 
@@ -29,28 +29,28 @@ class LoginViewModel: ViewModelProtocol {
     private let emailSubject = PublishSubject<String>()
     private let passwordSubject = PublishSubject<String>()
     private let signInDidTapSubject = PublishSubject<Void>()
-    private let loginResultSubject = PublishSubject<LocalUser>()
+    private let didLogInSubject = PublishSubject<LocalUser>()
     private let errorsSubject = PublishSubject<Error>()
     private let disposeBag = DisposeBag()
 
     typealias Credentials = (email: String, password: String)
-    let firebaseClient: FirebaseClient
+    let firebaseClient: FirebaseClientType
 
-    var credentialsObservable: Observable<Credentials> {
-        return Observable.combineLatest(emailSubject.asObservable(), passwordSubject.asObservable()) { (email, password) in
-            return Credentials(email: email, password: password)
-        }
-    }
+    let credentialsObservable: Observable<Credentials>
 
-    init(firebaseClient: FirebaseClient = FirebaseClient()) {
+    init(firebaseClient: FirebaseClientType = FirebaseClient()) {
         input = Input(email: emailSubject.asObserver(),
                       password: passwordSubject.asObserver(),
                       signInDidTap: signInDidTapSubject.asObserver())
 
-        output = Output(loginResultObservable: loginResultSubject,
+        output = Output(didLogInObservable: didLogInSubject,
                         errorsObservable: errorsSubject)
 
         self.firebaseClient = firebaseClient
+
+        credentialsObservable = Observable.combineLatest(emailSubject.asObservable(), passwordSubject.asObservable()) { (email, password) in
+            return Credentials(email: email, password: password)
+        }
 
         setNetworkObservers()
     }
@@ -66,8 +66,8 @@ class LoginViewModel: ViewModelProtocol {
             .subscribe(onNext: { [weak self] result in
                 guard let self = self else { return }
                 switch result {
-                case .success(let data):
-                    self.loginResultSubject.onNext(data)
+                case .success(let user):
+                    self.didLogInSubject.onNext(user)
                 case .failure(let error):
                     self.errorsSubject.onNext(error)
                 }

@@ -55,7 +55,7 @@ final class ConnectRequestViewModel: ViewModelProtocol {
     private func setObservers() {
         firebaseClient.createCallDroppedObservable(forUid: requestingUser.uid)?.subscribe(onNext: { [weak self] _ in
             guard let self = self else { return }
-            self.firebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser")
+            self.firebaseClient.usersRef.child(at: self.currentUser.uid).child(at: "requestingUser")
                 .updateChildValues(["uid": "", "latitude": 0, "longitude": 0])
             self.callDroppedSubject.onNext(())
         }).disposed(by: disposeBag)
@@ -67,7 +67,7 @@ final class ConnectRequestViewModel: ViewModelProtocol {
         // Work item if firebase updates succeed
         let workItem = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
-            self.firebaseClient.usersRef.child(self.currentUser.uid).child("requestingUser").updateChildValues(["uid": "",
+            self.firebaseClient.usersRef.child(at: self.currentUser.uid).child(at: "requestingUser").updateChildValues(["uid": "",
                                                                                           "latitude": 0,
                                                                                           "longitude": 0])
             let name = Notification.Name(rawValue: NotificationConstants.requestResponseNotificationKey)
@@ -97,10 +97,10 @@ final class ConnectRequestViewModel: ViewModelProtocol {
                 return
             }
             group.enter()
-            firebaseClient.usersRef.child(currentUser.uid).updateChildValues(["isConnected": true, "connectedTo": requestingUser.uid],
+            firebaseClient.usersRef.child(at: currentUser.uid).updateChildValues(["isConnected": true, "connectedTo": requestingUser.uid],
                                                                       withCompletionBlock: updateCompletionHandler)
             group.enter()
-            firebaseClient.usersRef.child(requestingUser.uid).updateChildValues(["isConnected": true],
+            firebaseClient.usersRef.child(at: requestingUser.uid).updateChildValues(["isConnected": true],
                                                                                 withCompletionBlock: updateCompletionHandler)
         }
 
