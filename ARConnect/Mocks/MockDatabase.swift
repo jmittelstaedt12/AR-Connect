@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Firebase
 
 class MockDatabase: NSObject {
     @objc dynamic var database =
@@ -27,7 +28,24 @@ class MockDatabase: NSObject {
                      "longitude": 0.0,
                      "uid": ""
                     ]
+                ],
+             "n13XNUAEb1bIcZF57fqVE9BHEzo2":
+                ["connectedTo": "",
+                 "email": "Kevin@gmail.com",
+                 "isConnected": false,
+                 "isOnline": true,
+                 "isPending": false,
+                 "latitude": 40.68404,
+                 "longitude": -73.9259,
+                 "name": "Kevin Nelson",
+                 "pendingRequest": false,
+                 "profileImageUrl": "https://firebasestorage.googleapis.com/v0/b/ar-connect.appspot.com/o/AF25B069-910D-4627-88E6-B1AEB7D6513E.png?alt=media&token=662d13fa-d0af-45eb-be9e-54a7f9be8779",
+                 "requestingUser":
+                    ["latitude": 0.0,
+                     "longitude": 0.0,
+                     "uid": ""
+                    ]
                 ]
             ]
-    ]
+        ]
 }

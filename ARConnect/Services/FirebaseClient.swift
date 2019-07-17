@@ -30,6 +30,16 @@ class FirebaseClient: FirebaseClientType {
     private(set) var usersRef: DatabaseReferenceType!
     var observedReferences = [DatabaseReference]()
 
+    struct FIRObservables {
+        var usersObservable: Observable<[LocalUser]>?
+        var requestingUserUidObservable: Observable<String>?
+        var requestIsPendingObservable: Observable<Bool>?
+        var amOnlineObservable: Observable<Bool>?
+        var amInSessionObservable: Observable<Bool>?
+    }
+
+    private var observables = FIRObservables()
+
     init() {
         let firebase = Firebase(functionality: .network)
         auth = firebase.auth
@@ -484,7 +494,7 @@ class FirebaseClient: FirebaseClientType {
 
 }
 
-enum FirebaseError: LocalizedError {
+enum FirebaseError: LocalizedError, Equatable {
     case noResponse(userName: String?)
     case isOffline(userName: String?)
     case unavailable
@@ -520,13 +530,3 @@ enum FirebaseError: LocalizedError {
         }
     }
 }
-
-fileprivate struct FIRObservables {
-    var usersObservable: Observable<[LocalUser]>?
-    var requestingUserUidObservable: Observable<String>?
-    var requestIsPendingObservable: Observable<Bool>?
-    var amOnlineObservable: Observable<Bool>?
-    var amInSessionObservable: Observable<Bool>?
-}
-
-fileprivate var observables = FIRObservables()

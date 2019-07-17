@@ -32,9 +32,48 @@ final class MainViewModelTests: QuickSpec {
             subject = MainViewModel(firebaseClient: client)
         }
 
-        describe("user authentication status") {
-            context("user is authenticated") {
-                it("notifies authenticated observable") {
+//        describe("user authentication status") {
+//            context("user is authenticated") {
+//                var authenticatedEvents: [Recorded<Event<Result<String, FirebaseError>>>]!
+//                beforeEach {
+//                    let scheduledObserver = scheduler.createObserver(Result<String, FirebaseError>.self)
+//                    subject.output.authenticatedUserObservable.subscribe(scheduledObserver).disposed(by: disposeBag)
+//                    scheduler.scheduleAt(10, action: {
+//                        client.auth.user = nil
+//                    })
+//                    scheduler.start()
+//                    authenticatedEvents = scheduledObserver.events
+//                }
+//
+//                it("notifies authenticated observable") {
+//                    expect(authenticatedEvents).to(equal(
+//                        [
+//                            .next(0, .success("mock")),
+//                            .next(10, .failure(.amOffline))
+//                        ]
+//                    ))
+//                }
+//            }
+//        }
+
+        describe("connect request from other user") {
+            context("preparing view to display connect request") {
+            }
+        }
+
+        describe("user logged out") {
+            context("user tapped log out") {
+                var events: [Recorded<Event<Void>>]!
+                beforeEach {
+                    let scheduledObserver = scheduler.createObserver(Void.self)
+                    subject.output.endSessionObservable.subscribe(scheduledObserver).disposed(by: disposeBag)
+                    scheduler.start()
+                    subject.input.disconnectRequest.onNext(())
+                    events = scheduledObserver.events
+                }
+
+                it("notifies view of log out") {
+                    expect(events).toNot(beEmpty())
                 }
             }
         }

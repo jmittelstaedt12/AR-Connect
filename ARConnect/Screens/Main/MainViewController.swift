@@ -114,18 +114,6 @@ final class MainViewController: UIViewController, ControllerProtocol {
             })
             .disposed(by: disposeBag)
 
-        viewModel.output.authenticatedUserObservable
-            .subscribe(onNext: { [weak self] result in
-                switch result {
-                case .success:
-                    return
-                case .failure(let error):
-                    self?.createAndDisplayAlert(withTitle: error.title, body: error.errorDescription)
-                    AppDelegate.shared.rootViewController.switchToLogout()
-                }
-            })
-            .disposed(by: disposeBag)
-
         viewModel.output.connectRequestObservable
             .subscribe(onNext: { [weak self] connectRequestViewModel in
                 DispatchQueue.main.async {

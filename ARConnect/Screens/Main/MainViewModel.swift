@@ -22,7 +22,6 @@ class MainViewModel: ViewModelProtocol {
 
     struct Output {
         let profileImageDataObservable: Observable<Data>
-        let authenticatedUserObservable: Observable<Result<String, FirebaseError>>
         let connectRequestObservable: Observable<ConnectRequestViewModel>
         let endSessionObservable: Observable<Void>
         let sessionStartObservable: Observable<Result<String, FirebaseError>>
@@ -35,7 +34,6 @@ class MainViewModel: ViewModelProtocol {
     private let disconnectRequestSubject = PublishSubject<Void>()
     private let logoutRequestSubject = PublishSubject<Void>()
     private let profileImageDataSubject = PublishSubject<Data>()
-    private let isAuthenticatedSubject = PublishSubject<Result<String, FirebaseError>>()
     private let connectRequestSubject = PublishSubject<ConnectRequestViewModel>()
     private let endSessionSubject = PublishSubject<Void>()
     private let sessionStartSubject = PublishSubject<Result<String, FirebaseError>>()
@@ -71,12 +69,11 @@ class MainViewModel: ViewModelProtocol {
 
         self.input = Input(disconnectRequest: disconnectRequestSubject.asObserver(),
                            logoutRequest: logoutRequestSubject.asObserver())
-        self.output = Output(profileImageDataObservable: profileImageDataSubject.asObservable(),
-                        authenticatedUserObservable: isAuthenticatedSubject.asObservable(),
-                        connectRequestObservable: connectRequestSubject.asObservable(),
-                        endSessionObservable: endSessionSubject.asObservable(),
-                        sessionStartObservable: sessionStartSubject.asObservable(),
-                        didSendConnectRequestObservable: didSendConnectRequestSubject.asObservable())
+        self.output = Output(profileImageDataObservable: profileImageDataSubject,
+                        connectRequestObservable: connectRequestSubject,
+                        endSessionObservable: endSessionSubject,
+                        sessionStartObservable: sessionStartSubject,
+                        didSendConnectRequestObservable: didSendConnectRequestSubject)
 
         setNetworkObservers()
         setUIEventObservers()
@@ -93,17 +90,6 @@ class MainViewModel: ViewModelProtocol {
             .subscribe(onNext: { [weak self] user in
                 guard let self = self else { return }
                 self.currentUser = user
-            })
-            .disposed(by: disposeBag)
-
-        // Observe if current user becomes invalid
-        BehaviorRelay<LocalUser?>(value: firebaseClient.auth.user).asObservable()
-            .subscribe(onNext: { [weak self] currentUser in
-                if currentUser == nil {
-                    self?.isAuthenticatedSubject.onNext(.failure(.amOffline))
-                    return
-                }
-                self?.isAuthenticatedSubject.onNext(.success(currentUser!.uid))
             })
             .disposed(by: disposeBag)
 
@@ -136,16 +122,14 @@ class MainViewModel: ViewModelProtocol {
                         connectRequestViewModel = ConnectRequestViewModel(currentUser: currentUser,
                                                                           requestingUser: requestingUserWithImageData,
                                                                           meetupLocation: location,
-                                                                          currentLocation: currentLocation,
-                                                                          firebaseClient: FirebaseClient())
+                                                                          currentLocation: currentLocation)
                         self.connectRequestSubject.onNext(connectRequestViewModel!)
                     }
                 } else {
                     connectRequestViewModel = ConnectRequestViewModel(currentUser: currentUser,
                                                                       requestingUser: requestingUser,
                                                                       meetupLocation: location,
-                                                                      currentLocation: currentLocation,
-                                                                      firebaseClient: FirebaseClient())
+                                                                      currentLocation: currentLocation)
                     self.connectRequestSubject.onNext(connectRequestViewModel!)
                 }
             })

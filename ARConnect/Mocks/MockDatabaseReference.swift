@@ -52,7 +52,6 @@ class MockDatabaseReference: DatabaseReferenceType {
         self.currentValue = databaseInstance.database[keyPath: KeyPath(fullPath)]
         self.snapshot = MockDataSnapshot(value: currentValue)
         self.snapshotObservable = BehaviorRelay<DataSnapshot>(value: snapshot)
-
         databaseInstance.rx.observe([String : [String : [String : Any]]].self, "database")
             .subscribe(onNext: { [weak self] database in
                 guard let self = self, let database = database else { return }

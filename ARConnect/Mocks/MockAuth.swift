@@ -12,7 +12,7 @@ import RxSwift
 import RxCocoa
 
 protocol AuthType {
-    var user: LocalUser? { get }
+    var user: LocalUser? { get set }
     func createUser(withEmail email: String, password: String, completion: ((Result<LocalUser, Error>) -> ())?)
     func signIn(withEmail email: String, password: String, completion: ((Result<LocalUser, Error>) -> ())?)
     func signOut() throws
@@ -20,7 +20,7 @@ protocol AuthType {
 
 class MockAuth: AuthType {
 
-    var user: LocalUser? = LocalUser(name: "mock", email: "mock", uid: "mock")
+    var user: LocalUser? = LocalUser(name: "Jacob Mittel", email: "jacob@gmail.com", uid: "S1HrJFwrwUalb37PzVHny6B5qry2")
 
     enum MockResponse {
         case pending, passed, failed
