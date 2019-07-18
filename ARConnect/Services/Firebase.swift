@@ -40,10 +40,7 @@ extension Auth: AuthType {
             return nil
             }
         }
-
-        set {
-            // do nothing
-        }
+        set {}
     }
 
     func createUser(withEmail email: String, password: String, completion: ((Result<LocalUser, Error>) -> ())?) {

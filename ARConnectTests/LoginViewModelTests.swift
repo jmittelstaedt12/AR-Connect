@@ -22,7 +22,8 @@ class LoginViewModelTests: QuickSpec {
         var scheduler: TestScheduler!
         var disposeBag: DisposeBag!
         var subject: LoginViewModel!
-
+        continueAfterFailure = false
+        #error("add continue after failure elsewhere and see if it works")
         beforeEach {
             scheduler = TestScheduler(initialClock: 0)
             disposeBag = DisposeBag()
